@@ -1,0 +1,363 @@
+/* --- AboutStore.jsx --- */
+
+        .bento-grid-container {
+          display: grid;
+          grid-template-columns: 2fr 1fr;
+          gap: 1.5rem;
+          margin-top: 3rem;
+          width: 100%;
+        }
+        .bento-card-main {
+          background-color: var(--white);
+          border-radius: var(--border-radius-lg, 24px);
+          box-shadow: var(--shadow-sm);
+          border: 1px solid var(--color-border, #E2DBD0);
+          transition: var(--transition-smooth, all 0.3s ease);
+          padding: 3rem;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          min-height: 400px;
+          box-sizing: border-box;
+        }
+        .bento-card-main:hover {
+          transform: translateY(-4px);
+          box-shadow: var(--shadow-md);
+          border-color: var(--color-primary);
+        }
+        .bento-stack {
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+        .bento-card-secondary {
+          background-color: var(--white);
+          border-radius: var(--border-radius-md, 16px);
+          box-shadow: var(--shadow-sm);
+          border: 1px solid rgba(226, 219, 208, 0.7);
+          transition: var(--transition-smooth, all 0.3s ease);
+          padding: 2rem;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          min-height: 190px;
+          box-sizing: border-box;
+        }
+        .bento-card-secondary:hover {
+          transform: translateY(-4px);
+          box-shadow: var(--shadow-md);
+          border-color: var(--color-accent);
+        }
+        .icon-box-primary {
+          display: inline-flex;
+          padding: 0.75rem;
+          border-radius: 12px;
+          background-color: rgba(107, 158, 92, 0.1);
+          color: #2D5333;
+          border: 1px solid rgba(107, 158, 92, 0.2);
+        }
+        .icon-box-accent {
+          display: inline-flex;
+          padding: 0.75rem;
+          border-radius: 12px;
+          background-color: rgba(201, 125, 92, 0.1);
+          color: #C97D5C;
+          border: 1px solid rgba(201, 125, 92, 0.2);
+        }
+        @media (max-width: 768px) {
+          .bento-grid-container {
+            grid-template-columns: 1fr;
+          }
+          .bento-card-main {
+            padding: 2rem;
+            min-height: auto;
+          }
+        }
+      
+
+/* --- FeaturedProducts.jsx --- */
+
+        .fp-section {
+          padding: clamp(3.5rem, 7vw, 6rem) 1.5rem;
+          max-width: 1100px;
+          margin: 0 auto;
+          box-sizing: border-box;
+        }
+        .fp-header {
+          text-align: center;
+          margin-bottom: 3rem;
+        }
+        .fp-eyebrow {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 5px 14px;
+          border-radius: 999px;
+          background: var(--green-mist);
+          border: 1px solid var(--border-subtle);
+          color: var(--green-deep);
+          font-family: var(--font-display);
+          font-size: 0.72rem;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          margin-bottom: 0.9rem;
+        }
+        .fp-title {
+          font-family: var(--font-display);
+          font-size: clamp(1.9rem, 4vw, 2.6rem);
+          font-weight: 800;
+          color: var(--green-brand);
+          line-height: 1.15;
+          margin-bottom: 0.75rem;
+          text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .fp-sub {
+          color: var(--text-secondary);
+          font-size: 0.95rem;
+          line-height: 1.7;
+          max-width: 480px;
+          margin: 0 auto;
+          font-weight: 500;
+        }
+        .fp-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 2rem;
+        }
+        @media (max-width: 900px) {
+          .fp-grid { grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+        }
+        @media (max-width: 560px) {
+          .fp-grid { grid-template-columns: 1fr; gap: 1rem; }
+        }
+      
+
+/* --- HeroTV.jsx --- */
+        .hero-section {
+          position: relative;
+          min-height: 80vh; 
+          display: flex;
+          align-items: center;
+          overflow: hidden;
+          width: 100%;
+          padding: 40px 6vw 80px; 
+        }
+        
+        .hero-content {
+          position: relative;
+          z-index: 10;
+          width: 100%;
+          max-width: 1400px;
+          margin: 0 auto;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+          gap: 2rem;
+          transform: translateY(-4vh);
+        }
+
+        .hero-text-col {
+          flex: 0 0 52%;
+          text-align: left;
+          padding-right: 2vw;
+        }
+
+        .hero-card-col {
+          flex: 0 0 45%;
+          display: flex;
+          justify-content: center;
+          perspective: 1000px;
+        }
+
+        .hero-title {
+          color: var(--text-primary);
+          font-size: clamp(2.2rem, 4vw, 4.5rem);
+          line-height: 1.05;
+          margin-bottom: 1.5rem;
+          font-weight: 800;
+        }
+
+        .hero-subtitle {
+          color: #333;
+          font-size: clamp(1rem, 1.2vw, 1.25rem);
+          line-height: 1.5;
+          margin-bottom: 2.5rem;
+          font-weight: 600;
+          max-width: 90%;
+        }
+
+        .hero-buttons {
+          display: flex;
+          gap: 1rem;
+          flex-wrap: wrap;
+          justify-content: flex-start;
+        }
+
+        .tv-card {
+          position: relative;
+          border-radius: 20px;
+          padding: 10px;
+          background: linear-gradient(145deg, #1a1a1a, #2d2d2d, #1a1a1a);
+          box-shadow: 
+            0 0 0 1px rgba(255,255,255,0.05),
+            0 0 30px 5px rgba(109,191,71,0.3),
+            0 20px 40px rgba(0,0,0,0.5);
+          max-width: 580px;
+          width: 100%;
+        }
+
+        /* RESPONSIVE: Laptops medianas e iPads horizontales (1048px) */
+        @media (max-width: 1048px) {
+          .hero-section {
+            padding: 10px 4vw; 
+            min-height: calc(100vh - 100px); 
+          }
+          .hero-title {
+            font-size: clamp(1.8rem, 3vw, 2.5rem); 
+            margin-bottom: 0.8rem;
+          }
+          .hero-subtitle {
+            font-size: clamp(0.9rem, 1.2vw, 1rem); 
+            margin-bottom: 1rem;
+          }
+          .tv-card {
+            max-width: 380px; 
+            padding: 8px;
+          }
+          .hero-content {
+            transform: translateY(-3vh);
+            gap: 1rem; 
+          }
+        }
+
+        /* RESPONSIVE: Tablets en vertical y pantallas medianas (900px) */
+        @media (max-width: 900px) {
+          .hero-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 3rem;
+            transform: translateY(0);
+            padding-top: 2rem;
+          }
+          .hero-text-col {
+            flex: 1 1 100%;
+            padding-right: 0;
+          }
+          .hero-card-col {
+            flex: 1 1 100%;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+          }
+          .hero-subtitle {
+            margin: 0 auto 2.5rem auto;
+            max-width: 100%;
+          }
+          .hero-buttons {
+            justify-content: center;
+          }
+        }
+
+        /* RESPONSIVE: Mobile (hasta 768px) */
+        @media (max-width: 768px) {
+          .hero-section {
+            padding: 60px 5vw 80px;
+            min-height: auto;
+          }
+          .hero-title {
+            font-size: clamp(2rem, 8vw, 2.5rem);
+          }
+          .tv-card {
+            max-width: 100%;
+          }
+          .hero-buttons {
+            flex-direction: column;
+            width: 100%;
+          }
+          .hero-buttons button {
+            width: 100%;
+          }
+        }
+        
+        @keyframes pulseLED {
+          0% { opacity: 0.6; }
+          100% { opacity: 1; }
+        }
+
+/* --- ProductCarousel.jsx --- */
+        .carousel-track {
+          display: flex;
+          gap: 2rem;
+          width: max-content;
+          animation: scrollCarousel 60s linear infinite;
+          padding: 0 1rem;
+        }
+        
+        .carousel-track:hover {
+          animation-play-state: paused;
+        }
+
+        .carousel-card-wrapper {
+          width: 320px;
+          flex-shrink: 0;
+        }
+
+        @keyframes scrollCarousel {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(calc(-100% / 3 - 0.66rem)); }
+        }
+        
+        .carousel-fade-left, .carousel-fade-right {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 8vw;
+          min-width: 60px;
+          z-index: 5;
+          pointer-events: none;
+        }
+        .carousel-fade-left {
+          left: 0;
+          background: linear-gradient(to right, rgba(0,0,0,0.4) 0%, transparent 100%);
+        }
+        .carousel-fade-right {
+          right: 0;
+          background: linear-gradient(to left, rgba(0,0,0,0.4) 0%, transparent 100%);
+        }
+
+        @media (max-width: 768px) {
+          .carousel-card-wrapper {
+            width: 280px;
+          }
+        }
+      
+
+/* --- PromoBanner.jsx --- */
+
+        .promo-flex-container {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 2.5rem;
+          max-width: 1100px;
+          margin: 0 auto;
+          position: relative;
+          z-index: 10;
+        }
+        .promo-text-content {
+          text-align: left;
+          max-width: 650px;
+        }
+        @media (max-width: 768px) {
+          .promo-flex-container {
+            flex-direction: column;
+            text-align: center;
+          }
+          .promo-text-content {
+            text-align: center;
+          }
+        }
+      
+

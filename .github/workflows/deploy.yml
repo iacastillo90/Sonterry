@@ -1,0 +1,103 @@
+name: deploy-ci-cd
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # ─── Job 1: Backend ───────────────────────────────────────────────────────
+  backend:
+    name: Backend – Test
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+
+    env:
+      NODE_ENV: test
+      MONGO_URI: mongodb://localhost:27017/sonterry-test
+      JWT_SECRET: test_jwt_secret_ci
+      JWT_EXPIRES_IN: 1d
+      REFRESH_TOKEN_SECRET: test_refresh_secret_ci
+      REFRESH_TOKEN_EXPIRES_IN: 7d
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: Back/package-lock.json
+
+      - name: Install Back Dependencies
+        run: npm ci
+        working-directory: Back
+
+      - name: Run Backend Unit Tests
+        run: npm test
+        working-directory: Back
+
+  # ─── Job 2: Frontend ──────────────────────────────────────────────────────
+  frontend:
+    name: Frontend – Lint & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: Front/package-lock.json
+
+      - name: Install Front Dependencies
+        run: npm ci
+        working-directory: Front
+
+      - name: Lint Frontend
+        run: npm run lint
+        working-directory: Front
+
+      - name: Build Frontend (Production)
+        run: npm run build
+        working-directory: Front
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: Front/dist/
+          retention-days: 7
+
+  # ─── Job 3: Deploy (solo en push a main) ──────────────────────────────────
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Frontend Build
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: Front/dist/
+
+      # TODO: Reemplaza este paso con tu método de deploy real
+      # Opciones: SSH + rsync, Docker Hub push, Render deploy hook, etc.
+      - name: Deploy placeholder
+        run: echo "✅ Build listo para deploy. Configura aquí tu paso de deploy."

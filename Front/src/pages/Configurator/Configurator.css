@@ -1,0 +1,119 @@
+/* Configurator.css */
+
+.config-panel-container {
+  background: linear-gradient(to top, rgba(245, 241, 232, 0.95) 80%, rgba(245, 241, 232, 0) 100%);
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  width: 100%;
+}
+
+.config-panel-card {
+  max-width: 850px;
+  margin: 0 auto;
+  background-color: var(--white);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-md);
+  padding: 1rem 1.5rem;
+}
+
+.config-panel-flex {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem;
+  justify-content: center;
+}
+
+.config-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.config-label {
+  font-size: 0.7rem;
+  color: var(--color-text-light);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+.config-options {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.config-separator {
+  width: 1px;
+  height: 24px;
+  background-color: var(--border-subtle);
+}
+
+.config-swatch {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  transition: var(--transition-smooth);
+}
+
+.config-swatch.active {
+  border: 2px solid var(--color-primary) !important;
+  box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-primary);
+  transform: scale(1.15);
+}
+
+.config-swatch.inactive {
+  border: 1px solid var(--border-subtle) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+.config-print-btn {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  border: 1px solid var(--border-subtle);
+  transition: var(--transition-smooth);
+}
+
+.config-print-btn.active {
+  background-color: var(--color-primary);
+  color: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+
+.config-print-btn.inactive {
+  background-color: var(--white);
+  color: var(--color-text);
+  box-shadow: none;
+}
+
+.config-upload-btn {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: var(--border-radius-sm);
+  border: 1px dashed var(--color-primary);
+  background-color: rgba(107, 158, 92, 0.08);
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.config-upload-btn:hover {
+  background-color: rgba(107, 158, 92, 0.15);
+}
+
+.config-reset-btn {
+  background: none;
+  border: none;
+  color: var(--color-danger);
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  padding: 0.5rem;
+}
