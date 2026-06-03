@@ -163,4 +163,24 @@ const resetPassword = async (token, newPassword) => {
   return { token: accessToken, refreshToken, user: { id: user._id, name: user.name, email: user.email, role: user.role } };
 };
 
-module.exports = { register, login, signToken, refreshAccessToken, forgotPassword, resetPassword, getCookieOptions };
+const logout = async (userId) => {
+  const user = await User.findById(userId);
+  if (user) {
+    user.refreshTokenHash = undefined;
+    await user.save();
+  }
+};
+
+const changePassword = async (userId, currentPassword, newPassword) => {
+  const user = await User.findById(userId).select('+password');
+  if (!user) throw new AppError('Usuario no encontrado', 404);
+
+  if (!(await user.comparePassword(currentPassword))) {
+    throw new AppError('La contraseña actual es incorrecta', 401);
+  }
+
+  user.password = newPassword;
+  await user.save();
+};
+
+module.exports = { register, login, signToken, refreshAccessToken, forgotPassword, resetPassword, getCookieOptions, logout, changePassword };
