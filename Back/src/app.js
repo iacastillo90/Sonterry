@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
 const corsOptions = require('./config/cors');
 const notFound = require('./errors/notFound');
 const errorHandler = require('./errors/errorHandler');
@@ -24,14 +25,28 @@ const stripeWebhooks = require('./webhooks/stripe');
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "blob:", process.env.MINIO_PUBLIC_URL || ''].filter(Boolean),
+      connectSrc: ["'self'", process.env.CORS_ORIGIN || ''].filter(Boolean),
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+    },
+  },
+}));
 app.use(cors(corsOptions));
 
 // Stripe webhook MUST be before express.json() to preserve raw body for signature verification
 app.use('/api/webhooks/stripe', stripeWebhooks);
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ limit: '1mb', extended: true }));
+app.use(cookieParser());
 app.use(morgan('dev'));
 
 // Global rate limiter — protects all /api/ routes
