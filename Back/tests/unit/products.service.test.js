@@ -1,3 +1,10 @@
+// Set required env vars before any require to avoid process.exit(1) from config/env.js
+process.env.JWT_SECRET = 'test_jwt_secret';
+process.env.JWT_EXPIRES_IN = '1d';
+process.env.REFRESH_TOKEN_SECRET = 'test_refresh_secret';
+process.env.REFRESH_TOKEN_EXPIRES_IN = '7d';
+process.env.MONGO_URI = 'mongodb://localhost:27017/sonterry-test';
+
 jest.mock('../../src/models/product.model');
 
 const Product = require('../../src/models/product.model');
