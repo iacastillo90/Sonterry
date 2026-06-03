@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { useUiStore } from '../../store/uiStore';
-import { User, ShoppingBag, CreditCard, MessageSquare, LifeBuoy, LogOut, Menu, X } from 'lucide-react';
+import { User, ShoppingBag, CreditCard, MessageSquare, LifeBuoy, Heart, Settings as SettingsIcon, LogOut, Menu, X } from 'lucide-react';
 import OrderHistory from './components/OrderHistory';
 import ProfileWallet from './components/ProfileWallet';
 import ProfileReviews from './components/ProfileReviews';
 import ProfileSupport from './components/ProfileSupport';
 import ProfileInfo from './components/ProfileInfo';
+import Wishlist from './Wishlist';
+import Settings from './Settings';
 import './Profile.css';
 
 const Profile = () => {
@@ -23,8 +25,8 @@ const Profile = () => {
     setIsSidebarOpen(false);
   }, [activeTab]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     addToast('Sesión cerrada con éxito', 'info');
     navigate('/login');
   };
@@ -172,6 +174,48 @@ const Profile = () => {
             <span>Soporte Técnico</span>
           </button>
 
+          <button
+            onClick={() => setActiveTab('deseos')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              padding: '0.75rem 1rem',
+              borderRadius: 'var(--border-radius-sm)',
+              border: 'none',
+              cursor: 'pointer',
+              backgroundColor: activeTab === 'deseos' ? 'var(--color-primary)' : 'transparent',
+              color: activeTab === 'deseos' ? '#FFFFFF' : 'var(--color-text)',
+              fontWeight: activeTab === 'deseos' ? '600' : '500',
+              textAlign: 'left',
+              transition: 'var(--transition-smooth)'
+            }}
+          >
+            <Heart size={18} />
+            <span>Lista de Deseos</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('configuracion')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              padding: '0.75rem 1rem',
+              borderRadius: 'var(--border-radius-sm)',
+              border: 'none',
+              cursor: 'pointer',
+              backgroundColor: activeTab === 'configuracion' ? 'var(--color-primary)' : 'transparent',
+              color: activeTab === 'configuracion' ? '#FFFFFF' : 'var(--color-text)',
+              fontWeight: activeTab === 'configuracion' ? '600' : '500',
+              textAlign: 'left',
+              transition: 'var(--transition-smooth)'
+            }}
+          >
+            <SettingsIcon size={18} />
+            <span>Configuración</span>
+          </button>
+
           {/* Separator line */}
           <div style={{ borderTop: '1px solid var(--color-border)', margin: '0.75rem 0' }} />
 
@@ -225,6 +269,20 @@ const Profile = () => {
           {/* TAB 5: SOPORTE */}
           {activeTab === 'soporte' && (
             <ProfileSupport />
+          )}
+
+          {/* TAB 6: LISTA DE DESEOS */}
+          {activeTab === 'deseos' && (
+            <div className="animate-fade-in">
+              <Wishlist />
+            </div>
+          )}
+
+          {/* TAB 7: CONFIGURACIÓN */}
+          {activeTab === 'configuracion' && (
+            <div className="animate-fade-in">
+              <Settings />
+            </div>
           )}
 
         </div>

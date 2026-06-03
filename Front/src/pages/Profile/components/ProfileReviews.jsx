@@ -62,7 +62,7 @@ const ProfileReviews = ({ isActive }) => {
               </div>
 
               <p style={{ fontSize: '0.9rem', fontStyle: 'italic', color: 'var(--color-text)', backgroundColor: '#F9F7F2', padding: '1rem', borderRadius: '4px', borderLeft: '3px solid var(--color-primary)' }}>
-                "{rev.comment}"
+                &ldquo;{rev.comment}&rdquo;
               </p>
 
               <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', fontSize: '0.78rem', color: 'var(--color-text-light)', alignItems: 'center' }}>
