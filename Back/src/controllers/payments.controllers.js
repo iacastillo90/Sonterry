@@ -4,7 +4,7 @@ const formatResponse = require('../utils/formatResponse');
 
 const createPayment = catchAsync(async (req, res) => {
   const { orderId } = req.body;
-  const result = await paymentsService.createPaymentIntent(orderId);
+  const result = await paymentsService.createPaymentIntent(orderId, req.user._id);
   res.status(200).json(formatResponse(true, 'Intención de pago creada', result));
 });
 

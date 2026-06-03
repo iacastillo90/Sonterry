@@ -28,8 +28,8 @@ const replyToTicket = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { content, statusUpdate } = req.body;
   const sender = req.user.role === 'admin' ? 'admin' : 'user';
-  
-  const ticket = await ticketsService.replyToTicket(id, sender, content, statusUpdate);
+
+  const ticket = await ticketsService.replyToTicket(id, sender, content, statusUpdate, req.user);
   res.status(201).json(formatResponse(true, 'Respuesta enviada', ticket));
 });
 

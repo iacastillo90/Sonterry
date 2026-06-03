@@ -12,12 +12,15 @@ if (env.STRIPE_SECRET_KEY) {
   logger.warn('STRIPE_SECRET_KEY no configurado. Pagos Stripe deshabilitados.');
 }
 
-const createPaymentIntent = async (orderId) => {
+const createPaymentIntent = async (orderId, userId) => {
   if (!stripe) throw new AppError('Stripe no está configurado', 500);
 
   const order = await Order.findById(orderId);
   if (!order) throw new AppError('Pedido no encontrado', 404);
   if (order.status !== 'pending') throw new AppError('El pedido ya no está pendiente', 400);
+  if (order.user.toString() !== userId.toString()) {
+    throw new AppError('No tienes permiso para pagar este pedido', 403);
+  }
 
   const paymentIntent = await stripe.paymentIntents.create({
     amount: Math.round(order.total * 100),
