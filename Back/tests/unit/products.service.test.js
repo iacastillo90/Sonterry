@@ -10,6 +10,13 @@ jest.mock('../../src/models/product.model');
 const Product = require('../../src/models/product.model');
 const productsService = require('../../src/services/products.service');
 
+// Mock search service to test delegation independently
+jest.mock('../../src/services/search.service', () => ({
+  searchProducts: jest.fn(),
+}));
+
+const { searchProducts: mockSearchProducts } = require('../../src/services/search.service');
+
 describe('products.service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -50,19 +57,20 @@ describe('products.service', () => {
       );
     });
 
-    it('debe usar búsqueda de texto cuando search está presente', async () => {
-      Product.find.mockReturnValue({
-        populate: jest.fn().mockReturnThis(),
-        skip: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockReturnThis(),
-        sort: jest.fn().mockResolvedValue([]),
+    it('debe delegar búsqueda a searchService cuando search está presente', async () => {
+      mockSearchProducts.mockResolvedValue({
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 20,
+        totalPages: 0,
       });
-      Product.countDocuments.mockResolvedValue(0);
 
       await productsService.getProducts({ search: 'camiseta' });
-      expect(Product.find).toHaveBeenCalledWith(
-        expect.objectContaining({ $text: { $search: 'camiseta' } }),
-      );
+
+      // No debe llamar a Product.find con $text — eso lo maneja searchService
+      expect(Product.find).not.toHaveBeenCalled();
+      expect(mockSearchProducts).toHaveBeenCalledWith({ search: 'camiseta' });
     });
   });
 

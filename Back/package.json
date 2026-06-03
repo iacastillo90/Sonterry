@@ -9,6 +9,7 @@
     "seed": "node scripts/seed.js",
     "migrate": "node scripts/migrate.js",
     "clear-cache": "node scripts/clearCache.js",
+    "sync-search": "node scripts/syncMeilisearch.js",
     "test": "cross-env NODE_ENV=test MONGO_URI=mongodb://localhost:27017/mi-ecommerce-test JWT_SECRET=test_jwt_secret JWT_EXPIRES_IN=1d REFRESH_TOKEN_SECRET=test_refresh_secret REFRESH_TOKEN_EXPIRES_IN=7d jest --runInBand --detectOpenHandles",
     "test:watch": "cross-env NODE_ENV=test MONGO_URI=mongodb://localhost:27017/mi-ecommerce-test JWT_SECRET=test_jwt_secret JWT_EXPIRES_IN=1d REFRESH_TOKEN_SECRET=test_refresh_secret REFRESH_TOKEN_EXPIRES_IN=7d jest --watch",
     "test:coverage": "cross-env NODE_ENV=test MONGO_URI=mongodb://localhost:27017/mi-ecommerce-test JWT_SECRET=test_jwt_secret JWT_EXPIRES_IN=1d REFRESH_TOKEN_SECRET=test_refresh_secret REFRESH_TOKEN_EXPIRES_IN=7d jest --coverage"
@@ -28,6 +29,7 @@
     "ioredis": "^5.4.1",
     "jsonwebtoken": "^9.0.2",
     "minio": "^8.0.7",
+    "meilisearch": "^0.42.0",
     "mongoose": "^8.9.5",
     "morgan": "^1.10.0",
     "multer": "^2.1.1",

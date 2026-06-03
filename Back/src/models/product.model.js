@@ -50,4 +50,48 @@ productSchema.pre('save', async function (next) {
   next();
 });
 
+// ── Meilisearch sync hooks ────────────────────────────────────────────────
+// Se requiren inline para evitar circular imports al cargar el modelo
+
+productSchema.post('save', async function (doc) {
+  try {
+    const { addSearchSyncJob } = require('../jobs/searchSyncQueue');
+    if (doc.isDeleted) {
+      await addSearchSyncJob('remove', doc._id);
+    } else {
+      await doc.populate('category', 'name');
+      const { indexProduct } = require('../services/search.service');
+      await indexProduct(doc);
+    }
+  } catch (err) {
+    // Silently fail — eventual consistency via syncAll
+  }
+});
+
+productSchema.post('findOneAndUpdate', async function (result) {
+  if (!result) return;
+  try {
+    const { addSearchSyncJob } = require('../jobs/searchSyncQueue');
+    if (result.isDeleted) {
+      await addSearchSyncJob('remove', result._id);
+    } else {
+      await result.populate('category', 'name');
+      const { indexProduct } = require('../services/search.service');
+      await indexProduct(result);
+    }
+  } catch (err) {
+    // Silently fail — eventual consistency via syncAll
+  }
+});
+
+productSchema.post('findOneAndDelete', async function (result) {
+  if (!result) return;
+  try {
+    const { addSearchSyncJob } = require('../jobs/searchSyncQueue');
+    await addSearchSyncJob('remove', result._id);
+  } catch (err) {
+    // Silently fail
+  }
+});
+
 module.exports = mongoose.model('Product', productSchema);

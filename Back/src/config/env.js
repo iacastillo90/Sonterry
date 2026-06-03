@@ -79,6 +79,8 @@ module.exports = {
   CORS_ORIGIN: process.env.CORS_ORIGIN || '',
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5173',
   COOKIE_SECURE: process.env.NODE_ENV === 'production',
+  MEILI_HOST: process.env.MEILI_HOST || 'http://localhost:7700',
+  MEILI_MASTER_KEY: process.env.MEILI_MASTER_KEY || '',
   SMTP_HOST: process.env.SMTP_HOST || '',
   SMTP_PORT: parseInt(process.env.SMTP_PORT, 10) || 587,
   SMTP_USER: process.env.SMTP_USER || '',
