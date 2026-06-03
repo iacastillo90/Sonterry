@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Send, CheckCircle, AlertCircle, Package, MessageSquare, HelpCircle, Headphones } from 'lucide-react';
+import { sendContactMessage } from '../../../services/contact.service';
 
 /* ─── Validation schema ─────────────────────────────────────── */
 const contactSchema = z.object({
@@ -27,6 +28,7 @@ const SUBJECTS = [
 const ContactForm = () => {
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
 
   const {
     register, handleSubmit, reset,
@@ -35,12 +37,16 @@ const ContactForm = () => {
 
   const onSubmit = async (data) => {
     setSending(true);
-    // Simulates API delay — replace with real endpoint
-    await new Promise((r) => setTimeout(r, 1500));
-    console.log('Contact form data:', data);
-    setSending(false);
-    setSent(true);
-    reset();
+    setError('');
+    try {
+      await sendContactMessage(data);
+      setSent(true);
+      reset();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Error al enviar el mensaje. Intenta de nuevo.');
+    } finally {
+      setSending(false);
+    }
   };
 
   if (sent) {
@@ -168,6 +174,23 @@ const ContactForm = () => {
             </span>
           )}
         </div>
+
+        {error && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            padding: '0.75rem 1rem',
+            background: 'rgba(239, 68, 68, 0.1)',
+            color: 'var(--color-danger)',
+            borderRadius: 'var(--border-radius-sm)',
+            fontSize: '0.875rem',
+            fontWeight: '500',
+            border: '1px solid rgba(239, 68, 68, 0.2)',
+          }}>
+            <AlertCircle size={16} /> {error}
+          </div>
+        )}
 
         {/* Submit */}
         <button
