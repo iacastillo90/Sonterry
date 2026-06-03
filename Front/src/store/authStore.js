@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import axios from 'axios';
 import { useCartStore } from './cartStore';
 
 import api from '../services/api';
@@ -22,7 +21,7 @@ export const useAuthStore = create((set, get) => ({
   login: async (email, password) => {
     set({ loading: true, error: null });
     try {
-      const response = await axios.post('/api/auth/login', { email, password }, { withCredentials: true });
+      const response = await api.post('/auth/login', { email, password });
       const { token, user } = response.data.data;
 
       localStorage.setItem('st_token', token);
@@ -43,7 +42,7 @@ export const useAuthStore = create((set, get) => ({
   register: async (name, email, password) => {
     set({ loading: true, error: null });
     try {
-      const response = await axios.post('/api/auth/register', { name, email, password }, { withCredentials: true });
+      const response = await api.post('/auth/register', { name, email, password });
       const { token, user } = response.data.data;
 
       localStorage.setItem('st_token', token);
@@ -66,7 +65,12 @@ export const useAuthStore = create((set, get) => ({
     set({ user: updatedUser });
   },
 
-  logout: () => {
+  logout: async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch {
+      // If logout endpoint fails (network, etc.), still clear local state
+    }
     localStorage.removeItem('st_token');
     localStorage.removeItem('st_user');
     set({ token: null, user: null, isAuthenticated: false, error: null });
