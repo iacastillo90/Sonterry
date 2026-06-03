@@ -19,7 +19,9 @@ const paymentsRoutes = require('./routes/payments.routes');
 const reviewsRoutes = require('./routes/reviews.routes');
 const ticketsRoutes = require('./routes/tickets.routes');
 const bankAccountsRoutes = require('./routes/bankAccounts.routes');
+const searchRoutes = require('./routes/search.routes');
 const healthRoutes = require('./routes/health.routes');
+const contactRoutes = require('./routes/contact.routes');
 const n8nWebhooks = require('./webhooks/n8n.webhook');
 const stripeWebhooks = require('./webhooks/stripe');
 
@@ -32,7 +34,7 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "blob:", process.env.MINIO_PUBLIC_URL || ''].filter(Boolean),
-      connectSrc: ["'self'", process.env.CORS_ORIGIN || ''].filter(Boolean),
+      connectSrc: ["'self'", ...(process.env.CORS_ORIGIN || '').split(',').map(s => s.trim()).filter(Boolean)],
       fontSrc: ["'self'"],
       objectSrc: ["'none'"],
       frameAncestors: ["'none'"],
@@ -66,6 +68,8 @@ app.use('/api/payments', paymentsRoutes);
 app.use('/api/reviews', reviewsRoutes);
 app.use('/api/tickets', ticketsRoutes);
 app.use('/api/bank-accounts', bankAccountsRoutes);
+app.use('/api/search', searchRoutes);
+app.use('/api/contact', contactRoutes);
 app.use('/api/webhooks/n8n', n8nWebhooks);
 
 // Fallbacks
