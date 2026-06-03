@@ -70,6 +70,8 @@ services:
       - MINIO_PUBLIC_URL=${MINIO_PUBLIC_URL:-http://localhost:9000}
       - N8N_WEBHOOK_URL=http://n8n:5678/webhook/dispatch-notification
       - N8N_API_KEY=${N8N_API_KEY:-sonterry_n8n_secret}
+      - MEILI_HOST=http://meilisearch:7700
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY:-sonterry_meili_master_key}
       - CORS_ORIGIN=${CLIENT_URL:-http://localhost:5173},http://localhost:3000
     depends_on:
       database:
@@ -77,6 +79,8 @@ services:
       redis:
         condition: service_healthy
       minio:
+        condition: service_healthy
+      meilisearch:
         condition: service_healthy
     networks:
       - sonterry_network
@@ -151,6 +155,26 @@ services:
       timeout: 5s
       retries: 5
 
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    container_name: sonterry_search
+    restart: unless-stopped
+    ports:
+      - "${PORT_MEILI:-7700}:7700"
+    environment:
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY:-sonterry_meili_master_key}
+      - MEILI_NO_ANALYTICS=true
+      - MEILI_ENV=${NODE_ENV:-development}
+    volumes:
+      - meili_data:/meili_data
+    networks:
+      - sonterry_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   frontend:
     build:
       context: ./Front
@@ -172,6 +196,7 @@ volumes:
   redis_data:
   n8n_data:
   minio_data:
+  meili_data:
 
 networks:
   sonterry_network:

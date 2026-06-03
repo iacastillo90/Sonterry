@@ -1,8 +1,12 @@
 # Stage 1: Build React App
-FROM node:18-alpine AS build
+FROM node:22-alpine AS build
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+
+# Skip Cypress binary download — needed only for E2E tests, not for production build
+ENV CYPRESS_INSTALL_BINARY=0
+RUN npm ci
+
 COPY . .
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
