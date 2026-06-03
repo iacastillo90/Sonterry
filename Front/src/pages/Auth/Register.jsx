@@ -42,7 +42,7 @@ const Register = () => {
         <Input label="Correo Electrónico" name="email" type="email" register={register} error={errors.email} />
         <Input label="Contraseña (Mín. 8 caracteres)" name="password" type="password" register={register} error={errors.password} />
         
-        <Button type="submit" variant="accent" className="auth-submit-btn" disabled={loading}>
+        <Button type="submit" variant="accent" className="auth-submit-btn" disabled={loading} data-cy="submit-register">
           {loading ? 'Creando...' : 'Crear Cuenta'}
         </Button>
       </form>
