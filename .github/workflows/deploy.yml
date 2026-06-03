@@ -41,8 +41,16 @@ jobs:
         run: npm ci
         working-directory: Back
 
-      - name: Run Backend Unit Tests
+      - name: npm audit (Backend)
+        run: npm audit --audit-level=high
+        working-directory: Back
+
+      - name: Run Backend Tests
         run: npm test
+        working-directory: Back
+
+      - name: Coverage Report
+        run: npm run test:coverage -- --coverageReporters=text-summary
         working-directory: Back
 
   # ─── Job 2: Frontend ──────────────────────────────────────────────────────
@@ -63,6 +71,10 @@ jobs:
 
       - name: Install Front Dependencies
         run: npm ci
+        working-directory: Front
+
+      - name: npm audit (Frontend)
+        run: npm audit --audit-level=high
         working-directory: Front
 
       - name: Lint Frontend
