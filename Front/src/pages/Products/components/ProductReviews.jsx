@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, MessageSquare, AlertCircle } from 'lucide-react';
 import * as productsService from '../../../services/products.service';
@@ -17,23 +17,21 @@ const ProductReviews = ({ productId }) => {
   const [comment, setComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
 
-  useEffect(() => {
-    if (productId) {
-      loadReviews();
-    }
-  }, [productId]);
-
-  const loadReviews = async () => {
+  const loadReviews = useCallback(async () => {
     setLoadingReviews(true);
     try {
       const revs = await productsService.fetchReviews(productId);
       setReviews(revs);
     } catch (err) {
       console.error('Error fetching reviews:', err);
-    } finally {
-      setLoadingReviews(false);
     }
-  };
+  }, [productId]);
+
+  useEffect(() => {
+    if (productId) {
+      loadReviews();
+    }
+  }, [productId, loadReviews]);
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();

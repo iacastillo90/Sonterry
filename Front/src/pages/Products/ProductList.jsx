@@ -108,7 +108,7 @@ const ProductList = () => {
         {searchVal && (
           <div className="pl-search-pill">
             <span style={{ fontSize: '0.9rem', color: 'var(--green-deep)', fontFamily: 'var(--font-body)' }}>
-              Resultados para: <strong>"{searchVal}"</strong>
+              Resultados para: <strong>&ldquo;{searchVal}&rdquo;</strong>
             </span>
             <button
               onClick={handleClearSearch}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useUiStore } from '../../store/uiStore';
 import api from '../../services/api';
@@ -64,7 +64,7 @@ const AdminDashboard = () => {
   const { data: tickets, isLoading: loadingTickets, refetch: refetchTickets } = useAdminTickets();
 
   // Load all initial lists
-  const loadCatalogData = async () => {
+  const loadCatalogData = useCallback(async () => {
     setLoadingProducts(true);
     try {
       const [cats, prods] = await Promise.all([
@@ -78,9 +78,9 @@ const AdminDashboard = () => {
     } finally {
       setLoadingProducts(false);
     }
-  };
+  }, [addToast]);
 
-  const fetchUsersList = async () => {
+  const fetchUsersList = useCallback(async () => {
     setLoadingUsers(true);
     try {
       const res = await api.get('/users');
@@ -91,12 +91,12 @@ const AdminDashboard = () => {
     } finally {
       setLoadingUsers(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadCatalogData();
     fetchUsersList();
-  }, []);
+  }, [loadCatalogData, fetchUsersList]);
 
   // Calculate statistics
   const totalIngresos = (orders || [])

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import * as productsService from '../../../services/products.service';
 import LoadingSpinner from '../../../components/common/LoadingSpinner';
@@ -8,13 +8,7 @@ const RelatedProducts = ({ categoryId, currentProductId }) => {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loadingRelated, setLoadingRelated] = useState(false);
 
-  useEffect(() => {
-    if (categoryId && currentProductId) {
-      loadRelatedProducts();
-    }
-  }, [categoryId, currentProductId]);
-
-  const loadRelatedProducts = async () => {
+  const loadRelatedProducts = useCallback(async () => {
     setLoadingRelated(true);
     try {
       const relProds = await productsService.fetchRelatedProducts(categoryId, currentProductId);
@@ -24,7 +18,13 @@ const RelatedProducts = ({ categoryId, currentProductId }) => {
     } finally {
       setLoadingRelated(false);
     }
-  };
+  }, [categoryId, currentProductId]);
+
+  useEffect(() => {
+    if (categoryId && currentProductId) {
+      loadRelatedProducts();
+    }
+  }, [categoryId, currentProductId, loadRelatedProducts]);
 
   return (
     <div style={{ marginBottom: '4rem' }}>

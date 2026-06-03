@@ -2,13 +2,13 @@ import React from 'react';
 import { useUiStore } from '../../store/uiStore';
 import { AlertCircle, CheckCircle, Info, X } from 'lucide-react';
 
-const Toast = () => {
+const Toast = (props) => {
   const { toasts, removeToast } = useUiStore();
 
   if (toasts.length === 0) return null;
 
   return (
-    <div style={{
+    <div {...props} style={{
       position: 'fixed',
       bottom: '2rem',
       right: '2rem',

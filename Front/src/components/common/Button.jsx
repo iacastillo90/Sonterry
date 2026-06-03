@@ -13,21 +13,19 @@ const Button = ({
   disabled = false,
   className = '',
   style = {},
+  ...props
 }) => {
   return (
-    <>
-
-
-      <button
-        type={type}
-        onClick={onClick}
-        disabled={disabled}
-        style={style}
-        className={`snt-btn snt-btn-${variant} ${className}`}
-      >
-        {children}
-      </button>
-    </>
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      style={style}
+      className={`snt-btn snt-btn-${variant} ${className}`}
+      {...props}
+    >
+      {children}
+    </button>
   );
 };
 
