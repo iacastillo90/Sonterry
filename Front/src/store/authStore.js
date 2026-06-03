@@ -4,25 +4,31 @@ import { useCartStore } from './cartStore';
 
 import api from '../services/api';
 
-export const useAuthStore = create((set) => ({
+export const useAuthStore = create((set, get) => ({
   user: JSON.parse(localStorage.getItem('st_user')) || null,
   token: localStorage.getItem('st_token') || null,
-  refreshToken: localStorage.getItem('st_refresh_token') || null,
   isAuthenticated: !!localStorage.getItem('st_token'),
   loading: false,
   error: null,
 
+  /**
+   * Synchronize token after silent refresh (called by api.js interceptor).
+   * Keeps Zustand state in sync with localStorage without a full page reload.
+   */
+  setToken: (token) => {
+    set({ token, isAuthenticated: true });
+  },
+
   login: async (email, password) => {
     set({ loading: true, error: null });
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
-      const { token, refreshToken, user } = response.data.data;
+      const response = await axios.post('/api/auth/login', { email, password }, { withCredentials: true });
+      const { token, user } = response.data.data;
 
       localStorage.setItem('st_token', token);
-      localStorage.setItem('st_refresh_token', refreshToken);
       localStorage.setItem('st_user', JSON.stringify(user));
 
-      set({ token, refreshToken, user, isAuthenticated: true, loading: false });
+      set({ token, user, isAuthenticated: true, loading: false });
 
       await useCartStore.getState().fetchCart();
 
@@ -37,14 +43,13 @@ export const useAuthStore = create((set) => ({
   register: async (name, email, password) => {
     set({ loading: true, error: null });
     try {
-      const response = await axios.post('/api/auth/register', { name, email, password });
-      const { token, refreshToken, user } = response.data.data;
+      const response = await axios.post('/api/auth/register', { name, email, password }, { withCredentials: true });
+      const { token, user } = response.data.data;
 
       localStorage.setItem('st_token', token);
-      localStorage.setItem('st_refresh_token', refreshToken);
       localStorage.setItem('st_user', JSON.stringify(user));
 
-      set({ token, refreshToken, user, isAuthenticated: true, loading: false });
+      set({ token, user, isAuthenticated: true, loading: false });
 
       await useCartStore.getState().fetchCart();
 
@@ -63,11 +68,9 @@ export const useAuthStore = create((set) => ({
 
   logout: () => {
     localStorage.removeItem('st_token');
-    localStorage.removeItem('st_refresh_token');
     localStorage.removeItem('st_user');
-    set({ token: null, refreshToken: null, user: null, isAuthenticated: false, error: null });
+    set({ token: null, user: null, isAuthenticated: false, error: null });
 
     useCartStore.getState().clearCart();
-  }
+  },
 }));
-
