@@ -5,6 +5,7 @@ COPY package*.json ./
 
 # Skip Cypress binary download — needed only for E2E tests, not for production build
 ENV CYPRESS_INSTALL_BINARY=0
+ENV npm_config_update_notifier=false
 RUN npm ci
 
 COPY . .

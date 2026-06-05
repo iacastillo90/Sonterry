@@ -200,4 +200,10 @@ const createManualOrder = async (orderData) => {
   return order;
 };
 
-module.exports = { createOrder, updateOrderStatus, getUserOrders, getAllOrders, getOrdersByProduct, updateOrderDispatch, createManualOrder };
+const getOrderById = async (orderId, userId) => {
+  const order = await Order.findOne({ _id: orderId, user: userId });
+  if (!order) throw new AppError('Pedido no encontrado', 404);
+  return order;
+};
+
+module.exports = { createOrder, updateOrderStatus, getUserOrders, getAllOrders, getOrdersByProduct, updateOrderDispatch, createManualOrder, getOrderById };

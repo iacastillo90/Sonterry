@@ -68,6 +68,11 @@ services:
       - MINIO_BUCKET=${MINIO_BUCKET:-sonterry}
       - MINIO_USE_SSL=false
       - MINIO_PUBLIC_URL=${MINIO_PUBLIC_URL:-http://localhost:9000}
+      - WOMPI_PUBLIC_KEY=${WOMPI_PUBLIC_KEY:-}
+      - WOMPI_PRIVATE_KEY=${WOMPI_PRIVATE_KEY:-}
+      - WOMPI_INTEGRITY_KEY=${WOMPI_INTEGRITY_KEY:-}
+      - WOMPI_EVENTOS_SECRET=${WOMPI_EVENTOS_SECRET:-}
+      - WOMPI_API_URL=https://sandbox.wompi.co
       - N8N_WEBHOOK_URL=http://n8n:5678/webhook/dispatch-notification
       - N8N_API_KEY=${N8N_API_KEY:-sonterry_n8n_secret}
       - MEILI_HOST=http://meilisearch:7700
