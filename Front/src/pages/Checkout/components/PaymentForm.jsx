@@ -5,12 +5,13 @@ import { formatCurrency } from '../../../utils/formatCurrency';
 import { useUiStore } from '../../../store/uiStore';
 import Button from '../../../components/common/Button';
 import api from '../../../services/api';
+import { createWompiTransaction } from '../../../services/wompi.service';
 import { useNavigate } from 'react-router-dom';
 import { Landmark, CreditCard, Banknote } from 'lucide-react';
 
 const PaymentForm = ({ onBack }) => {
   const [loading, setLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('tarjeta');
+  const [paymentMethod, setPaymentMethod] = useState('wompi');
   const [bankAccounts, setBankAccounts] = useState([]);
   
   const { shippingAddress } = useCheckoutStore();
@@ -30,35 +31,135 @@ const PaymentForm = ({ onBack }) => {
     fetchBankAccounts();
   }, []);
 
+  const syncCartToBackend = async () => {
+    // Reemplaza el carrito de MongoDB con los items de Zustand
+    try {
+      const { data: serverCart } = await api.get('/cart');
+      const serverItems = serverCart.data?.items || [];
+
+      // Remove ALL server cart items primero
+      for (const si of serverItems) {
+        if (si._id) {
+          try { await api.delete(`/cart/${si._id}`); } catch (_) { /* ignore */ }
+        }
+      }
+
+      // Add ALL items from Zustand
+      for (const item of items) {
+        await api.post('/cart', {
+          productId: item.product._id || item.product,
+          quantity: item.quantity,
+          customization: item.customization || undefined,
+        });
+      }
+    } catch (err) {
+      console.error('Error syncing cart:', err);
+    }
+  };
+
   const handlePayment = async () => {
     setLoading(true);
     try {
-      // 1. Create order in Backend
+      // Sync Zustand cart to MongoDB before creating order
+      await syncCartToBackend();
+
       const orderResponse = await api.post('/orders', {
         shippingAddress,
         paymentMethod
       });
       const order = orderResponse.data.data;
 
-      // 2. If it's a card payment, process with Stripe (Stub)
-      if (paymentMethod === 'tarjeta') {
-        await api.post('/payments/charge', {
-          orderId: order._id,
-          paymentMethodId: 'stripe_payment_stub_id'
-        });
-        addToast('¡Pedido creado y pagado con éxito!', 'success');
-      } else {
-        // If it's transfer or deposit, just mark as created (pending payment validation)
-        addToast('¡Pedido creado! Pendiente de validación de pago.', 'success');
-      }
+      if (paymentMethod === 'wompi') {
+        let transactionData;
+        try {
+          transactionData = await createWompiTransaction(order._id);
 
-      clearCart();
-      navigate('/profile');
+          await loadWompiScript();
+
+          const redirectUrl = `${window.location.origin}/checkout/callback`;
+          const user = JSON.parse(localStorage.getItem('st_user'));
+
+          const widget = new window.WidgetCheckout({
+            currency: transactionData.currency || 'COP',
+            amountInCents: transactionData.amountInCents,
+            reference: transactionData.reference,
+            publicKey: transactionData.publicKey,
+            signature: {
+              integrity: transactionData.integritySignature,
+            },
+            customerData: {
+              email: user?.email || '',
+            },
+          });
+
+          widget.open((result) => {
+            console.log('Wompi transaction result:', result);
+            const transaction = result?.transaction;
+            if (transaction) {
+              const status = transaction.status === 'APPROVED' ? 'APPROVED' : 'DECLINED';
+              navigate(`/checkout/callback?ref=${transaction.reference}&transaction_id=${transaction.id}&status=${status}`);
+            }
+          });
+        } catch (wompiError) {
+          setLoading(false);
+          console.error('Wompi error:', wompiError);
+          console.error('Wompi error name:', wompiError.name);
+          console.error('Wompi error message:', wompiError.message);
+          console.error('Wompi error stack:', wompiError.stack);
+          console.error('Wompi error response:', wompiError.response);
+
+          const errorMsg = wompiError.response?.data?.message
+            || wompiError.message
+            || 'Error al procesar el pago';
+
+          addToast(errorMsg, 'error');
+
+          if (wompiError.message === 'WOMPI_SCRIPT_TIMEOUT' && transactionData) {
+            const checkoutUrl = `https://checkout.wompi.co/pay?public-key=${transactionData.publicKey}&currency=COP&amount-in-cents=${transactionData.amountInCents}&reference=${transactionData.reference}&redirect-url=${window.location.origin}/checkout/callback`;
+            window.open(checkoutUrl, '_blank');
+          }
+        }
+      } else {
+        addToast('¡Pedido creado! Pendiente de validación de pago.', 'success');
+        clearCart();
+        navigate('/profile');
+      }
     } catch (error) {
       addToast(error.response?.data?.message || 'Error en el procesamiento del pedido', 'error');
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadWompiScript = () => {
+    return new Promise((resolve, reject) => {
+      if (window.WompiWidget) {
+        resolve();
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://checkout.wompi.co/widget.js';
+      script.async = true;
+
+      const timeout = setTimeout(() => {
+        script.onload = null;
+        script.onerror = null;
+        reject(new Error('WOMPI_SCRIPT_TIMEOUT'));
+      }, 5000);
+
+      script.onload = () => {
+        clearTimeout(timeout);
+        resolve();
+      };
+
+      script.onerror = () => {
+        clearTimeout(timeout);
+        reject(new Error('WOMPI_SCRIPT_TIMEOUT'));
+      };
+
+      document.head.appendChild(script);
+    });
   };
 
   const filteredBanks = bankAccounts.filter(acc => acc.supportedMethods === 'ambas' || acc.supportedMethods === paymentMethod);
@@ -76,9 +177,9 @@ const PaymentForm = ({ onBack }) => {
         <h4 style={{ fontSize: '1rem', marginBottom: '1rem' }}>Selecciona tu método de pago:</h4>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
           
-          <div onClick={() => setPaymentMethod('tarjeta')} style={{ border: `2px solid ${paymentMethod === 'tarjeta' ? 'var(--color-primary)' : 'var(--border-subtle)'}`, borderRadius: '8px', padding: '1rem', textAlign: 'center', cursor: 'pointer', backgroundColor: paymentMethod === 'tarjeta' ? '#F0FDF4' : '#FFF' }}>
-            <CreditCard size={24} style={{ margin: '0 auto 0.5rem', color: paymentMethod === 'tarjeta' ? 'var(--color-primary)' : '#64748B' }} />
-            <span style={{ fontWeight: 600, fontSize: '0.9rem', color: '#1E293B' }}>Tarjeta (Crédito/Débito)</span>
+          <div onClick={() => setPaymentMethod('wompi')} style={{ border: `2px solid ${paymentMethod === 'wompi' ? 'var(--color-primary)' : 'var(--border-subtle)'}`, borderRadius: '8px', padding: '1rem', textAlign: 'center', cursor: 'pointer', backgroundColor: paymentMethod === 'wompi' ? '#F0FDF4' : '#FFF' }}>
+            <CreditCard size={24} style={{ margin: '0 auto 0.5rem', color: paymentMethod === 'wompi' ? 'var(--color-primary)' : '#64748B' }} />
+            <span style={{ fontWeight: 600, fontSize: '0.9rem', color: '#1E293B' }}>Pagar con Wompi</span>
           </div>
 
           <div onClick={() => setPaymentMethod('transferencia')} style={{ border: `2px solid ${paymentMethod === 'transferencia' ? 'var(--color-primary)' : 'var(--border-subtle)'}`, borderRadius: '8px', padding: '1rem', textAlign: 'center', cursor: 'pointer', backgroundColor: paymentMethod === 'transferencia' ? '#F0FDF4' : '#FFF' }}>
@@ -94,14 +195,12 @@ const PaymentForm = ({ onBack }) => {
         </div>
       </div>
 
-      {paymentMethod === 'tarjeta' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem', animation: 'fadeIn 0.3s' }}>
-          <h4 style={{ fontSize: '0.9rem', color: '#475569' }}>Información de Tarjeta de Crédito (Demostración):</h4>
-          <input type="text" placeholder="4242 4242 4242 4242" disabled style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-subtle)', backgroundColor: 'var(--color-bg)' }} />
-          <div className="shipping-form-row">
-            <input type="text" placeholder="12 / 29" disabled style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-subtle)', backgroundColor: 'var(--color-bg)' }} />
-            <input type="text" placeholder="123" disabled style={{ padding: '0.75rem', borderRadius: '4px', border: '1px solid var(--border-subtle)', backgroundColor: 'var(--color-bg)' }} />
-          </div>
+      {paymentMethod === 'wompi' && (
+        <div style={{ marginBottom: '1.5rem', animation: 'fadeIn 0.3s' }}>
+          <h4 style={{ fontSize: '0.9rem', color: '#475569', marginBottom: '0.5rem' }}>Pago Seguro con Wompi</h4>
+          <p style={{ fontSize: '0.85rem', color: '#64748B', marginBottom: '1rem' }}>
+            Paga de forma segura con Wompi. Aceptamos tarjetas, PSE, Nequi, Daviplata y más.
+          </p>
         </div>
       )}
 
