@@ -1,4 +1,5 @@
 const paymentsService = require('../services/payments.service');
+const ordersService = require('../services/orders.service');
 const wompiService = require('../services/wompi.service');
 const Order = require('../models/order.model');
 const Payment = require('../models/payment.model');
@@ -56,6 +57,9 @@ const confirmWompiPayment = catchAsync(async (req, res) => {
   order.wompiStatus = transaction.status;
 
   if (transaction.status === 'APPROVED') {
+    // Deduct stock BEFORE marking paid — prevents paid-but-no-stock scenarios
+    await ordersService.deductOrderStock(order);
+
     order.status = 'paid';
     order.paidAt = new Date();
 

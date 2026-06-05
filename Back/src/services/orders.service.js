@@ -8,40 +8,44 @@ const { addNotificationJob } = require('../jobs/notificationQueue');
 const { sendOrderConfirmation, sendOrderStatusUpdate } = require('./email.service');
 const logger = require('../logs/logger');
 
-const createOrder = async (userId, shippingAddress, customerName, paymentMethod = 'tarjeta') => {
-  const cart = await getCart(userId);
-  if (!cart || cart.items.length === 0) {
-    throw new AppError('El carrito está vacío', 400);
-  }
-
-  // Atomic stock check + decrement via findOneAndUpdate with optimistic lock
+const deductOrderStock = async (order) => {
   const stockResults = await Promise.all(
-    cart.items.map(item =>
+    order.items.map(item =>
       Product.findOneAndUpdate(
-        { _id: item.product._id, stock: { $gte: item.quantity } },
+        { _id: item.product, stock: { $gte: item.quantity } },
         { $inc: { stock: -item.quantity } },
-        { new: true, projection: { price: 1, name: 1 } }
+        { new: true, projection: { name: 1 } }
       )
     )
   );
 
   const failedIndex = stockResults.findIndex(r => !r);
   if (failedIndex !== -1) {
-    // Compensating transaction: restore stock for successful decrements
+    // Compensate successful decrements
     await Promise.all(
       stockResults.map((r, i) =>
         r
-          ? Product.findByIdAndUpdate(cart.items[i].product._id, { $inc: { stock: cart.items[i].quantity } })
+          ? Product.findByIdAndUpdate(order.items[i].product, { $inc: { stock: order.items[i].quantity } })
           : Promise.resolve()
       )
     );
-    throw new AppError(`Stock insuficiente para: ${cart.items[failedIndex].product.name}`, 400);
+    throw new AppError(`Stock insuficiente para: ${order.items[failedIndex].name}`, 400);
   }
+};
+
+const createOrder = async (userId, shippingAddress, customerName, paymentMethod = 'tarjeta') => {
+  const cart = await getCart(userId);
+  if (!cart || cart.items.length === 0) {
+    throw new AppError('El carrito está vacío', 400);
+  }
+
+  // Stock is NOT deducted here anymore — it's deducted at payment confirmation
+  // (see deductOrderStock called from confirmWompiPayment, Wompi webhook, Stripe webhook)
 
   const items = cart.items.map((item, i) => ({
     product: item.product._id,
     name: item.product.name,
-    price: stockResults[i].price,
+    price: item.product.price,
     quantity: item.quantity,
     customization: item.customization || undefined,
   }));
@@ -206,4 +210,4 @@ const getOrderById = async (orderId, userId) => {
   return order;
 };
 
-module.exports = { createOrder, updateOrderStatus, getUserOrders, getAllOrders, getOrdersByProduct, updateOrderDispatch, createManualOrder, getOrderById };
+module.exports = { createOrder, updateOrderStatus, getUserOrders, getAllOrders, getOrdersByProduct, updateOrderDispatch, createManualOrder, getOrderById, deductOrderStock };

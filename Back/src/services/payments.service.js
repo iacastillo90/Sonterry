@@ -2,6 +2,7 @@ const Stripe = require('stripe');
 const Order = require('../models/order.model');
 const Payment = require('../models/payment.model');
 const AppError = require('../errors/AppError');
+const { deductOrderStock } = require('./orders.service');
 const env = require('../config/env');
 const logger = require('../logs/logger');
 
@@ -50,6 +51,13 @@ const handlePaymentSucceeded = async (paymentIntent) => {
   if (!order) {
     logger.warn(`Stripe webhook: orden ${orderId} no encontrada`);
     return;
+  }
+
+  // Deduct stock — log but don't fail the webhook if stock is insufficient
+  try {
+    await deductOrderStock(order);
+  } catch (stockErr) {
+    logger.error(`[Stripe] Stock deduction failed for order ${orderId}: ${stockErr.message}`);
   }
 
   order.status = 'paid';

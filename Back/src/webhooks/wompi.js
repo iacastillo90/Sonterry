@@ -4,6 +4,7 @@ const config = require('../config/env');
 const logger = require('../logs/logger');
 const Order = require('../models/order.model');
 const Payment = require('../models/payment.model');
+const { deductOrderStock } = require('../services/orders.service');
 const { verifyEventSignature } = require('../utils/wompi');
 
 router.post('/', express.raw({ type: 'application/json' }), async (req, res) => {
@@ -42,6 +43,14 @@ router.post('/', express.raw({ type: 'application/json' }), async (req, res) => 
         if (order.status === 'paid') {
           logger.info(`[Wompi] Order ${order._id} already paid, skipping`);
           return res.status(200).json({ received: true });
+        }
+
+        // Deduct stock — log but don't fail the webhook if stock is insufficient
+        try {
+          await deductOrderStock(order);
+        } catch (stockErr) {
+          logger.error(`[Wompi] Stock deduction failed for order ${order._id}: ${stockErr.message}`);
+          // Order will be marked paid but flagged with wompiStatus for manual review
         }
 
         order.status = 'paid';
