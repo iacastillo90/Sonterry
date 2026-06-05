@@ -5,5 +5,6 @@ const { protect } = require('../middlewares/auth.middleware');
 
 router.post('/create-payment-intent', protect, paymentsControllers.createPayment);
 router.post('/wompi/transaction', protect, paymentsControllers.createWompiTransaction);
+router.post('/wompi/confirm', protect, paymentsControllers.confirmWompiPayment);
 
 module.exports = router;

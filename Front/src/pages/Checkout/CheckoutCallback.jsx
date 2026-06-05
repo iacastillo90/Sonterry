@@ -7,35 +7,50 @@ const CheckoutCallback = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [confirmResult, setConfirmResult] = useState(null);
 
   const ref = searchParams.get('ref');
   const transactionId = searchParams.get('transaction_id');
   const paymentStatus = searchParams.get('status');
 
   useEffect(() => {
-    const verifyPayment = async () => {
+    const confirmPayment = async () => {
       if (!ref) {
         setLoading(false);
         return;
       }
 
       try {
-        const orderId = ref.split('-')[1];
-        if (orderId) {
-          const response = await api.get(`/orders/${orderId}`);
-          const order = response.data.data || response.data;
-          if (order?.status === 'paid') {
-            localStorage.removeItem('st_cart');
-          }
+        const response = await api.post('/payments/wompi/confirm', {
+          reference: ref,
+          transactionId,
+        });
+        const result = response.data;
+        const order = result?.data?.order;
+        const txStatus = result?.data?.transactionStatus;
+
+        setConfirmResult({
+          success: txStatus === 'APPROVED',
+          orderStatus: order?.status,
+          txStatus,
+        });
+
+        if (txStatus === 'APPROVED' || order?.status === 'paid') {
+          localStorage.removeItem('st_cart');
         }
       } catch (error) {
-        console.error('Error verifying payment:', error);
+        console.error('Error confirming payment:', error);
+        setConfirmResult({
+          success: paymentStatus === 'APPROVED',
+          orderStatus: 'pending',
+          txStatus: paymentStatus,
+        });
       } finally {
         setLoading(false);
       }
     };
 
-    verifyPayment();
+    confirmPayment();
   }, [ref, transactionId, paymentStatus]);
 
   if (loading) {
@@ -49,7 +64,10 @@ const CheckoutCallback = () => {
     );
   }
 
-  if (paymentStatus === 'APPROVED') {
+  const isApproved = confirmResult?.success ?? paymentStatus === 'APPROVED';
+  const isDeclined = !isApproved && (paymentStatus === 'DECLINED' || paymentStatus === 'ERROR');
+
+  if (isApproved) {
     return (
       <div style={{ maxWidth: '500px', margin: '4rem auto', textAlign: 'center', padding: '2rem' }}>
         <CheckCircle size={64} style={{ color: '#22c55e', margin: '0 auto 1rem' }} />
@@ -75,7 +93,7 @@ const CheckoutCallback = () => {
     );
   }
 
-  if (paymentStatus === 'DECLINED' || paymentStatus === 'ERROR') {
+  if (isDeclined) {
     return (
       <div style={{ maxWidth: '500px', margin: '4rem auto', textAlign: 'center', padding: '2rem' }}>
         <XCircle size={64} style={{ color: '#ef4444', margin: '0 auto 1rem' }} />
