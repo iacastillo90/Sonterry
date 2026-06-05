@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const paymentSchema = new mongoose.Schema({
   order: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },
   amount: { type: Number, required: true },
-  method: { type: String, enum: ['stripe', 'paypal'], required: true },
+  method: { type: String, enum: ['stripe', 'paypal', 'wompi'], required: true },
   status: { type: String, enum: ['pending', 'succeeded', 'failed', 'refunded'], default: 'pending' },
   paymentIntentId: { type: String, select: false },
 }, { timestamps: true });
