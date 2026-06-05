@@ -74,9 +74,8 @@ const PaymentForm = ({ onBack }) => {
         try {
           transactionData = await createWompiTransaction(order._id);
 
-          await loadWompiScript();
+          await loadWompiScript(transactionData.publicKey);
 
-          const redirectUrl = `${window.location.origin}/checkout/callback`;
           const user = JSON.parse(localStorage.getItem('st_user'));
 
           const widget = new window.WidgetCheckout({
@@ -131,7 +130,7 @@ const PaymentForm = ({ onBack }) => {
     }
   };
 
-  const loadWompiScript = () => {
+  const loadWompiScript = (publicKey) => {
     return new Promise((resolve, reject) => {
       if (window.WompiWidget) {
         resolve();
@@ -141,6 +140,7 @@ const PaymentForm = ({ onBack }) => {
       const script = document.createElement('script');
       script.src = 'https://checkout.wompi.co/widget.js';
       script.async = true;
+      script.setAttribute('data-public-key', publicKey);
 
       const timeout = setTimeout(() => {
         script.onload = null;
