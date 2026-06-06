@@ -13,5 +13,6 @@ router.get('/all', protect, restrictTo('admin'), ordersControllers.getAllOrders)
 router.get('/product/:productId', protect, restrictTo('admin'), ordersControllers.getOrdersByProduct);
 router.patch('/:id/status', protect, restrictTo('admin'), zodValidate(updateOrderStatusSchema), ordersControllers.updateOrderStatus);
 router.patch('/:id/dispatch', protect, restrictTo('admin'), ordersControllers.updateOrderDispatch);
+router.patch('/:id/cancel', protect, ordersControllers.cancelOrder);
 
 module.exports = router;

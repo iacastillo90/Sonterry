@@ -1,0 +1,35 @@
+schema: spec-driven
+
+context: |
+  Tech stack: Node.js 22 / Express 4 / Mongoose 8 / CommonJS (Back) + React 18 / Vite 5 / ESM (Front)
+  Architecture: REST API with controllers/services/models pattern + React with Zustand/TanStack Query
+  Testing: Jest 30 (Back) — integration tests with supertest + MongoDB Memory Server
+  Formatting: Prettier + ESLint (no config files found — check package.json for scripts)
+  Auth: JWT with bcrypt + refresh tokens
+  Validation: Zod 4 (migrated from express-validator)
+
+rules:
+  proposal:
+    - Include tradeoffs for each approach considered
+    - Identify affected modules (Back/ Front/ Docker)
+  specs:
+    - Use Given/When/Then format for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+    - All user-facing messages MUST be in Spanish
+  design:
+    - Include data flow diagrams for complex flows
+    - Document architecture decisions with rationale
+    - Include file changes table
+  tasks:
+    - Group tasks by phase (infrastructure, implementation, testing)
+    - Use hierarchical numbering (1.1, 1.2, etc.)
+    - Keep tasks small enough to complete in one session
+  apply:
+    - Follow existing code patterns and conventions
+    - NEVER build after changes
+    - Use conventional commits format
+  verify:
+    - Run tests if test infrastructure exists
+    - Compare implementation against every spec scenario
+  archive:
+    - Sync delta specs to main specs before archiving

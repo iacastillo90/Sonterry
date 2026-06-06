@@ -210,4 +210,41 @@ const getOrderById = async (orderId, userId) => {
   return order;
 };
 
-module.exports = { createOrder, updateOrderStatus, getUserOrders, getAllOrders, getOrdersByProduct, updateOrderDispatch, createManualOrder, getOrderById, deductOrderStock };
+const cancelOrder = async (orderId, userId) => {
+  const order = await Order.findOne({ _id: orderId, user: userId });
+  if (!order) throw new AppError('Pedido no encontrado', 404);
+
+  if (order.status === 'cancelled') throw new AppError('El pedido ya fue cancelado', 400);
+
+  if (order.status === 'shipped' || order.status === 'delivered') {
+    throw new AppError('No se puede cancelar un pedido que ya fue enviado o entregado', 400);
+  }
+
+  // paid only allowed if not yet shipped (no tracking number)
+  if (order.status === 'paid' && order.shippingDetails?.trackingNumber) {
+    throw new AppError('No se puede cancelar un pedido que ya está en proceso de envío', 400);
+  }
+
+  // Restore stock for each item
+  await Promise.all(
+    order.items.map(item =>
+      Product.findByIdAndUpdate(item.product, { $inc: { stock: +item.quantity } })
+    )
+  );
+
+  order.status = 'cancelled';
+  await order.save();
+
+  // Fire-and-forget notification
+  addNotificationJob({
+    orderId: order._id,
+    type: 'STATUS_UPDATED',
+    status: 'cancelled',
+    recipientPhone: order.shippingAddress?.phone,
+    customerName: order.user?.name || 'Cliente',
+  }).catch(err => logger.error(`[Orders] Failed to enqueue notification: ${err.message}`));
+
+  return order;
+};
+
+module.exports = { createOrder, updateOrderStatus, getUserOrders, getAllOrders, getOrdersByProduct, updateOrderDispatch, createManualOrder, getOrderById, deductOrderStock, cancelOrder };

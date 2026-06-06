@@ -45,4 +45,9 @@ const getOrderById = catchAsync(async (req, res) => {
   res.status(200).json(formatResponse(true, 'Pedido encontrado', order));
 });
 
-module.exports = { createOrder, updateOrderStatus, getUserOrders, getAllOrders, getOrdersByProduct, updateOrderDispatch, createManualOrder, getOrderById };
+const cancelOrder = catchAsync(async (req, res) => {
+  const order = await ordersService.cancelOrder(req.params.id, req.user._id);
+  res.status(200).json(formatResponse(true, 'Orden cancelada exitosamente', { order }));
+});
+
+module.exports = { createOrder, updateOrderStatus, getUserOrders, getAllOrders, getOrdersByProduct, updateOrderDispatch, createManualOrder, getOrderById, cancelOrder };
