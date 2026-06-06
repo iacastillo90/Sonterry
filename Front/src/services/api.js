@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: '/api',
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -34,7 +35,10 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Don't retry the refresh endpoint itself
+    if (error.response?.status === 401 &&
+        !originalRequest._retry &&
+        !originalRequest.url?.includes('/auth/refresh')) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -47,22 +51,12 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const refreshToken = localStorage.getItem('st_refresh_token');
-      if (!refreshToken) {
-        isRefreshing = false;
-        localStorage.removeItem('st_token');
-        localStorage.removeItem('st_user');
-        window.location.href = '/login';
-        return Promise.reject(error);
-      }
-
       try {
-        const { data } = await axios.post('/api/auth/refresh', { refreshToken });
+        // Refresh token is auto-sent via HttpOnly cookie (withCredentials: true)
+        const { data } = await axios.post('/api/auth/refresh', {}, { withCredentials: true });
         const newToken = data.data.accessToken;
-        const newRefreshToken = data.data.refreshToken;
 
         localStorage.setItem('st_token', newToken);
-        localStorage.setItem('st_refresh_token', newRefreshToken);
 
         processQueue(null, newToken);
 
@@ -71,7 +65,6 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         localStorage.removeItem('st_token');
-        localStorage.removeItem('st_refresh_token');
         localStorage.removeItem('st_user');
         window.location.href = '/login';
         return Promise.reject(refreshError);

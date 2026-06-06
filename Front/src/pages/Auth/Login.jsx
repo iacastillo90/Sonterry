@@ -45,7 +45,7 @@ const Login = () => {
           <Link to="/forgot-password" className="auth-forgot-password-link">¿Olvidaste tu contraseña?</Link>
         </div>
         
-        <Button type="submit" variant="primary" className="auth-submit-btn" disabled={loading}>
+        <Button type="submit" variant="primary" className="auth-submit-btn" disabled={loading} data-cy="submit-login">
           {loading ? 'Ingresando...' : 'Iniciar Sesión'}
         </Button>
       </form>

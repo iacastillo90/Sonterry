@@ -1,23 +1,26 @@
-const { body } = require('express-validator');
+const { z } = require('zod');
 
-const createOrderRules = [
-  body('shippingAddress.address')
-    .trim().notEmpty().withMessage('La dirección es requerida'),
-  body('shippingAddress.city')
-    .trim().notEmpty().withMessage('La ciudad es requerida'),
-  body('shippingAddress.postalCode')
-    .trim().notEmpty().withMessage('El código postal es requerido'),
-  body('shippingAddress.country')
-    .trim().notEmpty().withMessage('El país es requerido'),
-  body('shippingAddress.phone')
-    .trim().notEmpty().withMessage('El teléfono es requerido')
-    .matches(/^[0-9+\s\-()]{7,20}$/).withMessage('Formato de teléfono inválido'),
-];
+const paymentMethods = ['tarjeta', 'efectivo', 'transferencia', 'deposito', 'wompi'];
 
-const updateOrderStatusRules = [
-  body('status')
-    .isIn(['pending', 'paid', 'shipped', 'delivered', 'cancelled'])
-    .withMessage('Estado de pedido inválido. Valores permitidos: pending, paid, shipped, delivered, cancelled'),
-];
+const createOrderSchema = z.object({
+  shippingAddress: z.object({
+    address: z.string().min(1, { message: "La dirección es requerida" }),
+    city: z.string().min(1, { message: "La ciudad es requerida" }),
+    postalCode: z.string().min(1, { message: "El código postal es requerido" }),
+    country: z.string().min(1, { message: "El país es requerido" }),
+    phone: z.string().min(1, { message: "El teléfono es requerido" }).regex(/^[0-9+\s\-()]{7,20}$/, { message: "Formato de teléfono inválido" }),
+  }),
+  paymentMethod: z.string().refine((val) => paymentMethods.includes(val), {
+    message: "Método de pago inválido",
+  }).optional(),
+});
 
-module.exports = { createOrderRules, updateOrderStatusRules };
+const statusValues = ['pending', 'paid', 'shipped', 'delivered', 'cancelled'];
+
+const updateOrderStatusSchema = z.object({
+  status: z.string().refine((val) => statusValues.includes(val), {
+    message: "Estado de pedido inválido. Valores permitidos: pending, paid, shipped, delivered, cancelled",
+  }),
+});
+
+module.exports = { createOrderSchema, updateOrderStatusSchema };

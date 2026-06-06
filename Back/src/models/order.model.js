@@ -28,9 +28,11 @@ const orderSchema = new mongoose.Schema({
     phone: { type: String, required: true },
   },
   paymentIntentId: { type: String },
+  wompiTransactionId: { type: String },
+  wompiStatus: { type: String },
   paymentMethod: {
     type: String,
-    enum: ['tarjeta', 'efectivo', 'transferencia', 'deposito'],
+    enum: ['tarjeta', 'efectivo', 'transferencia', 'deposito', 'wompi'],
     default: 'tarjeta',
   },
   shippingDetails: {
@@ -50,6 +52,7 @@ const orderSchema = new mongoose.Schema({
 orderSchema.index({ user: 1, createdAt: -1 });
 orderSchema.index({ status: 1 });
 orderSchema.index({ paymentIntentId: 1 });
+orderSchema.index({ wompiTransactionId: 1 });
 
 orderSchema.pre('save', function (next) {
   if (this.isNew || this.isModified('status')) {

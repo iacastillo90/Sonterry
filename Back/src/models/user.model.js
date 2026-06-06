@@ -24,6 +24,9 @@ const userSchema = new mongoose.Schema({
   },
   passwordResetToken: { type: String },
   passwordResetExpires: { type: Date },
+  refreshTokenHash: { type: String, select: false },
+  loginAttempts: { type: Number, default: 0 },
+  lockUntil: { type: Date, default: null },
 }, { timestamps: true });
 
 userSchema.index({ role: 1, isActive: 1 });

@@ -11,7 +11,7 @@ const MainLayout = ({ children }) => {
       <main className="main-content">{children}</main>
       <Footer />
       <CartDrawer />
-      <Toast />
+      <Toast data-cy="auth-toast" />
     </div>
   );
 };

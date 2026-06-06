@@ -6,6 +6,7 @@ import { useUiStore } from '../../store/uiStore';
 import { ShoppingBag, User as UserIcon, Search, Truck, Store, Phone, MapPin, Coffee, Menu, X } from 'lucide-react';
 import logo from '../../assets/img/logo.jpg';
 import api from '../../services/api';
+import SearchAutocomplete from './SearchAutocomplete';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -13,7 +14,6 @@ const Navbar = () => {
   const items = useCartStore((state) => state.items);
   const toggleCart = useUiStore((state) => state.toggleCart);
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -31,15 +31,6 @@ const Navbar = () => {
   }, []);
 
   const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/productos?search=${encodeURIComponent(searchQuery.trim())}`);
-    } else {
-      navigate('/productos');
-    }
-  };
 
   return (
     <>
@@ -81,18 +72,9 @@ const Navbar = () => {
             </div>
 
             {/* Search (Desktop) */}
-            <form onSubmit={handleSearchSubmit} className="nav-search desktop-only">
-              <input
-                type="text"
-                placeholder="Buscar productos..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="nav-search-input"
-              />
-              <button type="submit" className="nav-search-btn">
-                <Search size={16} strokeWidth={2.5} />
-              </button>
-            </form>
+            <div className="nav-search desktop-only">
+              <SearchAutocomplete variant="desktop" />
+            </div>
 
             {/* Actions */}
             <div className="nav-actions">
@@ -131,19 +113,7 @@ const Navbar = () => {
           {/* Search Expandable (Mobile) */}
           {isMobileSearchOpen && (
             <div className="mobile-search-container mobile-only container">
-              <form onSubmit={handleSearchSubmit} className="nav-search-mobile">
-                <input
-                  type="text"
-                  placeholder="Buscar productos..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="nav-search-input"
-                  autoFocus
-                />
-                <button type="submit" className="nav-search-btn">
-                  <Search size={16} strokeWidth={2.5} />
-                </button>
-              </form>
+              <SearchAutocomplete variant="mobile" onSearchSubmit={() => setIsMobileSearchOpen(false)} />
             </div>
           )}
         </div>

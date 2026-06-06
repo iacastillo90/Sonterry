@@ -2,6 +2,7 @@ const Stripe = require('stripe');
 const Order = require('../models/order.model');
 const Payment = require('../models/payment.model');
 const AppError = require('../errors/AppError');
+const { deductOrderStock } = require('./orders.service');
 const env = require('../config/env');
 const logger = require('../logs/logger');
 
@@ -12,12 +13,15 @@ if (env.STRIPE_SECRET_KEY) {
   logger.warn('STRIPE_SECRET_KEY no configurado. Pagos Stripe deshabilitados.');
 }
 
-const createPaymentIntent = async (orderId) => {
+const createPaymentIntent = async (orderId, userId) => {
   if (!stripe) throw new AppError('Stripe no está configurado', 500);
 
   const order = await Order.findById(orderId);
   if (!order) throw new AppError('Pedido no encontrado', 404);
   if (order.status !== 'pending') throw new AppError('El pedido ya no está pendiente', 400);
+  if (order.user.toString() !== userId.toString()) {
+    throw new AppError('No tienes permiso para pagar este pedido', 403);
+  }
 
   const paymentIntent = await stripe.paymentIntents.create({
     amount: Math.round(order.total * 100),
@@ -47,6 +51,13 @@ const handlePaymentSucceeded = async (paymentIntent) => {
   if (!order) {
     logger.warn(`Stripe webhook: orden ${orderId} no encontrada`);
     return;
+  }
+
+  // Deduct stock — log but don't fail the webhook if stock is insufficient
+  try {
+    await deductOrderStock(order);
+  } catch (stockErr) {
+    logger.error(`[Stripe] Stock deduction failed for order ${orderId}: ${stockErr.message}`);
   }
 
   order.status = 'paid';

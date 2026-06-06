@@ -1,39 +1,26 @@
-const { body } = require('express-validator');
+const { z } = require('zod');
+const mongoose = require('mongoose');
 
-const createProductRules = [
-  body('name')
-    .trim().notEmpty().withMessage('El nombre es requerido')
-    .isLength({ max: 200 }).withMessage('Máximo 200 caracteres'),
-  body('description')
-    .trim().notEmpty().withMessage('La descripción es requerida')
-    .isLength({ max: 5000 }).withMessage('Máximo 5000 caracteres'),
-  body('price')
-    .isFloat({ min: 0 }).withMessage('El precio debe ser un número positivo'),
-  body('stock')
-    .isInt({ min: 0 }).withMessage('El stock debe ser un entero positivo'),
-  body('category')
-    .isMongoId().withMessage('La categoría debe ser un ID válido'),
-  body('type')
-    .optional()
-    .isIn(['serigrafia', 'dtf', 'prenda', 'otro', 'mug', 'gorra', 'estampado']).withMessage('Tipo inválido'),
-  body('images')
-    .optional()
-    .isArray().withMessage('images debe ser un array')
-    .custom((arr) => arr.every(url => /^https?:\/\/.+/.test(url)))
-    .withMessage('Cada imagen debe ser una URL válida (http/https)'),
-];
+const urlRegex = /^https?:\/\/.+/;
+const validTypes = ['serigrafia', 'dtf', 'prenda', 'otro', 'mug', 'gorra', 'estampado'];
 
-const updateProductRules = [
-  body('name').optional().trim().isLength({ max: 200 }).withMessage('Máximo 200 caracteres'),
-  body('description').optional().trim().isLength({ max: 5000 }).withMessage('Máximo 5000 caracteres'),
-  body('price').optional().isFloat({ min: 0 }).withMessage('Precio inválido'),
-  body('stock').optional().isInt({ min: 0 }).withMessage('Stock inválido'),
-  body('type').optional().isIn(['serigrafia', 'dtf', 'prenda', 'otro', 'mug', 'gorra', 'estampado']).withMessage('Tipo inválido'),
-  body('images')
-    .optional()
-    .isArray().withMessage('images debe ser un array')
-    .custom((arr) => arr.every(url => /^https?:\/\/.+/.test(url)))
-    .withMessage('Cada imagen debe ser una URL válida'),
-];
+const createProductSchema = z.object({
+  name: z.string().min(1, { message: "El nombre es requerido" }).max(200, { message: "Máximo 200 caracteres" }),
+  description: z.string().min(1, { message: "La descripción es requerida" }).max(5000, { message: "Máximo 5000 caracteres" }),
+  price: z.coerce.number().min(0, { message: "El precio debe ser un número positivo" }),
+  stock: z.coerce.number().int().min(0, { message: "El stock debe ser un entero positivo" }),
+  category: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), { message: "La categoría debe ser un ID válido" }),
+  type: z.string().refine((val) => validTypes.includes(val), { message: "Tipo inválido" }).optional(),
+  images: z.array(z.string().regex(urlRegex, { message: "Cada imagen debe ser una URL válida (http/https)" })).optional(),
+});
 
-module.exports = { createProductRules, updateProductRules };
+const updateProductSchema = z.object({
+  name: z.string().max(200, { message: "Máximo 200 caracteres" }).optional(),
+  description: z.string().max(5000, { message: "Máximo 5000 caracteres" }).optional(),
+  price: z.coerce.number().min(0, { message: "Precio inválido" }).optional(),
+  stock: z.coerce.number().int().min(0, { message: "Stock inválido" }).optional(),
+  type: z.string().refine((val) => validTypes.includes(val), { message: "Tipo inválido" }).optional(),
+  images: z.array(z.string().regex(urlRegex, { message: "Cada imagen debe ser una URL válida" })).optional(),
+});
+
+module.exports = { createProductSchema, updateProductSchema };

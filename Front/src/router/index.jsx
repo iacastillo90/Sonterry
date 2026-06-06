@@ -26,6 +26,7 @@ const NotFound = lazy(() => import('../pages/NotFound/NotFound'));
 const ConfiguratorPage = lazy(() => import('../pages/Configurator/ConfiguratorPage'));
 const ContactPage      = lazy(() => import('../pages/Contact/ContactPage'));
 const AboutPage        = lazy(() => import('../pages/About/AboutPage'));
+const CheckoutCallback = lazy(() => import('../pages/Checkout/CheckoutCallback'));
 
 export const router = createBrowserRouter([
   {
@@ -59,6 +60,10 @@ export const router = createBrowserRouter([
   {
     path: '/checkout',
     element: <ProtectedRoute><MainLayout><Checkout /></MainLayout></ProtectedRoute>
+  },
+  {
+    path: '/checkout/callback',
+    element: <MainLayout><CheckoutCallback /></MainLayout>
   },
   {
     path: '/login',

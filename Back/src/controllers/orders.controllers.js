@@ -3,8 +3,8 @@ const catchAsync = require('../utils/catchAsync');
 const formatResponse = require('../utils/formatResponse');
 
 const createOrder = catchAsync(async (req, res) => {
-  const { shippingAddress } = req.body;
-  const order = await ordersService.createOrder(req.user._id, shippingAddress, req.user.name);
+  const { shippingAddress, paymentMethod } = req.body;
+  const order = await ordersService.createOrder(req.user._id, shippingAddress, req.user.name, paymentMethod);
   res.status(201).json(formatResponse(true, 'Pedido creado con éxito', order));
 });
 
@@ -40,4 +40,9 @@ const createManualOrder = catchAsync(async (req, res) => {
   res.status(201).json(formatResponse(true, 'Pedido manual creado', order));
 });
 
-module.exports = { createOrder, updateOrderStatus, getUserOrders, getAllOrders, getOrdersByProduct, updateOrderDispatch, createManualOrder };
+const getOrderById = catchAsync(async (req, res) => {
+  const order = await ordersService.getOrderById(req.params.id, req.user._id);
+  res.status(200).json(formatResponse(true, 'Pedido encontrado', order));
+});
+
+module.exports = { createOrder, updateOrderStatus, getUserOrders, getAllOrders, getOrdersByProduct, updateOrderDispatch, createManualOrder, getOrderById };

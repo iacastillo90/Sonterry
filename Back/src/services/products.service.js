@@ -1,14 +1,18 @@
 const Product = require('../models/product.model');
 const AppError = require('../errors/AppError');
 const { uploadMultipleToMinio } = require('../utils/minioUpload');
+const { searchProducts } = require('./search.service');
 
 const getProducts = async (filters = {}) => {
+  // Delegate to Meilisearch when a search query is present
+  if (filters.search) {
+    return searchProducts(filters);
+  }
+
+  // Non-search queries hit MongoDB directly (zero change for existing flows)
   const query = { isDeleted: false };
   if (filters.category) query.category = filters.category;
   if (filters.type) query.type = filters.type;
-  if (filters.search) {
-    query.$text = { $search: filters.search };
-  }
   if (filters.minPrice !== undefined && filters.minPrice !== '') {
     query.price = { ...query.price, $gte: parseFloat(filters.minPrice) };
   }

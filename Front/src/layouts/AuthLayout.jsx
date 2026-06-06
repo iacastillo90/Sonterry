@@ -23,7 +23,7 @@ const AuthLayout = ({ children }) => {
       }}>
         {children}
       </div>
-      <Toast />
+      <Toast data-cy="auth-toast" />
     </div>
   );
 };

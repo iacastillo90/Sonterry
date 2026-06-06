@@ -9,10 +9,20 @@ const logger = require('./logs/logger');
 const startServer = async () => {
   await connectDB();
 
-  // Iniciar worker de notificaciones — no en test para no interferir con Jest
+  // Inicializar Meilisearch — no en test
+  if (env.NODE_ENV !== 'test') {
+    const { ensureIndex } = require('./config/meilisearch');
+    await ensureIndex();
+    logger.info('[Server] Meilisearch index ensured.');
+  }
+
+  // Iniciar workers BullMQ — no en test para no interferir con Jest
   if (env.NODE_ENV !== 'test') {
     require('./jobs/workers/notificationWorker');
     logger.info('[Server] Notification worker started.');
+
+    require('./jobs/workers/searchSyncWorker');
+    logger.info('[Server] Search sync worker started.');
   }
 
   const server = app.listen(env.PORT, () => {

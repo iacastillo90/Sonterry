@@ -35,9 +35,14 @@ const updateTicketStatus = async (id, status) => {
   return ticket;
 };
 
-const replyToTicket = async (id, sender, content, statusUpdate) => {
+const replyToTicket = async (id, sender, content, statusUpdate, user) => {
   const ticket = await Ticket.findById(id).populate('user');
   if (!ticket) throw new AppError('Ticket no encontrado', 404);
+
+  // BOLA prevention: users can only reply to their own tickets
+  if (sender !== 'admin' && ticket.user._id.toString() !== user._id.toString()) {
+    throw new AppError('No tienes permiso para responder este ticket', 403);
+  }
 
   ticket.messages.push({
     sender,
