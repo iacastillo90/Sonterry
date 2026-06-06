@@ -34,15 +34,8 @@ const PaymentForm = ({ onBack }) => {
   const syncCartToBackend = async () => {
     // Reemplaza el carrito de MongoDB con los items de Zustand
     try {
-      const { data: serverCart } = await api.get('/cart');
-      const serverItems = serverCart.data?.items || [];
-
-      // Remove ALL server cart items primero
-      for (const si of serverItems) {
-        if (si._id) {
-          try { await api.delete(`/cart/${si._id}`); } catch (_) { /* ignore */ }
-        }
-      }
+      // Clear ALL server cart items with single request
+      await api.delete('/cart');
 
       // Add ALL items from Zustand
       for (const item of items) {
