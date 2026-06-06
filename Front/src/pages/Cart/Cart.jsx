@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../../store/cartStore';
+import { useAuthStore } from '../../store/authStore';
 import { formatCurrency } from '../../utils/formatCurrency';
 import CartEmptyState from './components/CartEmptyState';
 import CartItemList from './components/CartItemList';
@@ -8,8 +9,21 @@ import CartSummaryPanel from './components/CartSummaryPanel';
 import './Cart.css';
 
 const Cart = () => {
-  const { items, removeFromCart, updateItemQuantity, getCartTotal } = useCartStore();
+  const { items, fetchCart, removeFromCart, updateItemQuantity, getCartTotal } = useCartStore();
+  const isAuthenticated = useAuthStore(s => s.isAuthenticated);
   const navigate = useNavigate();
+
+  // Auto-refresh cart from backend on mount if user is authenticated
+  // Only replace local items if backend returns data (don't empty local cart)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const controller = new AbortController();
+    
+    fetchCart().then(/* no-op — fetchCart handles the update */);
+    
+    return () => controller.abort();
+  }, [isAuthenticated, fetchCart]);
 
   const handleQtyChange = (item, delta) => {
     const newQty = item.quantity + delta;
