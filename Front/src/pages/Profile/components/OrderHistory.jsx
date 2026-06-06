@@ -9,6 +9,8 @@ import OrderTracking from './OrderTracking';
 import api from '../../../services/api';
 import { createWompiTransaction } from '../../../services/wompi.service';
 import { useUiStore } from '../../../store/uiStore';
+import EditItemsModal from './EditItemsModal';
+import EditShippingModal from './EditShippingModal';
 
 const CANCELABLE_STATUSES = ['pending', 'paid'];
 
@@ -107,6 +109,8 @@ const OrderHistory = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancellingId, setCancellingId] = useState(null);
   const [payingId, setPayingId] = useState(null);
+  const [editItemsOrder, setEditItemsOrder] = useState(null);
+  const [editShippingOrder, setEditShippingOrder] = useState(null);
 
   const handlePayNow = async (e, order) => {
     e.stopPropagation();
@@ -166,6 +170,16 @@ const OrderHistory = () => {
       setShowCancelModal(false);
       setCancellingId(null);
     }
+  };
+
+  const handleEditItemsClick = (e, order) => {
+    e.stopPropagation();
+    setEditItemsOrder(order);
+  };
+
+  const handleEditShippingClick = (e, order) => {
+    e.stopPropagation();
+    setEditShippingOrder(order);
   };
 
   const handleCloseModal = () => {
@@ -245,6 +259,42 @@ const OrderHistory = () => {
                     {payingId === order._id ? 'Procesando...' : 'Pagar ahora'}
                   </button>
                 )}
+                {order.status === 'pending' && (
+                  <>
+                    <button
+                      onClick={e => handleEditItemsClick(e, order)}
+                      style={{
+                        padding: '0.4rem 1rem',
+                        borderRadius: '6px',
+                        border: '1px solid var(--color-border)',
+                        backgroundColor: '#FFF',
+                        color: 'var(--color-text)',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        fontSize: '0.8rem',
+                        transition: 'var(--transition-smooth)',
+                      }}
+                    >
+                      Editar items
+                    </button>
+                    <button
+                      onClick={e => handleEditShippingClick(e, order)}
+                      style={{
+                        padding: '0.4rem 1rem',
+                        borderRadius: '6px',
+                        border: '1px solid var(--color-border)',
+                        backgroundColor: '#FFF',
+                        color: 'var(--color-text)',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        fontSize: '0.8rem',
+                        transition: 'var(--transition-smooth)',
+                      }}
+                    >
+                      Editar dirección
+                    </button>
+                  </>
+                )}
                 {canCancel && (
                   <button
                     onClick={e => handleCancelClick(e, order)}
@@ -283,6 +333,20 @@ const OrderHistory = () => {
           onConfirm={handleConfirmCancel}
           onClose={handleCloseModal}
           loading={!!cancellingId && showCancelModal}
+        />
+      )}
+
+      {editItemsOrder && (
+        <EditItemsModal
+          order={editItemsOrder}
+          onClose={() => setEditItemsOrder(null)}
+        />
+      )}
+
+      {editShippingOrder && (
+        <EditShippingModal
+          order={editShippingOrder}
+          onClose={() => setEditShippingOrder(null)}
         />
       )}
     </div>
