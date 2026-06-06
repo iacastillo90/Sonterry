@@ -1,14 +1,34 @@
 import React, { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { useUserOrders } from '../../../queries/useOrders';
 import { formatCurrency } from '../../../utils/formatCurrency';
 import { formatDate } from '../../../utils/formatDate';
 import LoadingSpinner from '../../../components/common/LoadingSpinner';
 import OrderTracking from './OrderTracking';
 import api from '../../../services/api';
+import { createWompiTransaction } from '../../../services/wompi.service';
 import { useUiStore } from '../../../store/uiStore';
 
 const CANCELABLE_STATUSES = ['pending', 'paid'];
+
+const loadWompiScript = (publicKey) => {
+  return new Promise((resolve, reject) => {
+    if (window.WompiWidget) { resolve(); return; }
+    const script = document.createElement('script');
+    script.src = 'https://checkout.wompi.co/widget.js';
+    script.async = true;
+    script.setAttribute('data-public-key', publicKey);
+    const timeout = setTimeout(() => {
+      script.onload = null;
+      script.onerror = null;
+      reject(new Error('WOMPI_SCRIPT_TIMEOUT'));
+    }, 5000);
+    script.onload = () => { clearTimeout(timeout); resolve(); };
+    script.onerror = () => { clearTimeout(timeout); reject(new Error('WOMPI_SCRIPT_TIMEOUT')); };
+    document.head.appendChild(script);
+  });
+};
 
 const CancelModal = ({ order, onConfirm, onClose, loading }) => (
   <div
@@ -80,11 +100,51 @@ const CancelModal = ({ order, onConfirm, onClose, loading }) => (
 
 const OrderHistory = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const addToast = useUiStore(s => s.addToast);
   const { data: orders, isLoading } = useUserOrders();
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancellingId, setCancellingId] = useState(null);
+  const [payingId, setPayingId] = useState(null);
+
+  const handlePayNow = async (e, order) => {
+    e.stopPropagation();
+    setPayingId(order._id);
+    try {
+      const transactionData = await createWompiTransaction(order._id);
+      await loadWompiScript(transactionData.publicKey);
+
+      const user = JSON.parse(localStorage.getItem('st_user'));
+
+      const widget = new window.WidgetCheckout({
+        currency: transactionData.currency || 'COP',
+        amountInCents: transactionData.amountInCents,
+        reference: transactionData.reference,
+        publicKey: transactionData.publicKey,
+        signature: { integrity: transactionData.integritySignature },
+        customerData: { email: user?.email || '' },
+      });
+
+      widget.open((result) => {
+        const transaction = result?.transaction;
+        if (transaction) {
+          const status = transaction.status === 'APPROVED' ? 'APPROVED' : 'DECLINED';
+          navigate(`/checkout/callback?ref=${transaction.reference}&transaction_id=${transaction.id}&status=${status}`);
+        }
+      });
+    } catch (wompiError) {
+      const errorMsg = wompiError.response?.data?.message || wompiError.message || 'Error al procesar el pago';
+      addToast(errorMsg, 'error');
+
+      // Fallback: si el script no cargó, abrir checkout directo
+      if (wompiError.message === 'WOMPI_SCRIPT_TIMEOUT') {
+        addToast('El widget no cargó, intenta de nuevo', 'error');
+      }
+    } finally {
+      setPayingId(null);
+    }
+  };
 
   const handleCancelClick = (e, order) => {
     e.stopPropagation();
@@ -164,26 +224,48 @@ const OrderHistory = () => {
                 Total: {formatCurrency(order.total)}
               </div>
 
-              {canCancel && (
-                <button
-                  onClick={e => handleCancelClick(e, order)}
-                  style={{
-                    padding: '0.4rem 1rem',
-                    borderRadius: '6px',
-                    border: '1px solid #FCA5A5',
-                    backgroundColor: '#FEF2F2',
-                    color: '#DC2626',
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                    fontSize: '0.8rem',
-                    transition: 'var(--transition-smooth)',
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FEE2E2'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = '#FEF2F2'}
-                >
-                  Cancelar pedido
-                </button>
-              )}
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {order.status === 'pending' && order.paymentMethod === 'wompi' && (
+                  <button
+                    onClick={e => handlePayNow(e, order)}
+                    disabled={payingId === order._id}
+                    style={{
+                      padding: '0.4rem 1rem',
+                      borderRadius: '6px',
+                      border: '1px solid var(--color-primary)',
+                      backgroundColor: 'var(--color-primary)',
+                      color: '#FFFFFF',
+                      cursor: payingId === order._id ? 'not-allowed' : 'pointer',
+                      fontWeight: 600,
+                      fontSize: '0.8rem',
+                      opacity: payingId === order._id ? 0.7 : 1,
+                      transition: 'var(--transition-smooth)',
+                    }}
+                  >
+                    {payingId === order._id ? 'Procesando...' : 'Pagar ahora'}
+                  </button>
+                )}
+                {canCancel && (
+                  <button
+                    onClick={e => handleCancelClick(e, order)}
+                    style={{
+                      padding: '0.4rem 1rem',
+                      borderRadius: '6px',
+                      border: '1px solid #FCA5A5',
+                      backgroundColor: '#FEF2F2',
+                      color: '#DC2626',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                      fontSize: '0.8rem',
+                      transition: 'var(--transition-smooth)',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FEE2E2'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = '#FEF2F2'}
+                  >
+                    Cancelar pedido
+                  </button>
+                )}
+              </div>
             </div>
           );
         })}
