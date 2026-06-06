@@ -108,6 +108,7 @@ const OrderHistory = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancellingId, setCancellingId] = useState(null);
+  const [isCancelling, setIsCancelling] = useState(false);
   const [payingId, setPayingId] = useState(null);
   const [editItemsOrder, setEditItemsOrder] = useState(null);
   const [editShippingOrder, setEditShippingOrder] = useState(null);
@@ -152,12 +153,14 @@ const OrderHistory = () => {
 
   const handleCancelClick = (e, order) => {
     e.stopPropagation();
-    setShowCancelModal(true);
     setCancellingId(order._id);
+    setShowCancelModal(true);
+    setIsCancelling(false);
   };
 
   const handleConfirmCancel = async () => {
     if (!cancellingId) return;
+    setIsCancelling(true);
     try {
       await api.patch(`/orders/${cancellingId}/cancel`);
       addToast('Pedido cancelado exitosamente', 'success');
@@ -167,8 +170,8 @@ const OrderHistory = () => {
     } catch (error) {
       const msg = error.response?.data?.message || 'Error al cancelar el pedido';
       addToast(msg, 'error');
-      setShowCancelModal(false);
-      setCancellingId(null);
+    } finally {
+      setIsCancelling(false);
     }
   };
 
@@ -183,10 +186,10 @@ const OrderHistory = () => {
   };
 
   const handleCloseModal = () => {
-    if (!cancellingId) {
-      setShowCancelModal(false);
-      setCancellingId(null);
-    }
+    if (isCancelling) return;
+    setShowCancelModal(false);
+    setCancellingId(null);
+    setIsCancelling(false);
   };
 
   if (isLoading) return <LoadingSpinner />;
@@ -332,7 +335,7 @@ const OrderHistory = () => {
           order={orders.find(o => o._id === cancellingId)}
           onConfirm={handleConfirmCancel}
           onClose={handleCloseModal}
-          loading={!!cancellingId && showCancelModal}
+          loading={isCancelling}
         />
       )}
 
