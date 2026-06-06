@@ -37,6 +37,23 @@ router.post('/', express.raw({ type: 'application/json' }), async (req, res) => 
         return res.status(200).json({ received: true });
       }
 
+      // GUARD: If order is cancelled, ignore the transaction entirely
+      if (order.status === 'cancelled') {
+        logger.warn(`[Wompi] Order ${order._id} is cancelled, ignoring transaction ${wompiId} (${status})`);
+        // Update reference tracking for audit
+        const refEntry = order.wompiReferences.find(r => r.transactionId === reference);
+        if (refEntry) refEntry.status = status;
+        await order.save();
+        return res.status(200).json({ received: true });
+      }
+
+      // GUARD: If this reference was invalidated (e.g., order items were edited), ignore
+      const refEntry = order.wompiReferences.find(r => r.transactionId === reference);
+      if (refEntry && !refEntry.active) {
+        logger.warn(`[Wompi] Reference ${reference} is inactive for order ${order._id}, ignoring transaction ${wompiId}`);
+        return res.status(200).json({ received: true });
+      }
+
       order.wompiStatus = status;
 
       if (status === 'APPROVED') {
@@ -75,6 +92,13 @@ router.post('/', express.raw({ type: 'application/json' }), async (req, res) => 
           status: 'failed',
           paymentIntentId: wompiId,
         });
+      }
+
+      // Update reference tracking
+      if (refEntry) {
+        refEntry.status = status;
+      } else {
+        order.wompiReferences.push({ transactionId: reference, status, active: true, createdAt: new Date() });
       }
 
       await order.save();

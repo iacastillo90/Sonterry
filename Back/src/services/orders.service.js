@@ -232,6 +232,20 @@ const cancelOrder = async (orderId, userId) => {
     )
   );
 
+  // Invalidate all active Wompi references
+  if (order.wompiReferences?.length > 0) {
+    let invalidatedCount = 0;
+    order.wompiReferences.forEach(ref => {
+      if (ref.active) {
+        ref.active = false;
+        invalidatedCount++;
+      }
+    });
+    if (invalidatedCount > 0) {
+      logger.info(`[Orders] Invalidated ${invalidatedCount} Wompi reference(s) for cancelled order ${order._id}`);
+    }
+  }
+
   order.status = 'cancelled';
   await order.save();
 
