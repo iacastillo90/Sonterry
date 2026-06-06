@@ -24,4 +24,9 @@ const updateCartItemQuantity = catchAsync(async (req, res) => {
   res.status(200).json(formatResponse(true, 'Cantidad de producto actualizada', cart));
 });
 
-module.exports = { getCart, addToCart, removeFromCart, updateCartItemQuantity };
+const clearCart = catchAsync(async (req, res) => {
+  await cartService.clearCart(req.user._id);
+  res.status(200).json(formatResponse(true, 'Carrito limpiado exitosamente', { items: [] }));
+});
+
+module.exports = { getCart, addToCart, removeFromCart, updateCartItemQuantity, clearCart };

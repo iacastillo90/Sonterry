@@ -67,4 +67,11 @@ const updateCartItemQuantity = async (userId, itemId, quantity) => {
   return await cart.populate('items.product');
 };
 
-module.exports = { getCart, addToCart, removeFromCart, updateCartItemQuantity };
+const clearCart = async (userId) => {
+  const cart = await getCart(userId);
+  cart.items = [];
+  await cart.save();
+  return cart;
+};
+
+module.exports = { getCart, addToCart, removeFromCart, updateCartItemQuantity, clearCart };
