@@ -210,4 +210,127 @@ const getOrderById = async (orderId, userId) => {
   return order;
 };
 
-module.exports = { createOrder, updateOrderStatus, getUserOrders, getAllOrders, getOrdersByProduct, updateOrderDispatch, createManualOrder, getOrderById, deductOrderStock };
+const cancelOrder = async (orderId, userId) => {
+  const order = await Order.findOne({ _id: orderId, user: userId });
+  if (!order) throw new AppError('Pedido no encontrado', 404);
+
+  if (order.status === 'cancelled') throw new AppError('El pedido ya fue cancelado', 400);
+
+  if (order.status === 'shipped' || order.status === 'delivered') {
+    throw new AppError('No se puede cancelar un pedido que ya fue enviado o entregado', 400);
+  }
+
+  // paid only allowed if not yet shipped (no tracking number)
+  if (order.status === 'paid' && order.shippingDetails?.trackingNumber) {
+    throw new AppError('No se puede cancelar un pedido que ya está en proceso de envío', 400);
+  }
+
+  // Restore stock for each item
+  await Promise.all(
+    order.items.map(item =>
+      Product.findByIdAndUpdate(item.product, { $inc: { stock: +item.quantity } })
+    )
+  );
+
+  // Invalidate all active Wompi references
+  if (order.wompiReferences?.length > 0) {
+    let invalidatedCount = 0;
+    order.wompiReferences.forEach(ref => {
+      if (ref.active) {
+        ref.active = false;
+        invalidatedCount++;
+      }
+    });
+    if (invalidatedCount > 0) {
+      logger.info(`[Orders] Invalidated ${invalidatedCount} Wompi reference(s) for cancelled order ${order._id}`);
+    }
+  }
+
+  order.status = 'cancelled';
+  await order.save();
+
+  // Fire-and-forget notification
+  addNotificationJob({
+    orderId: order._id,
+    type: 'STATUS_UPDATED',
+    status: 'cancelled',
+    recipientPhone: order.shippingAddress?.phone,
+    customerName: order.user?.name || 'Cliente',
+  }).catch(err => logger.error(`[Orders] Failed to enqueue notification: ${err.message}`));
+
+  return order;
+};
+
+const updateOrderItems = async (orderId, userId, newItems) => {
+  const order = await Order.findOne({ _id: orderId, user: userId });
+  if (!order) throw new AppError('Pedido no encontrado', 404);
+  if (order.status !== 'pending') throw new AppError('El pedido ya no está pendiente y no puede ser editado', 400);
+
+  // Restore stock for EXISTING items
+  await Promise.all(
+    order.items.map(item =>
+      Product.findByIdAndUpdate(item.product, { $inc: { stock: +item.quantity } })
+    )
+  );
+
+  // Validate and deduct stock for NEW items
+  const validatedItems = [];
+  for (const item of newItems) {
+    const product = await Product.findOneAndUpdate(
+      { _id: item.product, stock: { $gte: item.quantity } },
+      { $inc: { stock: -item.quantity } },
+      { new: true, projection: { price: 1, name: 1 } }
+    );
+
+    if (!product) {
+      // Compensate already-deducted stock for previous items in this batch
+      for (const validated of validatedItems) {
+        await Product.findByIdAndUpdate(validated.product, { $inc: { stock: +validated.quantity } });
+      }
+      // Restore original stock for old items
+      await Promise.all(
+        order.items.map(item =>
+          Product.findByIdAndUpdate(item.product, { $inc: { stock: +item.quantity } })
+        )
+      );
+      throw new AppError(`Stock insuficiente para el producto ${item.product}`, 409);
+    }
+
+    validatedItems.push({
+      product: product._id,
+      name: product.name,
+      price: product.price,
+      quantity: item.quantity,
+      customization: item.customization || undefined,
+    });
+  }
+
+  // Invalidate all active Wompi references (items changed = total may differ)
+  if (order.wompiReferences?.length > 0) {
+    order.wompiReferences.forEach(ref => { ref.active = false; });
+  }
+
+  // Recalculate total
+  const newTotal = validatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  order.items = validatedItems;
+  order.total = newTotal;
+  await order.save();
+
+  logger.info(`[Orders] Items updated for order ${order._id} — new total: ${newTotal}`);
+
+  return order;
+};
+
+const updateOrderShipping = async (orderId, userId, newAddress) => {
+  const order = await Order.findOne({ _id: orderId, user: userId });
+  if (!order) throw new AppError('Pedido no encontrado', 404);
+  if (order.status !== 'pending') throw new AppError('El pedido ya no está pendiente y no puede ser editado', 400);
+
+  order.shippingAddress = newAddress;
+  await order.save();
+
+  return order;
+};
+
+module.exports = { createOrder, updateOrderStatus, getUserOrders, getAllOrders, getOrdersByProduct, updateOrderDispatch, createManualOrder, getOrderById, deductOrderStock, cancelOrder, updateOrderItems, updateOrderShipping };

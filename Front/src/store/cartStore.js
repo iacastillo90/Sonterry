@@ -11,8 +11,12 @@ export const useCartStore = create((set, get) => ({
     try {
       const response = await api.get('/cart');
       const backendItems = response.data.data.items || [];
-      localStorage.setItem('st_cart', JSON.stringify(backendItems));
-      set({ items: backendItems });
+      // Only replace local items if backend has data
+      // This protects users with local items who aren't yet synced to backend
+      if (backendItems.length > 0) {
+        localStorage.setItem('st_cart', JSON.stringify(backendItems));
+        set({ items: backendItems });
+      }
     } catch (error) {
       console.error('Error fetching cart from backend:', error);
     }
@@ -67,14 +71,10 @@ export const useCartStore = create((set, get) => ({
     localStorage.setItem('st_cart', JSON.stringify(newItems));
     set({ items: newItems });
 
-    if (isAuth() && matchedItem) {
+    // Only DELETE from backend if item exists there (has _id)
+    if (isAuth() && matchedItem?._id) {
       try {
-        const itemId = matchedItem._id;
-        if (itemId) {
-          await api.delete(`/cart/${itemId}`);
-        } else {
-          await get().fetchCart();
-        }
+        await api.delete(`/cart/${matchedItem._id}`);
       } catch (error) {
         console.error('Error syncing cart remove with backend:', error);
       }
@@ -115,6 +115,17 @@ export const useCartStore = create((set, get) => ({
   clearCart: () => {
     localStorage.removeItem('st_cart');
     set({ items: [] });
+  },
+
+  clearCartBackend: async () => {
+    if (!isAuth()) return;
+    try {
+      await api.delete('/cart');
+      localStorage.removeItem('st_cart');
+      set({ items: [] });
+    } catch (error) {
+      console.error('Error clearing cart on backend:', error);
+    }
   },
 
   getCartTotal: () => {

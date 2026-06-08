@@ -30,6 +30,7 @@ const orderSchema = new mongoose.Schema({
   paymentIntentId: { type: String },
   wompiTransactionId: { type: String },
   wompiStatus: { type: String },
+  wompiReferences: [{ transactionId: String, status: String, active: { type: Boolean, default: true }, createdAt: { type: Date, default: Date.now } }],
   paymentMethod: {
     type: String,
     enum: ['tarjeta', 'efectivo', 'transferencia', 'deposito', 'wompi'],

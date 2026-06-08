@@ -36,7 +36,10 @@ async function createTransaction(order, amountInCents) {
   );
 
   order.wompiTransactionId = reference;
+  order.wompiReferences.push({ transactionId: reference, status: 'pending', active: true, createdAt: new Date() });
   await order.save();
+
+  logger.info(`[Wompi] Transaction reference ${reference} created for order ${order._id}`);
 
   return {
     amount_in_cents: amountInCents,
