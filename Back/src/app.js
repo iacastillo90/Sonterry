@@ -28,6 +28,10 @@ const wompiWebhooks = require('./webhooks/wompi');
 
 const app = express();
 
+// Requerido en Render/Vercel/Railway — están detrás de un proxy inverso
+// Permite que express-rate-limit y otros middlewares lean X-Forwarded-For correctamente
+app.set('trust proxy', 1);
+
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
