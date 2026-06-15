@@ -5,11 +5,14 @@ const { triggerN8nWorkflow } = require('../services/n8n.service');
 
 const QUEUE_NAME = 'notifications';
 
+const isTLS = env.REDIS_HOST !== 'localhost' && env.REDIS_HOST !== 'redis';
+
 const connection = {
   host: env.REDIS_HOST,
   port: env.REDIS_PORT,
   password: env.REDIS_PASSWORD || undefined,
   maxRetriesPerRequest: null,
+  ...(isTLS && { tls: {} }),
 };
 
 let notificationQueue = null;
