@@ -15,6 +15,7 @@
     "test:coverage": "cross-env NODE_ENV=test MONGO_URI=mongodb://localhost:27017/mi-ecommerce-test JWT_SECRET=test_jwt_secret JWT_EXPIRES_IN=1d REFRESH_TOKEN_SECRET=test_refresh_secret REFRESH_TOKEN_EXPIRES_IN=7d jest --coverage"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1069.0",
     "axios": "^1.16.1",
     "bcryptjs": "^2.4.3",
     "bullmq": "^5.8.0",

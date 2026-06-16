@@ -1,3 +1,4 @@
+const { PutObjectCommand } = require('@aws-sdk/client-s3');
 const minioClient = require('../config/minio');
 const env = require('../config/env');
 const AppError = require('../errors/AppError');
@@ -5,53 +6,11 @@ const logger = require('../logs/logger');
 const crypto = require('crypto');
 const path = require('path');
 
-let bucketInitialized = false;
-
-const initBucket = async () => {
-  if (bucketInitialized) return;
-  if (!minioClient) return;
-  
-  // Supabase no soporta makeBucket ni setBucketPolicy vía S3 (usa RLS)
-  if (env.MINIO_ENDPOINT.includes('supabase.co')) {
-    bucketInitialized = true;
-    return;
-  }
-
-  const bucketName = env.MINIO_BUCKET;
-  try {
-    const exists = await minioClient.bucketExists(bucketName);
-    if (!exists) {
-      await minioClient.makeBucket(bucketName, '');
-      logger.info(`[MinIO] Bucket creado: ${bucketName}`);
-
-      // Configurar política de lectura pública para que el navegador pueda acceder a las fotos
-      const policy = {
-        Version: '2012-10-17',
-        Statement: [
-          {
-            Effect: 'Allow',
-            Principal: '*',
-            Action: ['s3:GetObject'],
-            Resource: [`arn:aws:s3:::${bucketName}/*`],
-          },
-        ],
-      };
-      await minioClient.setBucketPolicy(bucketName, JSON.stringify(policy));
-      logger.info(`[MinIO] Política pública aplicada a: ${bucketName}`);
-    }
-    bucketInitialized = true;
-  } catch (error) {
-    logger.error(`[MinIO] Error inicializando bucket: ${error.message}`);
-  }
-};
-
 const uploadToMinio = async (fileBuffer, originalName, mimeType) => {
   if (!minioClient) {
-    logger.warn('[MinIO] MinIO no está configurado. Retornando URL placeholder.');
-    return null; // Dev sin credenciales → no crashea
+    logger.warn('[S3] Cliente S3 no configurado. Retornando URL placeholder.');
+    return null;
   }
-
-  await initBucket();
 
   const bucketName = env.MINIO_BUCKET;
   const ext = path.extname(originalName).toLowerCase();
@@ -59,21 +18,35 @@ const uploadToMinio = async (fileBuffer, originalName, mimeType) => {
   const objectName = `products/${randomName}`;
 
   try {
-    await minioClient.putObject(bucketName, objectName, fileBuffer, fileBuffer.length, {
-      'Content-Type': mimeType || 'image/jpeg',
+    const command = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: objectName,
+      Body: fileBuffer,
+      ContentType: mimeType || 'image/jpeg',
     });
+
+    await minioClient.send(command);
 
     // Resolver URL pública externa para navegador
     let publicUrlBase = env.MINIO_PUBLIC_URL;
     if (!publicUrlBase) {
+      // Si el endpoint de supabase ya contiene /storage/v1/s3, construir la URL pública correcta de Supabase
+      if (env.MINIO_ENDPOINT.includes('supabase.co')) {
+        const urlObj = new URL(env.MINIO_ENDPOINT.startsWith('http') ? env.MINIO_ENDPOINT : `https://${env.MINIO_ENDPOINT}`);
+        // Supabase public URL structure: https://[project_id].supabase.co/storage/v1/object/public/[bucket]/[object]
+        const baseUrl = `${urlObj.protocol}//${urlObj.host}`;
+        return `${baseUrl}/storage/v1/object/public/${bucketName}/${objectName}`;
+      }
+
       const protocol = env.MINIO_USE_SSL ? 'https' : 'http';
       const endpoint = env.MINIO_ENDPOINT === 'minio' ? 'localhost' : env.MINIO_ENDPOINT;
-      publicUrlBase = `${protocol}://${endpoint}:${env.MINIO_PORT}`;
+      publicUrlBase = `${protocol}://${endpoint}:${env.MINIO_PORT || 9000}`;
+      return `${publicUrlBase}/${bucketName}/${objectName}`;
     }
 
     return `${publicUrlBase}/${bucketName}/${objectName}`;
   } catch (error) {
-    throw new AppError(`Error al subir imagen a MinIO: ${error.message}`, 500);
+    throw new AppError(`Error al subir imagen a S3: ${error.message}`, 500);
   }
 };
 
