@@ -10,6 +10,12 @@ let bucketInitialized = false;
 const initBucket = async () => {
   if (bucketInitialized) return;
   if (!minioClient) return;
+  
+  // Supabase no soporta makeBucket ni setBucketPolicy vía S3 (usa RLS)
+  if (env.MINIO_ENDPOINT.includes('supabase.co')) {
+    bucketInitialized = true;
+    return;
+  }
 
   const bucketName = env.MINIO_BUCKET;
   try {
