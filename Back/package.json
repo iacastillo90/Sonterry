@@ -48,6 +48,7 @@
   },
   "overrides": {
     "glob": "^13.0.0",
+    "js-yaml": "^4.1.2",
     "babel-plugin-istanbul": {
       "test-exclude": "^7.0.1"
     }
