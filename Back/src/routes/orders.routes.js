@@ -8,9 +8,9 @@ const { createOrderSchema, updateOrderStatusSchema, updateOrderItemsSchema, upda
 router.post('/', protect, zodValidate(createOrderSchema), ordersControllers.createOrder);
 router.post('/manual', protect, restrictTo('admin'), ordersControllers.createManualOrder);
 router.get('/', protect, ordersControllers.getUserOrders);
-router.get('/:id', protect, ordersControllers.getOrderById);
 router.get('/all', protect, restrictTo('admin'), ordersControllers.getAllOrders);
 router.get('/product/:productId', protect, restrictTo('admin'), ordersControllers.getOrdersByProduct);
+router.get('/:id', protect, ordersControllers.getOrderById);
 router.patch('/:id/status', protect, restrictTo('admin'), zodValidate(updateOrderStatusSchema), ordersControllers.updateOrderStatus);
 router.patch('/:id/dispatch', protect, restrictTo('admin'), ordersControllers.updateOrderDispatch);
 router.patch('/:id/cancel', protect, ordersControllers.cancelOrder);
