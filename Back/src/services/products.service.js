@@ -9,12 +9,32 @@ const getProducts = async (filters = {}) => {
     return searchProducts(filters);
   }
 
-  // Non-search queries hit MongoDB directly (zero change for existing flows)
+  // Non-search queries hit MongoDB directly
   const query = { isDeleted: false };
   if (filters.isActive !== 'all') {
     query.isActive = filters.isActive === 'false' ? false : { $ne: false };
+    
+    // Fetch inactive categories to exclude their products
+    const Category = require('../models/category.model');
+    const inactiveCategories = await Category.find({ isActive: false }).select('_id');
+    const inactiveCategoryIds = inactiveCategories.map(c => c._id.toString());
+    
+    if (inactiveCategoryIds.length > 0) {
+      if (filters.category) {
+        if (inactiveCategoryIds.includes(filters.category)) {
+          return { data: [], total: 0, page: 1, limit: 10, totalPages: 0 };
+        }
+        query.category = filters.category;
+      } else {
+        query.category = { $nin: inactiveCategoryIds };
+      }
+    } else if (filters.category) {
+      query.category = filters.category;
+    }
+  } else {
+    if (filters.category) query.category = filters.category;
   }
-  if (filters.category) query.category = filters.category;
+
   if (filters.type) query.type = filters.type;
   if (filters.collectionName) query.collectionName = filters.collectionName;
   if (filters.minPrice !== undefined && filters.minPrice !== '') {

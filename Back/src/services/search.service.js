@@ -87,7 +87,29 @@ const searchProducts = async (filters = {}) => {
 
     // Build Meilisearch filter string
     const filterParts = ['isActive = true'];
-    if (category) filterParts.push(`categoryId = "${category}"`);
+    
+    if (filters.isActive !== 'all') {
+      const Category = require('../models/category.model');
+      const inactiveCategories = await Category.find({ isActive: false }).select('_id');
+      const inactiveCategoryIds = inactiveCategories.map(c => c._id.toString());
+      
+      if (inactiveCategoryIds.length > 0) {
+        if (category) {
+          if (inactiveCategoryIds.includes(category)) {
+            return { data: [], total: 0, page: 1, limit: 10, totalPages: 0 };
+          }
+          filterParts.push(`categoryId = "${category}"`);
+        } else {
+          // Meilisearch does not support `NOT IN` directly, but it supports `categoryId NOT IN [...]`
+          filterParts.push(`categoryId NOT IN [${inactiveCategoryIds.map(id => `"${id}"`).join(', ')}]`);
+        }
+      } else if (category) {
+        filterParts.push(`categoryId = "${category}"`);
+      }
+    } else if (category) {
+      filterParts.push(`categoryId = "${category}"`);
+    }
+
     if (type) filterParts.push(`type = "${type}"`);
     if (minPrice !== undefined && minPrice !== '') {
       filterParts.push(`price >= ${parseFloat(minPrice)}`);
@@ -135,9 +157,30 @@ const searchProducts = async (filters = {}) => {
  */
 const fallbackSearch = async (filters = {}) => {
   const query = { isDeleted: false };
+  
+  if (filters.isActive !== 'all') {
+    query.isActive = filters.isActive === 'false' ? false : { $ne: false };
+    const Category = require('../models/category.model');
+    const inactiveCategories = await Category.find({ isActive: false }).select('_id');
+    const inactiveCategoryIds = inactiveCategories.map(c => c._id.toString());
+    
+    if (inactiveCategoryIds.length > 0) {
+      if (filters.category) {
+        if (inactiveCategoryIds.includes(filters.category)) {
+          return { data: [], total: 0, page: 1, limit: 10, totalPages: 0 };
+        }
+        query.category = filters.category;
+      } else {
+        query.category = { $nin: inactiveCategoryIds };
+      }
+    } else if (filters.category) {
+      query.category = filters.category;
+    }
+  } else {
+    if (filters.category) query.category = filters.category;
+  }
 
   if (filters.search) query.$text = { $search: filters.search };
-  if (filters.category) query.category = filters.category;
   if (filters.type) query.type = filters.type;
   if (filters.minPrice !== undefined && filters.minPrice !== '') {
     query.price = { ...query.price, $gte: parseFloat(filters.minPrice) };

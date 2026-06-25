@@ -1,7 +1,48 @@
 const nodemailer = require('nodemailer');
 const env = require('../config/env');
 const logger = require('../logs/logger');
-const { orderConfirmation, orderStatusUpdate, passwordReset, quoteRequestAdmin, quoteRequestUser, orderEdited, orderDeleted } = require('../utils/emailTemplates');
+const { orderConfirmation, orderStatusUpdate, passwordReset, quoteRequestAdmin, quoteRequestUser, orderEdited, orderDeleted, ticketReplyUser, ticketReplyAdmin } = require('../utils/emailTemplates');
+
+const sendTicketReplyToUser = async (to, ticket, content) => {
+  try {
+    const t = await getTransporter();
+    const info = await t.sendMail({
+      from: env.EMAIL_FROM,
+      to,
+      subject: `Nueva respuesta en tu ticket #${ticket._id} - SonTerry`,
+      html: ticketReplyUser(ticket, content),
+    });
+    if (info.messageId && info.messageId.includes('ethereal')) {
+      logger.info(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+    }
+    logger.info(`Email de respuesta de ticket enviado a cliente ${to}`);
+    return info;
+  } catch (error) {
+    logger.error(`Error enviando email a ${to}: ${error.message}`);
+  }
+};
+
+const sendTicketReplyToAdmin = async (ticket, content, user) => {
+  try {
+    const t = await getTransporter();
+    const adminEmail = env.EMAIL_FROM; // Could be env.EMAIL_ADMIN if it exists
+    const info = await t.sendMail({
+      from: env.EMAIL_FROM,
+      to: adminEmail,
+      subject: `Nueva respuesta de cliente en ticket #${ticket._id} - SonTerry`,
+      html: ticketReplyAdmin(ticket, content, user),
+    });
+    if (info.messageId && info.messageId.includes('ethereal')) {
+      logger.info(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+    }
+    logger.info(`Email de respuesta de ticket enviado a admin`);
+    return info;
+  } catch (error) {
+    logger.error(`Error enviando email al admin: ${error.message}`);
+  }
+};
+
+
 
 let transporter = null;
 
@@ -157,4 +198,4 @@ const sendOrderDeleted = async (to, order) => {
   }
 };
 
-module.exports = { sendOrderConfirmation, sendOrderStatusUpdate, sendPasswordReset, sendQuoteEmails, sendOrderEdited, sendOrderDeleted };
+module.exports = { orderConfirmation, orderStatusUpdate, passwordReset, sendQuoteEmails, sendOrderEdited, sendOrderDeleted, sendTicketReplyToUser, sendTicketReplyToAdmin, sendOrderConfirmation, sendOrderStatusUpdate, sendPasswordReset };

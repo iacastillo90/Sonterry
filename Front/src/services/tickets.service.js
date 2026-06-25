@@ -19,3 +19,10 @@ export const updateTicketStatusAdmin = async (id, status) => {
   const res = await api.patch(`/tickets/${id}/status`, { status });
   return res.data.data;
 };
+
+export const replyToTicket = async (id, formData) => {
+  const res = await api.post(`/tickets/${id}/reply`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+  return res.data.data;
+};

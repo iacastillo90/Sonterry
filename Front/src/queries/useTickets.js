@@ -35,3 +35,14 @@ export const useUpdateTicketStatus = () => {
     }
   });
 };
+
+export const useReplyTicket = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, formData }) => ticketsService.replyToTicket(id, formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminTickets'] });
+      queryClient.invalidateQueries({ queryKey: ['userTickets'] });
+    }
+  });
+};

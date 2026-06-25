@@ -29,8 +29,13 @@ const replyToTicket = catchAsync(async (req, res) => {
   const { content, statusUpdate } = req.body;
   const sender = req.user.role === 'admin' ? 'admin' : 'user';
 
-  const ticket = await ticketsService.replyToTicket(id, sender, content, statusUpdate, req.user);
+  const ticket = await ticketsService.replyToTicket(id, sender, content, statusUpdate, req.user, req.file);
   res.status(201).json(formatResponse(true, 'Respuesta enviada', ticket));
 });
 
-module.exports = { createTicket, getUserTickets, getAllTickets, updateTicketStatus, replyToTicket };
+const deleteTicket = catchAsync(async (req, res) => {
+  await ticketsService.deleteTicket(req.params.id);
+  res.status(200).json(formatResponse(true, 'Ticket eliminado con éxito', null));
+});
+
+module.exports = { createTicket, getUserTickets, getAllTickets, updateTicketStatus, replyToTicket, deleteTicket };

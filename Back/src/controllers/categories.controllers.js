@@ -17,4 +17,9 @@ const deleteCategory = catchAsync(async (req, res) => {
   res.status(200).json(formatResponse(true, 'Categoría eliminada'));
 });
 
-module.exports = { getAllCategories, createCategory, deleteCategory };
+const updateCategory = catchAsync(async (req, res) => {
+  const category = await categoriesService.updateCategory(req.params.id, req.body);
+  res.status(200).json(formatResponse(true, 'Categoría actualizada', category));
+});
+
+module.exports = { getAllCategories, createCategory, deleteCategory, updateCategory };

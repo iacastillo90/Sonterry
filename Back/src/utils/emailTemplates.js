@@ -226,4 +226,59 @@ const orderDeleted = (order) => `
 </body>
 </html>`;
 
-module.exports = { orderConfirmation, orderStatusUpdate, passwordReset, quoteRequestAdmin, quoteRequestUser, orderEdited, orderDeleted };
+const ticketReplyUser = (ticket, replyContent) => `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family:Arial,sans-serif;background:#f5f5f5;margin:0;padding:0">
+  <div style="max-width:600px;margin:0 auto;background:#fff">
+    <div style="background:#3D3D3D;padding:24px;text-align:center">
+      <h1 style="color:#D4A373;margin:0;font-size:24px">SonTerry Soporte</h1>
+    </div>
+    <div style="padding:32px">
+      <h2 style="color:#3D3D3D;margin:0 0 16px">Nueva respuesta en tu ticket</h2>
+      <p style="color:#666">Hola,</p>
+      <p style="color:#666">Nuestro equipo de soporte ha respondido a tu ticket <strong>#${ticket._id}</strong> ("${ticket.subject}").</p>
+      
+      <div style="background:#f8f8f8;padding:16px;border-radius:8px;margin:24px 0">
+        <h4 style="margin:0 0 8px;color:#3D3D3D">Respuesta del Admin:</h4>
+        <p style="margin:0;color:#666;white-space:pre-wrap;">${replyContent}</p>
+      </div>
+
+      <p style="color:#666">Para continuar la conversación o adjuntar archivos, por favor ingresa a tu panel de cliente en nuestra tienda.</p>
+    </div>
+    <div style="background:#3D3D3D;padding:16px;text-align:center;color:#999;font-size:12px">
+      <p style="margin:0">SonTerry Accesorios — Personalización textil</p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+const ticketReplyAdmin = (ticket, replyContent, user) => `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family:Arial,sans-serif;background:#f5f5f5;margin:0;padding:0">
+  <div style="max-width:600px;margin:0 auto;background:#fff">
+    <div style="background:#3D3D3D;padding:24px;text-align:center">
+      <h1 style="color:#D4A373;margin:0;font-size:24px">SonTerry Admin</h1>
+    </div>
+    <div style="padding:32px">
+      <h2 style="color:#3D3D3D;margin:0 0 16px">Nueva respuesta de cliente</h2>
+      <p style="color:#666">El cliente <strong>${user.name}</strong> (${user.email}) ha respondido al ticket <strong>#${ticket._id}</strong> ("${ticket.subject}").</p>
+      
+      <div style="background:#f8f8f8;padding:16px;border-radius:8px;margin:24px 0">
+        <h4 style="margin:0 0 8px;color:#3D3D3D">Respuesta del Cliente:</h4>
+        <p style="margin:0;color:#666;white-space:pre-wrap;">${replyContent}</p>
+      </div>
+
+      <p style="color:#666">Ingresa al panel administrativo para continuar la conversación.</p>
+    </div>
+    <div style="background:#3D3D3D;padding:16px;text-align:center;color:#999;font-size:12px">
+      <p style="margin:0">SonTerry Accesorios — Personalización textil</p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+module.exports = { orderConfirmation, orderStatusUpdate, passwordReset, quoteRequestAdmin, quoteRequestUser, orderEdited, orderDeleted, ticketReplyUser, ticketReplyAdmin };

@@ -17,4 +17,12 @@ const deleteCategory = async (id) => {
   return category;
 };
 
-module.exports = { getAllCategories, createCategory, deleteCategory };
+const updateCategory = async (id, categoryData) => {
+  const category = await Category.findByIdAndUpdate(id, categoryData, { new: true, runValidators: true });
+  if (!category) {
+    throw new AppError('Categoría no encontrada', 404);
+  }
+  return category;
+};
+
+module.exports = { getAllCategories, createCategory, deleteCategory, updateCategory };

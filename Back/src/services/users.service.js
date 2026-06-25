@@ -42,4 +42,20 @@ const updateUserProfile = async (id, profileData) => {
   return user;
 };
 
-module.exports = { getAllUsers, getUserById, updateUserStatus, updateUserProfile };
+const updateUserDataAdmin = async (id, data) => {
+  const update = {};
+  if (data.name) update.name = data.name;
+  if (data.email) update.email = data.email;
+  
+  const user = await User.findByIdAndUpdate(id, update, { new: true, runValidators: true }).select('-password');
+  if (!user) throw new AppError('Usuario no encontrado', 404);
+  return user;
+};
+
+const deleteUser = async (id) => {
+  const user = await User.findByIdAndDelete(id);
+  if (!user) throw new AppError('Usuario no encontrado', 404);
+  return user;
+};
+
+module.exports = { getAllUsers, getUserById, updateUserStatus, updateUserProfile, updateUserDataAdmin, deleteUser };

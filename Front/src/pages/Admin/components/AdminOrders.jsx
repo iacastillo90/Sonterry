@@ -31,7 +31,7 @@ const AdminOrders = ({ orders, loadingOrders, addToast, products = [], categorie
 
   // Edit order state
   const [editForm, setEditForm] = useState({
-    productId: '', quantity: 1, price: 0, customization: '', paymentMethod: 'efectivo'
+    items: [], paymentMethod: 'efectivo'
   });
 
   // Dispatch form state
@@ -134,29 +134,37 @@ const AdminOrders = ({ orders, loadingOrders, addToast, products = [], categorie
 
   const handleOpenEdit = (order) => {
     setSelectedOrder(order);
-    if (order.items && order.items.length > 0) {
-      setEditForm({
-        productId: order.items[0].product._id || order.items[0].product,
-        quantity: order.items[0].quantity,
-        price: order.items[0].price,
-        customization: order.items[0].customization?.details || '',
-        paymentMethod: order.paymentMethod || 'efectivo'
-      });
-    }
+    setEditForm({
+      items: order.items?.map(i => ({
+        productId: i.product?._id || i.product,
+        quantity: i.quantity,
+        price: i.price,
+        customization: i.customization?.details || '',
+        name: i.name || (i.product && i.product.name) || 'Producto'
+      })) || [],
+      paymentMethod: order.paymentMethod || 'efectivo'
+    });
     setShowEditModal(true);
   };
 
   const submitEditOrder = async (e) => {
     e.preventDefault();
+    if (editForm.items.length === 0) {
+      return addToast('La orden debe tener al menos un artículo', 'warning');
+    }
+    if (editForm.items.some(i => !i.productId)) {
+      return addToast('Todos los artículos deben tener un producto seleccionado', 'warning');
+    }
+    
     setTriggeringOrderId(selectedOrder._id);
     try {
       await api.put(`/orders/${selectedOrder._id}/items-admin`, {
-        items: [{
-          product: editForm.productId,
-          quantity: editForm.quantity,
-          price: editForm.price,
-          customization: { details: editForm.customization }
-        }],
+        items: editForm.items.map(i => ({
+          product: i.productId,
+          quantity: i.quantity,
+          price: i.price,
+          customization: { details: i.customization }
+        })),
         paymentMethod: editForm.paymentMethod
       });
       addToast('Pedido actualizado con éxito', 'success');
@@ -198,11 +206,20 @@ const AdminOrders = ({ orders, loadingOrders, addToast, products = [], categorie
       
       // Auto-select the newly created product in the edit form
       if (res.data?.data) {
-        setEditForm({
-          ...editForm,
-          productId: res.data.data._id,
-          price: res.data.data.price
-        });
+        if (showEditModal) {
+          setEditForm(prev => {
+            const newItems = [...prev.items];
+            const emptyIdx = newItems.findIndex(i => !i.productId);
+            if (emptyIdx >= 0) {
+              newItems[emptyIdx] = { ...newItems[emptyIdx], productId: res.data.data._id, price: res.data.data.price, name: res.data.data.name };
+            } else {
+              newItems.push({ productId: res.data.data._id, quantity: 1, price: res.data.data.price, customization: '', name: res.data.data.name });
+            }
+            return { ...prev, items: newItems };
+          });
+        } else if (showManualModal) {
+          setManualForm({ ...manualForm, productId: res.data.data._id });
+        }
       }
     } catch (err) {
       addToast(err.response?.data?.message || 'Error al crear producto', 'error');
@@ -505,38 +522,96 @@ const AdminOrders = ({ orders, loadingOrders, addToast, products = [], categorie
 
       {showEditModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000 }}>
-          <div style={{ background: '#FFF', padding: '2rem', borderRadius: '8px', width: '90%', maxWidth: '500px' }}>
-            <h4 style={{ margin: '0 0 1rem 0' }}>Editar Pedido (Cambiar Producto/Precio)</h4>
+          <div style={{ background: '#FFF', padding: '2rem', borderRadius: '8px', width: '90%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <h4 style={{ margin: '0 0 1rem 0' }}>Editar Pedido #{selectedOrder?._id.slice(-6)}</h4>
             <p style={{ fontSize: '0.85rem', color: '#64748B', marginBottom: '1.5rem' }}>
-              Al guardar, se recalculará el stock y el precio total de la orden. (Solo modifica el primer producto).
+              Puedes añadir nuevos artículos, editar cantidades/precios o eliminar productos de la orden. Se recalculará el total automáticamente.
             </p>
-            <form onSubmit={submitEditOrder} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Producto*</label>
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'nowrap', width: '100%' }}>
-                  <select value={editForm.productId} onChange={e => {
-                    const prod = products.find(p => p._id === e.target.value);
-                    setEditForm({...editForm, productId: e.target.value, price: prod ? prod.price : editForm.price});
-                  }} style={{ flex: '1 1 0%', minWidth: '0', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC', textOverflow: 'ellipsis' }} required>
-                    <option value="">Seleccionar producto...</option>
-                    {products.map(p => <option key={p._id} value={p._id}>{p.name} - {formatCurrency(p.price)}</option>)}
-                  </select>
-                  <Button type="button" variant="outline" onClick={() => setShowQuickProductModal(true)} style={{ padding: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }} title="Crear Producto Nuevo">
-                    <PlusCircle size={16} />
-                  </Button>
-                </div>
+            <form onSubmit={submitEditOrder} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              
+              {/* Iterar sobre los items */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {editForm.items.map((item, index) => (
+                  <div key={index} style={{ border: '1px solid #E2E8F0', padding: '1rem', borderRadius: '8px', position: 'relative', backgroundColor: '#F8FAFC' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                      <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>Artículo {index + 1}</span>
+                      <button type="button" onClick={() => {
+                        const newItems = [...editForm.items];
+                        newItems.splice(index, 1);
+                        setEditForm({...editForm, items: newItems});
+                      }} style={{ background: 'none', border: 'none', color: '#D9534F', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem' }}>
+                        <Trash2 size={14} /> Quitar
+                      </button>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Producto*</label>
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'nowrap', width: '100%' }}>
+                          <select value={item.productId} onChange={e => {
+                            const prod = products.find(p => p._id === e.target.value);
+                            const newItems = [...editForm.items];
+                            newItems[index].productId = e.target.value;
+                            if (prod) {
+                              newItems[index].price = prod.price;
+                              newItems[index].name = prod.name;
+                            }
+                            setEditForm({...editForm, items: newItems});
+                          }} style={{ flex: '1 1 0%', minWidth: '0', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC', textOverflow: 'ellipsis' }} required>
+                            <option value="">Seleccionar producto...</option>
+                            {products.filter(p => !p.isDeleted).map(p => <option key={p._id} value={p._id}>{p.name} - {formatCurrency(p.price)}</option>)}
+                          </select>
+                          {index === editForm.items.length - 1 && (
+                            <Button type="button" variant="outline" onClick={() => setShowQuickProductModal(true)} style={{ padding: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }} title="Crear Producto Nuevo">
+                              <PlusCircle size={16} />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Cantidad*</label>
+                          <input type="number" min="1" value={item.quantity} onChange={e => {
+                            const newItems = [...editForm.items];
+                            newItems[index].quantity = parseInt(e.target.value) || 1;
+                            setEditForm({...editForm, items: newItems});
+                          }} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC' }} required />
+                        </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Precio Unitario*</label>
+                          <input type="number" min="0" value={item.price} onChange={e => {
+                            const newItems = [...editForm.items];
+                            newItems[index].price = parseFloat(e.target.value) || 0;
+                            setEditForm({...editForm, items: newItems});
+                          }} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC' }} required />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Detalles Custom (Opcional)</label>
+                        <textarea rows="2" value={item.customization} onChange={e => {
+                          const newItems = [...editForm.items];
+                          newItems[index].customization = e.target.value;
+                          setEditForm({...editForm, items: newItems});
+                        }} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC', resize: 'none' }} placeholder="Detalles de diseño..." />
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <Button type="button" variant="outline" onClick={() => {
+                  setEditForm({...editForm, items: [...editForm.items, { productId: '', quantity: 1, price: 0, customization: '', name: '' }]});
+                }} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+                  <PlusCircle size={14} /> Añadir Artículo
+                </Button>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', borderTop: '1px solid #E2E8F0', paddingTop: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Cantidad*</label>
-                  <input type="number" min="1" value={editForm.quantity} onChange={e => setEditForm({...editForm, quantity: parseInt(e.target.value)})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC' }} required />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Precio Unitario*</label>
-                  <input type="number" min="0" value={editForm.price} onChange={e => setEditForm({...editForm, price: parseFloat(e.target.value)})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC' }} required />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Método Pago*</label>
+                  <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Método Pago de la Orden*</label>
                   <select value={editForm.paymentMethod} onChange={e => setEditForm({...editForm, paymentMethod: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC' }} required>
                     <option value="efectivo">Efectivo</option>
                     <option value="transferencia">Transferencia</option>
@@ -545,10 +620,12 @@ const AdminOrders = ({ orders, loadingOrders, addToast, products = [], categorie
                     <option value="wompi">Wompi (Web)</option>
                   </select>
                 </div>
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Detalles Custom (Opcional)</label>
-                <textarea rows="2" value={editForm.customization} onChange={e => setEditForm({...editForm, customization: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC', resize: 'none' }} placeholder="Detalles de diseño..." />
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'flex-end' }}>
+                  <span style={{ fontSize: '0.85rem', color: '#64748B' }}>Total Recalculado:</span>
+                  <span style={{ fontSize: '1.25rem', fontWeight: '800', color: '#0F172A' }}>
+                    {formatCurrency(editForm.items.reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0))}
+                  </span>
+                </div>
               </div>
 
               <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>

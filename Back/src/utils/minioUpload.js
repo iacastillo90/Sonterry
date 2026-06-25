@@ -6,7 +6,7 @@ const logger = require('../logs/logger');
 const crypto = require('crypto');
 const path = require('path');
 
-const uploadToMinio = async (fileBuffer, originalName, mimeType) => {
+const uploadToMinio = async (fileBuffer, originalName, mimeType, folder = 'products') => {
   if (!minioClient) {
     logger.warn('[S3] Cliente S3 no configurado. Retornando URL placeholder.');
     return null;
@@ -15,7 +15,7 @@ const uploadToMinio = async (fileBuffer, originalName, mimeType) => {
   const bucketName = env.MINIO_BUCKET;
   const ext = path.extname(originalName).toLowerCase();
   const randomName = `${crypto.randomBytes(16).toString('hex')}${ext}`;
-  const objectName = `products/${randomName}`;
+  const objectName = `${folder}/${randomName}`;
 
   try {
     const command = new PutObjectCommand({
@@ -50,9 +50,9 @@ const uploadToMinio = async (fileBuffer, originalName, mimeType) => {
   }
 };
 
-const uploadMultipleToMinio = async (files) => {
+const uploadMultipleToMinio = async (files, folder = 'products') => {
   const results = await Promise.all(
-    files.map(f => uploadToMinio(f.buffer, f.originalname, f.mimetype))
+    files.map(f => uploadToMinio(f.buffer, f.originalname, f.mimetype, folder))
   );
   return results.filter(Boolean);
 };

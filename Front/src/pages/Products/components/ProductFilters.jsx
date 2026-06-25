@@ -16,7 +16,8 @@ const ProductFilters = ({ activeFilter, setActiveFilter, activeCollection, setAc
           api.get('/categories'),
           api.get('/products/collections')
         ]);
-        setCategories(catRes.data.data || []);
+        const activeCategories = (catRes.data.data || []).filter(c => c.isActive !== false);
+        setCategories(activeCategories);
         setCollections(colRes.data.data || []);
       } catch (err) {
         console.error('Error fetching filters:', err);

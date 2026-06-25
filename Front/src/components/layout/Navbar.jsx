@@ -40,7 +40,8 @@ const Navbar = () => {
     const fetchCategories = async () => {
       try {
         const res = await api.get('/categories');
-        setCategories(res.data.data);
+        const activeCategories = res.data.data.filter(c => c.isActive !== false);
+        setCategories(activeCategories);
       } catch (err) {
         console.error('Error fetching categories:', err);
       }
