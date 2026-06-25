@@ -4,10 +4,28 @@ import { useAuthStore } from '../../store/authStore';
 import { useCartStore } from '../../store/cartStore';
 import { useUiStore } from '../../store/uiStore';
 import { ShoppingBag, User as UserIcon, Search, Truck, Store, Phone, MapPin, Coffee, Menu, X } from 'lucide-react';
-import logo from '../../assets/img/logo.jpg';
+import logo from '../../assets/img/logo23.png';
 import api from '../../services/api';
 import SearchAutocomplete from './SearchAutocomplete';
 import './Navbar.css';
+
+const WhatsappIcon = ({ size = 24, color = "currentColor", strokeWidth = 2, ...props }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke={color}
+    strokeWidth={strokeWidth}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
+    <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" />
+  </svg>
+);
 
 const Navbar = () => {
   const { isAuthenticated, logout, user } = useAuthStore();
@@ -38,15 +56,15 @@ const Navbar = () => {
         {/* Row 1: Top Bar */}
         <div className="nav-top-bar">
           <div className="container nav-top-inner">
-            <div className="nav-top-item">
+            <Link to="/productos" className="nav-top-item" style={{ color: 'inherit', textDecoration: 'none' }}>
               <Truck size={14} /> <span>Envíos a todo Colombia</span>
-            </div>
-            <div className="nav-top-item">
-              <Store size={14} /> <span>Tiendas por departamentos y mayoristas</span>
-            </div>
-            <div className="nav-top-item">
-              <Phone size={14} /> <span>¿Necesitas ayuda? 301 826 7373</span>
-            </div>
+            </Link>
+            <Link to="/productos" className="nav-top-item" style={{ color: 'inherit', textDecoration: 'none' }}>
+              <Store size={14} /> <span>Tiendas por departamentos</span>
+            </Link>
+            <a href="https://wa.me/573018267373" target="_blank" rel="noopener noreferrer" className="nav-top-item" style={{ color: 'inherit', textDecoration: 'none' }}>
+              <WhatsappIcon size={14} /> <span>¿Necesitas ayuda? 301 826 7373</span>
+            </a>
           </div>
         </div>
 
@@ -65,8 +83,8 @@ const Navbar = () => {
                 <img src={logo} alt="SonTerry" className="nav-logo" />
                 <div className="nav-brand-divider" />
                 <div className="nav-brand-text">
-                  <span style={{ fontWeight: '800', fontSize: '0.95rem', color: 'var(--green-deep)', lineHeight: '1.2', fontFamily: 'var(--font-display)' }}>Taller & Bodega</span>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', fontWeight: '500' }}>Serigrafía textil y DTF</span>
+                  <span style={{ fontWeight: '800', fontSize: '0.95rem', color: 'var(--green-deep)', lineHeight: '1.2', fontFamily: 'var(--font-display)' }}>SonTerry<br />Tienda</span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', fontWeight: '500' }}>DTF</span>
                 </div>
               </Link>
             </div>
@@ -131,14 +149,14 @@ const Navbar = () => {
               <Store size={14} color="var(--green-brand)" strokeWidth={2.5} />
               <span>NOSOTROS</span>
             </Link>
-            {(!isAuthenticated || user?.role !== 'admin') && (
-              <Link to="/profile" className="nav-sub-link">
+            {(isAuthenticated && user?.role !== 'admin') && (
+              <Link to="/profile" state={{ tab: 'pedidos' }} className="nav-sub-link">
                 <MapPin size={14} color="var(--green-brand)" strokeWidth={2.5} />
                 <span>RASTREA TU PEDIDO</span>
               </Link>
             )}
             <Link to="/contacto" className="nav-sub-link">
-              <Phone size={14} color="var(--green-brand)" strokeWidth={2.5} />
+              <WhatsappIcon size={14} color="var(--green-brand)" strokeWidth={2.5} />
               <span>CONTACTO</span>
             </Link>
           </div>
@@ -165,15 +183,15 @@ const Navbar = () => {
             <Link to="/nosotros" className="nav-mobile-link" onClick={() => setMobileMenuOpen(false)}>
               <Store size={18} color="var(--green-brand)" /> Nosotros
             </Link>
-            {(!isAuthenticated || user?.role !== 'admin') && (
-              <Link to="/profile" className="nav-mobile-link" onClick={() => setMobileMenuOpen(false)}>
+            {(isAuthenticated && user?.role !== 'admin') && (
+              <Link to="/profile" state={{ tab: 'pedidos' }} className="nav-mobile-link" onClick={() => setMobileMenuOpen(false)}>
                 <MapPin size={18} color="var(--green-brand)" /> Rastrea tu Pedido
               </Link>
             )}
             <Link to="/contacto" className="nav-mobile-link" onClick={() => setMobileMenuOpen(false)}>
-              <Phone size={18} color="var(--green-brand)" /> Contacto
+              <WhatsappIcon size={18} color="var(--green-brand)" /> Contacto
             </Link>
-            
+
             {/* Additional user actions in mobile menu */}
             {isAuthenticated && (
               <>
@@ -181,9 +199,9 @@ const Navbar = () => {
                 <Link to={user?.role === 'admin' ? '/admin' : '/profile'} className="nav-mobile-link" onClick={() => setMobileMenuOpen(false)}>
                   <UserIcon size={18} color={user?.role === 'admin' ? 'var(--terra-mid)' : 'var(--green-brand)'} /> Mi Cuenta
                 </Link>
-                <button 
-                  onClick={() => { logout(); navigate('/login'); setMobileMenuOpen(false); }} 
-                  className="nav-mobile-link" 
+                <button
+                  onClick={() => { logout(); navigate('/login'); setMobileMenuOpen(false); }}
+                  className="nav-mobile-link"
                   style={{ border: 'none', background: 'transparent', width: '100%', textAlign: 'left', color: '#E53E3E' }}
                 >
                   <UserIcon size={18} color="#E53E3E" /> Cerrar Sesión

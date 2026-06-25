@@ -7,9 +7,11 @@ const { createProductSchema, updateProductSchema } = require('../validators/prod
 const upload = require('../middlewares/upload.middleware');
 
 router.get('/', productsControllers.getProducts);
+router.get('/collections', productsControllers.getCollections);
 router.get('/:slug', productsControllers.getProductBySlug);
 router.post('/', protect, restrictTo('admin'), upload.array('images', 5), zodValidate(createProductSchema), productsControllers.createProduct);
 router.put('/:id', protect, restrictTo('admin'), upload.array('images', 5), zodValidate(updateProductSchema), productsControllers.updateProduct);
+router.patch('/:id/toggle-active', protect, restrictTo('admin'), productsControllers.toggleActiveProduct);
 router.delete('/:id', protect, restrictTo('admin'), productsControllers.deleteProduct);
 router.patch('/:id/restore', protect, restrictTo('admin'), productsControllers.restoreProduct);
 

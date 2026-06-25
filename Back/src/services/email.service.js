@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 const env = require('../config/env');
 const logger = require('../logs/logger');
-const { orderConfirmation, orderStatusUpdate, passwordReset } = require('../utils/emailTemplates');
+const { orderConfirmation, orderStatusUpdate, passwordReset, quoteRequestAdmin, quoteRequestUser } = require('../utils/emailTemplates');
 
 let transporter = null;
 
@@ -88,4 +88,35 @@ const sendPasswordReset = async (to, resetURL) => {
   }
 };
 
-module.exports = { sendOrderConfirmation, sendOrderStatusUpdate, sendPasswordReset };
+const sendQuoteEmails = async (quote) => {
+  try {
+    const t = await getTransporter();
+    // 1. Enviar al admin
+    const adminEmail = env.EMAIL_FROM; // Or env.EMAIL_ADMIN if it existed
+    await t.sendMail({
+      from: env.EMAIL_FROM,
+      to: adminEmail,
+      subject: `Nueva Cotización de ${quote.name} - SonTerry`,
+      html: quoteRequestAdmin(quote),
+    });
+
+    // 2. Enviar copia al cliente
+    const info = await t.sendMail({
+      from: env.EMAIL_FROM,
+      to: quote.email,
+      subject: 'Hemos recibido tu solicitud de cotización - SonTerry',
+      html: quoteRequestUser(quote),
+    });
+
+    if (info.messageId && info.messageId.includes('ethereal')) {
+      logger.info(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+    }
+    logger.info(`Email de cotización enviado al cliente (${quote.email}) y al admin`);
+    return true;
+  } catch (error) {
+    logger.error(`Error enviando email de cotización: ${error.message}`);
+    throw error;
+  }
+};
+
+module.exports = { sendOrderConfirmation, sendOrderStatusUpdate, sendPasswordReset, sendQuoteEmails };

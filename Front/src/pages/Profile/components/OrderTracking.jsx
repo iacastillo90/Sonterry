@@ -1,6 +1,23 @@
 import React from 'react';
 import { formatDate } from '../../../utils/formatDate';
 
+const getTrackingLink = (company, trackingNumber) => {
+  switch (company) {
+    case 'Inter Rapidísimo':
+      return `https://www.interrapidisimo.com/sigue-tu-envio/?guia=${trackingNumber}`;
+    case 'Coordinadora':
+      return `https://www.coordinadora.com/portafolio-de-servicios/servicios-en-linea/rastrear-guias/?guia=${trackingNumber}`;
+    case 'Servientrega':
+      return `https://www.servientrega.com/wps/portal/Colombia/transacciones-personas/rastreo-envios/?guia=${trackingNumber}`; // Approximate
+    case 'Envía':
+      return 'https://enviacolombia.com/';
+    case 'TCC':
+      return 'https://www.tcc.com.co/logistica/rastreo/';
+    default:
+      return '#';
+  }
+};
+
 const OrderTracking = ({ order }) => {
   const steps = [
     { key: 'pending', label: 'Orden Recibida' },
@@ -82,6 +99,44 @@ const OrderTracking = ({ order }) => {
           );
         })}
       </div>
+
+      {order.shippingDetails?.trackingNumber && (
+        <div style={{ marginTop: '2rem', padding: '1.5rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+          <h4 style={{ margin: '0 0 1rem 0', color: '#0f172a', fontSize: '1rem' }}>Información de Despacho</h4>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div>
+              <span style={{ display: 'block', fontSize: '0.8rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Transportadora</span>
+              <span style={{ fontSize: '1rem', fontWeight: '500', color: '#334155' }}>{order.shippingDetails.company || 'N/A'}</span>
+            </div>
+            <div>
+              <span style={{ display: 'block', fontSize: '0.8rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Número de Guía</span>
+              <span style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--color-primary)' }}>{order.shippingDetails.trackingNumber}</span>
+            </div>
+          </div>
+          
+          <a 
+            href={getTrackingLink(order.shippingDetails.company, order.shippingDetails.trackingNumber)} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{ 
+              display: 'inline-block', 
+              padding: '0.75rem 1.5rem', 
+              background: 'var(--color-primary)', 
+              color: '#fff', 
+              textDecoration: 'none', 
+              borderRadius: '6px',
+              fontWeight: '600',
+              fontSize: '0.9rem',
+              transition: 'background 0.2s',
+              textAlign: 'center',
+              width: '100%',
+              maxWidth: '300px'
+            }}
+          >
+            Rastrear en página oficial
+          </a>
+        </div>
+      )}
     </div>
   );
 };

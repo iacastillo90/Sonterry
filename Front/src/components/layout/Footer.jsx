@@ -1,5 +1,5 @@
 import React from 'react';
-import footerWave from '../../assets/img/footer_wave.png';
+import footerWave from '../../assets/img/Footer2.png';
 import logoImg from '../../assets/img/logo.jpg';
 import { Instagram, MessageCircle, PlayCircle } from 'lucide-react';
 
@@ -154,11 +154,11 @@ const Footer = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1rem' }}>
               <img src={logoImg} alt="SonTerry" style={{ height: '40px', borderRadius: '8px' }} />
               <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: '800', color: 'var(--green-brand)' }}>
-                SonTerry Tienda
+                SonTerry Accesorios
               </span>
             </div>
             <p>
-              Taller artesanal de personalización textil. Expertos en serigrafía tradicional y estampado digital DTF con calidad boutique.
+              Taller artesanal de personalización textil. Expertos en estampado digital DTF con excelente calidad.
             </p>
             <div className="footer-socials">
               <a href="#" className="footer-social-icon"><Instagram size={20} /></a>
@@ -169,9 +169,8 @@ const Footer = () => {
 
           {/* Contact */}
           <div className="footer-col">
-            <h4>Taller Físico</h4>
-            <p><strong>Ubicación:</strong> Bogotá, Colombia</p>
-            <p><strong>Teléfono:</strong> +57 301 826 7373</p>
+            <h4>Contáctanos</h4>
+            <p><strong>WhatsApp:</strong> +57 301 826 7373</p>
             <p><strong>Email:</strong> taller@sonterry.com</p>
           </div>
 

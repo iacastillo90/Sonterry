@@ -14,12 +14,14 @@ const ProductList = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const filter   = searchParams.get('category') || 'all';
+  const collection = searchParams.get('collectionName') || '';
   const searchVal = searchParams.get('search')  || '';
   const minPrice  = searchParams.get('minPrice') || '';
   const maxPrice  = searchParams.get('maxPrice') || '';
 
   const params = {};
   if (filter !== 'all')  params.category  = filter;
+  if (collection)        params.collectionName = collection;
   if (searchVal)         params.search    = searchVal;
   if (minPrice)          params.minPrice  = minPrice;
   if (maxPrice)          params.maxPrice  = maxPrice;
@@ -29,6 +31,13 @@ const ProductList = () => {
   const setFilter = (val) => {
     const p = new URLSearchParams(searchParams);
     val === 'all' ? p.delete('category') : p.set('category', val);
+    setSearchParams(p);
+  };
+
+  const setCollectionFilter = (val) => {
+    const p = new URLSearchParams(searchParams);
+    if (!val) p.delete('collectionName');
+    else p.set('collectionName', val);
     setSearchParams(p);
   };
 
@@ -128,6 +137,8 @@ const ProductList = () => {
         <ProductFilters
           activeFilter={filter}
           setActiveFilter={setFilter}
+          activeCollection={collection}
+          setActiveCollection={setCollectionFilter}
           minPrice={minPrice}
           maxPrice={maxPrice}
           onApplyPrice={handleApplyPrice}

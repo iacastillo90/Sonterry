@@ -12,6 +12,11 @@ const getProductBySlug = catchAsync(async (req, res) => {
   res.status(200).json(formatResponse(true, 'Detalle del producto', product));
 });
 
+const getCollections = catchAsync(async (req, res) => {
+  const collections = await productsService.getCollections();
+  res.status(200).json(formatResponse(true, 'Colecciones listadas', collections));
+});
+
 const createProduct = catchAsync(async (req, res) => {
   const product = await productsService.createProduct(req.body, req.files || []);
   res.status(201).json(formatResponse(true, 'Producto creado', product));
@@ -32,4 +37,9 @@ const restoreProduct = catchAsync(async (req, res) => {
   res.status(200).json(formatResponse(true, 'Producto restaurado', product));
 });
 
-module.exports = { getProducts, getProductBySlug, createProduct, updateProduct, deleteProduct, restoreProduct };
+const toggleActiveProduct = catchAsync(async (req, res) => {
+  const product = await productsService.toggleActiveProduct(req.params.id);
+  res.status(200).json(formatResponse(true, product.isActive ? 'Producto activado' : 'Producto dado de baja', product));
+});
+
+module.exports = { getProducts, getCollections, getProductBySlug, createProduct, updateProduct, deleteProduct, restoreProduct, toggleActiveProduct };

@@ -3,21 +3,26 @@ import api from '../../../services/api';
 import { SlidersHorizontal, DollarSign, X } from 'lucide-react';
 import Button from '../../../components/common/Button';
 
-const ProductFilters = ({ activeFilter, setActiveFilter, minPrice, maxPrice, onApplyPrice }) => {
+const ProductFilters = ({ activeFilter, setActiveFilter, activeCollection, setActiveCollection, minPrice, maxPrice, onApplyPrice }) => {
   const [tempMin, setTempMin] = useState(minPrice || '');
   const [tempMax, setTempMax] = useState(maxPrice || '');
   const [categories, setCategories] = useState([]);
+  const [collections, setCollections] = useState([]);
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchFilters = async () => {
       try {
-        const res = await api.get('/categories');
-        setCategories(res.data.data);
+        const [catRes, colRes] = await Promise.all([
+          api.get('/categories'),
+          api.get('/products/collections')
+        ]);
+        setCategories(catRes.data.data || []);
+        setCollections(colRes.data.data || []);
       } catch (err) {
-        console.error('Error fetching categories:', err);
+        console.error('Error fetching filters:', err);
       }
     };
-    fetchCategories();
+    fetchFilters();
   }, []);
 
   const handlePriceSubmit = (e) => {
@@ -58,6 +63,26 @@ const ProductFilters = ({ activeFilter, setActiveFilter, minPrice, maxPrice, onA
               {opt.name}
             </button>
           ))}
+        </div>
+
+        {/* ── Collection chips ── */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+          <span className="pf-label">
+            <SlidersHorizontal size={13} /> Colección
+          </span>
+          <select
+            className="snt-input"
+            style={{ padding: '6px 12px', fontSize: '0.88rem', borderRadius: '20px', backgroundColor: '#fff', border: '1px solid #e2e8f0', minWidth: '150px' }}
+            value={activeCollection || ''}
+            onChange={(e) => setActiveCollection(e.target.value)}
+          >
+            <option value="">Todas</option>
+            {collections.map((colName) => (
+              <option key={colName} value={colName}>
+                {colName}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* ── Price filter ── */}

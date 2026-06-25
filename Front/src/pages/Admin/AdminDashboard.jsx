@@ -69,7 +69,7 @@ const AdminDashboard = () => {
     try {
       const [cats, prods] = await Promise.all([
         productsService.fetchCategories(),
-        api.get('/products?limit=100').then((r) => r.data.data.data),
+        api.get('/products?limit=100&isActive=all').then((r) => r.data.data.data),
       ]);
       setCategories(cats);
       setProducts(prods);

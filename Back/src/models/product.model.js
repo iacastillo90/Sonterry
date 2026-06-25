@@ -18,6 +18,8 @@ const productSchema = new mongoose.Schema({
   ratings: { type: Number, default: 0, min: 0, max: 5 },
   slug: { type: String, unique: true },
   type: { type: String, enum: ['serigrafia', 'dtf', 'prenda', 'otro', 'mug', 'gorra', 'estampado'], default: 'prenda' },
+  collectionName: { type: String, trim: true, default: null },
+  isActive: { type: Boolean, default: true },
   isDeleted: { type: Boolean, default: false },
   deletedAt: { type: Date, default: null },
 }, { timestamps: true });

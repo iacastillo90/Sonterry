@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { useUiStore } from '../../store/uiStore';
 import { User, ShoppingBag, CreditCard, MessageSquare, LifeBuoy, Heart, Settings as SettingsIcon, LogOut, Menu, X } from 'lucide-react';
@@ -15,10 +15,18 @@ import './Profile.css';
 const Profile = () => {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
   const addToast = useUiStore((state) => state.addToast);
   
-  const [activeTab, setActiveTab] = useState('perfil');
+  const [activeTab, setActiveTab] = useState(location.state?.tab || 'perfil');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  // Listen for state changes to update tab if navigating to profile while already inside
+  useEffect(() => {
+    if (location.state?.tab) {
+      setActiveTab(location.state.tab);
+    }
+  }, [location.state]);
   
   // Close sidebar on route or tab change
   useEffect(() => {

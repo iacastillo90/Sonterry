@@ -22,6 +22,7 @@ const bankAccountsRoutes = require('./routes/bankAccounts.routes');
 const searchRoutes = require('./routes/search.routes');
 const healthRoutes = require('./routes/health.routes');
 const contactRoutes = require('./routes/contact.routes');
+const quotesRoutes = require('./routes/quotes.routes');
 const n8nWebhooks = require('./webhooks/n8n.webhook');
 const stripeWebhooks = require('./webhooks/stripe');
 const wompiWebhooks = require('./webhooks/wompi');
@@ -76,6 +77,7 @@ app.use('/api/tickets', ticketsRoutes);
 app.use('/api/bank-accounts', bankAccountsRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/quotes', quotesRoutes);
 app.use('/api/webhooks/n8n', n8nWebhooks);
 
 // Fallbacks

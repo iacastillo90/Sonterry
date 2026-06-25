@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import heroVideo from '../../assets/video/sonterry-hero.mp4';
+import heroVideo from '../../assets/video/sonterry-hero2.mp4';
 import bgVideo from '../../assets/video/bg-escena-inicial.mp4';
 
 const HeroTV = () => {

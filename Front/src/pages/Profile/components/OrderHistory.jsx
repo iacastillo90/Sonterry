@@ -112,6 +112,7 @@ const OrderHistory = () => {
   const [payingId, setPayingId] = useState(null);
   const [editItemsOrder, setEditItemsOrder] = useState(null);
   const [editShippingOrder, setEditShippingOrder] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('');
 
   const handlePayNow = async (e, order) => {
     e.stopPropagation();
@@ -194,17 +195,48 @@ const OrderHistory = () => {
 
   if (isLoading) return <LoadingSpinner />;
 
-  if (!orders || orders.length === 0) {
+  if (!orders) {
     return <p style={{ opacity: 0.7 }}>Aún no has solicitado ningún trabajo en el taller.</p>;
   }
 
+  const filteredOrders = orders.filter(o => statusFilter ? o.status === statusFilter : true);
+
   return (
     <div>
-      <h3 style={{ fontSize: '1.4rem', marginBottom: '1.5rem' }}>Historial de Trabajos</h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <h3 style={{ fontSize: '1.4rem', margin: 0 }}>Historial de Trabajos</h3>
+        
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          {[{ key: '', label: 'Todos' }, { key: 'pending', label: 'Pendiente' }, { key: 'paid', label: 'En Proceso' }, { key: 'shipped', label: 'En Camino' }, { key: 'delivered', label: 'Completado' }].map(f => (
+            <button
+              key={f.key}
+              onClick={() => { setStatusFilter(f.key); setSelectedOrder(null); }}
+              style={{
+                padding: '0.5rem 1rem',
+                borderRadius: '20px',
+                border: statusFilter === f.key ? 'none' : '1px solid #cbd5e1',
+                background: statusFilter === f.key ? 'var(--color-primary)' : '#fff',
+                color: statusFilter === f.key ? '#fff' : '#475569',
+                fontSize: '0.85rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
       
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        {orders.map((order) => {
-          const canCancel = CANCELABLE_STATUSES.includes(order.status);
+      {filteredOrders.length === 0 ? (
+        <div style={{ padding: '3rem', textAlign: 'center', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+          <p style={{ color: '#64748b', margin: 0 }}>No hay trabajos que coincidan con este estado.</p>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
+          {filteredOrders.map((order) => {
+            const canCancel = CANCELABLE_STATUSES.includes(order.status);
 
           return (
             <div
@@ -323,6 +355,7 @@ const OrderHistory = () => {
           );
         })}
       </div>
+      )}
 
       {selectedOrder && (
         <div style={{ marginTop: '2.5rem' }}>

@@ -11,6 +11,8 @@ const createProductSchema = z.object({
   stock: z.coerce.number().int().min(0, { message: "El stock debe ser un entero positivo" }),
   category: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), { message: "La categoría debe ser un ID válido" }),
   type: z.string().refine((val) => validTypes.includes(val), { message: "Tipo inválido" }).optional(),
+  collectionName: z.string().optional(),
+  isActive: z.boolean().optional(),
   images: z.array(z.string().regex(urlRegex, { message: "Cada imagen debe ser una URL válida (http/https)" })).optional(),
 });
 
@@ -20,6 +22,8 @@ const updateProductSchema = z.object({
   price: z.coerce.number().min(0, { message: "Precio inválido" }).optional(),
   stock: z.coerce.number().int().min(0, { message: "Stock inválido" }).optional(),
   type: z.string().refine((val) => validTypes.includes(val), { message: "Tipo inválido" }).optional(),
+  collectionName: z.string().optional(),
+  isActive: z.boolean().optional(),
   images: z.array(z.string().regex(urlRegex, { message: "Cada imagen debe ser una URL válida" })).optional(),
 });
 

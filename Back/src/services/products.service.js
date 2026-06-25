@@ -11,8 +11,12 @@ const getProducts = async (filters = {}) => {
 
   // Non-search queries hit MongoDB directly (zero change for existing flows)
   const query = { isDeleted: false };
+  if (filters.isActive !== 'all') {
+    query.isActive = filters.isActive === 'false' ? false : { $ne: false };
+  }
   if (filters.category) query.category = filters.category;
   if (filters.type) query.type = filters.type;
+  if (filters.collectionName) query.collectionName = filters.collectionName;
   if (filters.minPrice !== undefined && filters.minPrice !== '') {
     query.price = { ...query.price, $gte: parseFloat(filters.minPrice) };
   }
@@ -34,6 +38,11 @@ const getProducts = async (filters = {}) => {
   ]);
 
   return { data: products, total, page, limit, totalPages: Math.ceil(total / limit) };
+};
+
+const getCollections = async () => {
+  const collections = await Product.distinct('collectionName', { isDeleted: false, collectionName: { $ne: null, $ne: '' } });
+  return collections;
 };
 
 const getProductBySlug = async (slug) => {
@@ -85,5 +94,13 @@ const restoreProduct = async (id) => {
   return product;
 };
 
-module.exports = { getProducts, getProductBySlug, createProduct, updateProduct, deleteProduct, restoreProduct };
+const toggleActiveProduct = async (id) => {
+  const product = await Product.findOne({ _id: id, isDeleted: false });
+  if (!product) throw new AppError('Producto no encontrado', 404);
+  product.isActive = !product.isActive;
+  await product.save();
+  return product;
+};
+
+module.exports = { getProducts, getCollections, getProductBySlug, createProduct, updateProduct, deleteProduct, restoreProduct, toggleActiveProduct };
 

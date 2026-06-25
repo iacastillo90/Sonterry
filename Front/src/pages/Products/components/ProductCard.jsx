@@ -125,6 +125,12 @@ const ProductCard = ({ product }) => {
           <Link to={`/productos/${product.slug}`} className="snt-card__name">
             {product.name}
           </Link>
+          
+          {product.collectionName && (
+            <div style={{ fontSize: '0.75rem', color: 'var(--green-brand)', marginBottom: '4px', fontWeight: '600' }}>
+              {product.collectionName}
+            </div>
+          )}
 
           <p className="snt-card__desc">{product.description}</p>
 

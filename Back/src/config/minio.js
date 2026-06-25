@@ -10,7 +10,8 @@ if (env.MINIO_ACCESS_KEY && env.MINIO_SECRET_KEY) {
     let endpointUrl = env.MINIO_ENDPOINT;
     if (!endpointUrl.startsWith('http')) {
       const protocol = env.MINIO_USE_SSL ? 'https' : 'http';
-      endpointUrl = `${protocol}://${endpointUrl}`;
+      const port = env.MINIO_PORT ? `:${env.MINIO_PORT}` : '';
+      endpointUrl = `${protocol}://${endpointUrl}${port}`;
     }
 
     minioClient = new S3Client({
