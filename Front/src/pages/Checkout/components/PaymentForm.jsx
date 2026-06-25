@@ -216,7 +216,7 @@ const PaymentForm = ({ onBack }) => {
                     <li><strong>Tipo de Cuenta:</strong> {acc.accountType}</li>
                     <li><strong>Número:</strong> {acc.accountNumber}</li>
                     <li><strong>Titular:</strong> {acc.ownerName}</li>
-                    <li><strong>Documento:</strong> {acc.ownerDocument}</li>
+                    <li><strong>Documento:</strong> {acc.ownerDoc}</li>
                     {acc.phoneNumber && <li><strong>Teléfono / Celular:</strong> {acc.phoneNumber}</li>}
                   </ul>
                 </div>

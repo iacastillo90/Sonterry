@@ -17,7 +17,7 @@ const AdminBankAccounts = ({ addToast }) => {
     accountNumber: '',
     accountType: 'Ahorros',
     ownerName: '',
-    ownerDocument: '',
+    ownerDoc: '',
     phoneNumber: '',
     supportedMethods: 'ambas',
     isActive: true
@@ -26,7 +26,7 @@ const AdminBankAccounts = ({ addToast }) => {
   const openNewModal = () => {
     setEditingId(null);
     setFormData({
-      bankName: '', accountNumber: '', accountType: 'Ahorros', ownerName: '', ownerDocument: '', phoneNumber: '', supportedMethods: 'ambas', isActive: true
+      bankName: '', accountNumber: '', accountType: 'Ahorros', ownerName: '', ownerDoc: '', phoneNumber: '', supportedMethods: 'ambas', isActive: true
     });
     setShowModal(true);
   };
@@ -38,7 +38,7 @@ const AdminBankAccounts = ({ addToast }) => {
       accountNumber: account.accountNumber,
       accountType: account.accountType,
       ownerName: account.ownerName,
-      ownerDocument: account.ownerDocument,
+      ownerDoc: account.ownerDoc,
       phoneNumber: account.phoneNumber || '',
       supportedMethods: account.supportedMethods,
       isActive: account.isActive
@@ -114,7 +114,7 @@ const AdminBankAccounts = ({ addToast }) => {
                 <p style={{ margin: 0 }}><strong>Tipo:</strong> {acc.accountType}</p>
                 <p style={{ margin: 0 }}><strong>Nro:</strong> {acc.accountNumber}</p>
                 <p style={{ margin: 0 }}><strong>Titular:</strong> {acc.ownerName}</p>
-                <p style={{ margin: 0 }}><strong>Documento:</strong> {acc.ownerDocument}</p>
+                <p style={{ margin: 0 }}><strong>Documento:</strong> {acc.ownerDoc}</p>
                 {acc.phoneNumber && <p style={{ margin: 0 }}><strong>Teléfono:</strong> {acc.phoneNumber}</p>}
                 
                 <p style={{ margin: '0.5rem 0 0 0', padding: '4px 8px', background: '#F1F5F9', borderRadius: '4px', display: 'inline-block', width: 'fit-content' }}>
@@ -166,7 +166,7 @@ const AdminBankAccounts = ({ addToast }) => {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.3rem' }}>Documento (CC/NIT) *</label>
-                  <input type="text" value={formData.ownerDocument} onChange={e => setFormData({...formData, ownerDocument: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC' }} required />
+                  <input type="text" value={formData.ownerDoc} onChange={e => setFormData({...formData, ownerDoc: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC' }} required />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.3rem' }}>Teléfono (Opcional)</label>

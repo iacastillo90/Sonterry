@@ -21,7 +21,7 @@ const bankAccountSchema = new mongoose.Schema({
     required: [true, 'El nombre del titular es requerido'],
     trim: true
   },
-  ownerDocument: {
+  ownerDoc: {
     type: String,
     required: [true, 'El documento del titular (CC/NIT) es requerido'],
     trim: true

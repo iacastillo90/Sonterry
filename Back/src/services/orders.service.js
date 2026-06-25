@@ -5,7 +5,7 @@ const User = require('../models/user.model');
 const AppError = require('../errors/AppError');
 const { getCart } = require('./cart.service');
 const { addNotificationJob } = require('../jobs/notificationQueue');
-const { sendOrderConfirmation, sendOrderStatusUpdate } = require('./email.service');
+const { sendOrderConfirmation, sendOrderStatusUpdate, sendOrderEdited, sendOrderDeleted } = require('./email.service');
 const logger = require('../logs/logger');
 
 const deductOrderStock = async (order) => {
@@ -84,6 +84,11 @@ const updateOrderStatus = async (orderId, newStatus) => {
   if (!order) throw new AppError('Pedido no encontrado', 404);
 
   const previousStatus = order.status;
+
+  if (previousStatus === 'pending' && ['paid', 'shipped', 'delivered'].includes(newStatus)) {
+    await deductOrderStock(order);
+  }
+
   order.status = newStatus;
   await order.save();
 
@@ -144,15 +149,27 @@ const getOrdersByProduct = async (productId, filters = {}) => {
 };
 
 const updateOrderDispatch = async (orderId, shippingDetails) => {
-  const order = await Order.findById(orderId);
+  const order = await Order.findById(orderId).populate('user', 'email name phone');
   if (!order) throw new AppError('Pedido no encontrado', 404);
 
+  const previousStatus = order.status;
+
   order.shippingDetails = shippingDetails;
-  if (shippingDetails.trackingNumber && order.status === 'paid') {
-    order.status = 'shipped';
+  if (shippingDetails.trackingNumber) {
+    if (order.status === 'pending') {
+      await deductOrderStock(order);
+      order.status = 'shipped';
+    } else if (order.status === 'paid') {
+      order.status = 'shipped';
+    }
   }
   
   await order.save();
+
+  if (order.status !== previousStatus) {
+    sendOrderStatusUpdate(order.user.email, order, previousStatus).catch(err => logger.error(err));
+  }
+
   return order;
 };
 
@@ -261,10 +278,34 @@ const cancelOrder = async (orderId, userId) => {
   return order;
 };
 
-const updateOrderItems = async (orderId, userId, newItems) => {
-  const order = await Order.findOne({ _id: orderId, user: userId });
+const deleteOrder = async (orderId) => {
+  const order = await Order.findById(orderId).populate('user', 'email name phone');
   if (!order) throw new AppError('Pedido no encontrado', 404);
-  if (order.status !== 'pending') throw new AppError('El pedido ya no está pendiente y no puede ser editado', 400);
+
+  // Restore stock if the order was taking stock.
+  // Pending orders don't take stock, but if we delete a paid/shipped order, we should probably restore stock.
+  if (['paid', 'shipped', 'delivered'].includes(order.status) || order.paymentMethod === 'efectivo') {
+    await Promise.all(
+      order.items.map(item =>
+        Product.findByIdAndUpdate(item.product, { $inc: { stock: +item.quantity } })
+      )
+    );
+  }
+
+  await Order.findByIdAndDelete(orderId);
+
+  if (order.user?.email) {
+    sendOrderDeleted(order.user.email, order).catch(err => logger.error(err));
+  }
+
+  return order;
+};
+
+const updateOrderItems = async (orderId, userId, newItems, isAdmin = false, paymentMethod = undefined) => {
+  const query = isAdmin ? { _id: orderId } : { _id: orderId, user: userId };
+  const order = await Order.findOne(query).populate('user', 'email name phone');
+  if (!order) throw new AppError('Pedido no encontrado', 404);
+  if (!isAdmin && order.status !== 'pending') throw new AppError('El pedido ya no está pendiente y no puede ser editado', 400);
 
   // Restore stock for EXISTING items
   await Promise.all(
@@ -299,7 +340,7 @@ const updateOrderItems = async (orderId, userId, newItems) => {
     validatedItems.push({
       product: product._id,
       name: product.name,
-      price: product.price,
+      price: isAdmin && item.price !== undefined ? item.price : product.price,
       quantity: item.quantity,
       customization: item.customization || undefined,
     });
@@ -315,9 +356,16 @@ const updateOrderItems = async (orderId, userId, newItems) => {
 
   order.items = validatedItems;
   order.total = newTotal;
+  if (isAdmin && paymentMethod) {
+    order.paymentMethod = paymentMethod;
+  }
   await order.save();
 
   logger.info(`[Orders] Items updated for order ${order._id} — new total: ${newTotal}`);
+
+  if (isAdmin && order.user?.email) {
+    sendOrderEdited(order.user.email, order).catch(err => logger.error(err));
+  }
 
   return order;
 };
@@ -333,4 +381,4 @@ const updateOrderShipping = async (orderId, userId, newAddress) => {
   return order;
 };
 
-module.exports = { createOrder, updateOrderStatus, getUserOrders, getAllOrders, getOrdersByProduct, updateOrderDispatch, createManualOrder, getOrderById, deductOrderStock, cancelOrder, updateOrderItems, updateOrderShipping };
+module.exports = { createOrder, updateOrderStatus, getUserOrders, getAllOrders, getOrdersByProduct, updateOrderDispatch, createManualOrder, getOrderById, deductOrderStock, cancelOrder, updateOrderItems, updateOrderShipping, deleteOrder };

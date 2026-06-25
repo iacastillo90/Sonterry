@@ -60,4 +60,14 @@ const updateOrderShipping = catchAsync(async (req, res) => {
   res.status(200).json(formatResponse(true, 'Dirección de envío actualizada', order));
 });
 
-module.exports = { createOrder, updateOrderStatus, getUserOrders, getAllOrders, getOrdersByProduct, updateOrderDispatch, createManualOrder, getOrderById, cancelOrder, updateOrderItems, updateOrderShipping };
+const deleteOrder = catchAsync(async (req, res) => {
+  await ordersService.deleteOrder(req.params.id);
+  res.status(200).json(formatResponse(true, 'Orden eliminada exitosamente'));
+});
+
+const updateOrderItemsAdmin = catchAsync(async (req, res) => {
+  const order = await ordersService.updateOrderItems(req.params.id, null, req.body.items, true, req.body.paymentMethod);
+  res.status(200).json(formatResponse(true, 'Pedido actualizado por admin', order));
+});
+
+module.exports = { createOrder, updateOrderStatus, getUserOrders, getAllOrders, getOrdersByProduct, updateOrderDispatch, createManualOrder, getOrderById, cancelOrder, updateOrderItems, updateOrderShipping, deleteOrder, updateOrderItemsAdmin };

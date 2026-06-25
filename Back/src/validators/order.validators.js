@@ -32,6 +32,9 @@ const updateOrderItemsSchema = z.object({
       details: z.string().max(1000).optional(),
     }).optional(),
   })).min(1, { message: "Debe haber al menos un producto en el pedido" }),
+  paymentMethod: z.string().refine((val) => paymentMethods.includes(val), {
+    message: "Método de pago inválido",
+  }).optional(),
 });
 
 const updateOrderShippingSchema = z.object({

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertCircle, Truck, CheckCircle, PlusCircle, DollarSign, Edit } from 'lucide-react';
+import { AlertCircle, Truck, CheckCircle, PlusCircle, DollarSign, Edit, Trash2 } from 'lucide-react';
 import LoadingSpinner from '../../../components/common/LoadingSpinner';
 import Button from '../../../components/common/Button';
 import { formatDate } from '../../../utils/formatDate';
@@ -7,14 +7,32 @@ import { formatCurrency } from '../../../utils/formatCurrency';
 import { useUpdateOrderStatus } from '../../../queries/useOrders';
 import api from '../../../services/api';
 
-const AdminOrders = ({ orders, loadingOrders, addToast, products = [], users = [], refetchOrders }) => {
+const AdminOrders = ({ orders, loadingOrders, addToast, products = [], categories = [], users = [], refetchOrders, loadCatalogData }) => {
   const [triggeringOrderId, setTriggeringOrderId] = useState(null);
   const updateOrderStatusMutation = useUpdateOrderStatus();
 
   // Modals state
   const [showDispatchModal, setShowDispatchModal] = useState(false);
   const [showManualModal, setShowManualModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showQuickProductModal, setShowQuickProductModal] = useState(false);
+  const [orderToDelete, setOrderToDelete] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Quick Product state
+  const [quickProductForm, setQuickProductForm] = useState({
+    name: '', price: '', stock: '99', category: categories.length > 0 ? categories[0]._id : '', type: 'prenda', description: '', collectionName: ''
+  });
+  const [quickProductImages, setQuickProductImages] = useState([]);
+
+  // Edit order state
+  const [editForm, setEditForm] = useState({
+    productId: '', quantity: 1, price: 0, customization: '', paymentMethod: 'efectivo'
+  });
 
   // Dispatch form state
   const [dispatchForm, setDispatchForm] = useState({
@@ -35,12 +53,25 @@ const AdminOrders = ({ orders, loadingOrders, addToast, products = [], users = [
     const d = new Date(o.createdAt);
     return d.getMonth() === currentMonth && d.getFullYear() === currentYear && ['paid', 'shipped', 'delivered'].includes(o.status);
   });
-  const cashFlow = { efectivo: 0, transferencia: 0, deposito: 0, tarjeta: 0, total: 0 };
+  const cashFlow = { efectivo: 0, transferencia: 0, deposito: 0, tarjeta: 0, wompi: 0, total: 0 };
   monthlyOrders.forEach(o => {
-    const pm = o.paymentMethod || 'tarjeta';
+    let pm = o.paymentMethod || 'tarjeta';
+    if (pm.toLowerCase().includes('wompi') || pm.toLowerCase().includes('tarjeta')) pm = 'tarjeta';
     if (cashFlow[pm] !== undefined) cashFlow[pm] += o.total;
     cashFlow.total += o.total;
   });
+
+  const stats = {
+    manuales: (orders || []).filter(o => ['efectivo', 'transferencia', 'deposito'].includes(o.paymentMethod)).length,
+    web: (orders || []).filter(o => !['efectivo', 'transferencia', 'deposito'].includes(o.paymentMethod)).length,
+    pending: (orders || []).filter(o => o.status === 'pending').length,
+    shipped: (orders || []).filter(o => o.status === 'shipped').length,
+    delivered: (orders || []).filter(o => o.status === 'delivered').length,
+  };
+
+  const sortedOrders = [...(orders || [])].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const totalPages = Math.ceil(sortedOrders.length / itemsPerPage);
+  const currentOrders = sortedOrders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handleOpenDispatch = (order) => {
     setSelectedOrder(order);
@@ -101,11 +132,110 @@ const AdminOrders = ({ orders, loadingOrders, addToast, products = [], users = [
     }
   };
 
+  const handleOpenEdit = (order) => {
+    setSelectedOrder(order);
+    if (order.items && order.items.length > 0) {
+      setEditForm({
+        productId: order.items[0].product._id || order.items[0].product,
+        quantity: order.items[0].quantity,
+        price: order.items[0].price,
+        customization: order.items[0].customization?.details || '',
+        paymentMethod: order.paymentMethod || 'efectivo'
+      });
+    }
+    setShowEditModal(true);
+  };
+
+  const submitEditOrder = async (e) => {
+    e.preventDefault();
+    setTriggeringOrderId(selectedOrder._id);
+    try {
+      await api.put(`/orders/${selectedOrder._id}/items-admin`, {
+        items: [{
+          product: editForm.productId,
+          quantity: editForm.quantity,
+          price: editForm.price,
+          customization: { details: editForm.customization }
+        }],
+        paymentMethod: editForm.paymentMethod
+      });
+      addToast('Pedido actualizado con éxito', 'success');
+      setShowEditModal(false);
+      refetchOrders();
+    } catch (err) {
+      addToast(err.response?.data?.message || 'Error al actualizar pedido', 'error');
+    } finally {
+      setTriggeringOrderId(null);
+    }
+  };
+
+  const submitQuickProduct = async (e) => {
+    e.preventDefault();
+    if (!quickProductForm.name || !quickProductForm.price) return;
+    setTriggeringOrderId('quick_product');
+    try {
+      const formData = new FormData();
+      formData.append('name', quickProductForm.name);
+      formData.append('description', quickProductForm.description);
+      formData.append('price', parseFloat(quickProductForm.price));
+      formData.append('stock', parseInt(quickProductForm.stock, 10));
+      formData.append('category', quickProductForm.category || categories[0]?._id);
+      formData.append('type', quickProductForm.type);
+      if (quickProductForm.collectionName) formData.append('collectionName', quickProductForm.collectionName);
+
+      for (let i = 0; i < quickProductImages.length; i++) {
+        formData.append('images', quickProductImages[i]);
+      }
+
+      const res = await api.post('/products', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      
+      addToast('Producto creado exitosamente', 'success');
+      setShowQuickProductModal(false);
+      
+      if (loadCatalogData) {
+        await loadCatalogData();
+      }
+      
+      // Auto-select the newly created product in the edit form
+      if (res.data?.data) {
+        setEditForm({
+          ...editForm,
+          productId: res.data.data._id,
+          price: res.data.data.price
+        });
+      }
+    } catch (err) {
+      addToast(err.response?.data?.message || 'Error al crear producto', 'error');
+    } finally {
+      setTriggeringOrderId(null);
+    }
+  };
+
+  const confirmDeleteOrder = (orderId) => {
+    setOrderToDelete(orderId);
+  };
+
+  const executeDeleteOrder = async () => {
+    if (!orderToDelete) return;
+    setTriggeringOrderId(orderToDelete);
+    try {
+      await api.delete(`/orders/${orderToDelete}`);
+      addToast('Orden eliminada con éxito', 'success');
+      setOrderToDelete(null);
+      refetchOrders();
+    } catch (error) {
+      addToast(error.response?.data?.message || 'Error al eliminar orden', 'error');
+    } finally {
+      setTriggeringOrderId(null);
+    }
+  };
+
   const handleDeliverOrder = async (orderId) => {
     setTriggeringOrderId(orderId);
     try {
       await updateOrderStatusMutation.mutateAsync({ id: orderId, status: 'delivered' });
       addToast('Pedido marcado como Entregado', 'success');
+      refetchOrders();
     } catch (error) {
       addToast('Error al entregar pedido', 'error');
     } finally {
@@ -128,27 +258,38 @@ const AdminOrders = ({ orders, loadingOrders, addToast, products = [], users = [
         </Button>
       </div>
 
-      {/* Cash Flow Section */}
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-        <div style={{ background: '#E6F4EA', padding: '1rem', borderRadius: '8px', minWidth: '150px', border: '1px solid #CEEAD6' }}>
+      {/* Enhanced Metrics Section */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+        <div style={{ background: '#E6F4EA', padding: '1rem', borderRadius: '8px', border: '1px solid #CEEAD6', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <span style={{ fontSize: '0.8rem', color: '#137333', fontWeight: 700 }}>FLUJO MES ACTUAL</span>
-          <h4 style={{ margin: '0.5rem 0 0 0', color: '#137333', fontSize: '1.25rem' }}>{formatCurrency(cashFlow.total)}</h4>
+          <h4 style={{ margin: '0.5rem 0 0 0', color: '#137333', fontSize: '1.5rem' }}>{formatCurrency(cashFlow.total)}</h4>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem', fontSize: '0.75rem', color: '#137333' }}>
+            <span>Efe: {formatCurrency(cashFlow.efectivo)}</span> | 
+            <span>Tra: {formatCurrency(cashFlow.transferencia)}</span> | 
+            <span>Tar: {formatCurrency(cashFlow.tarjeta)}</span>
+          </div>
         </div>
-        <div style={{ background: '#F8F9FA', padding: '1rem', borderRadius: '8px', minWidth: '120px', border: '1px solid #E2E8F0' }}>
-          <span style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 600 }}>Efectivo</span>
-          <p style={{ margin: '0.25rem 0 0 0', fontWeight: 700 }}>{formatCurrency(cashFlow.efectivo)}</p>
+        
+        <div style={{ background: '#FFF3E0', padding: '1rem', borderRadius: '8px', border: '1px solid #FFE0B2' }}>
+          <span style={{ fontSize: '0.8rem', color: '#E65100', fontWeight: 700 }}>PEDIDOS ACTIVOS</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '0.5rem' }}>
+            <h4 style={{ margin: '0', color: '#E65100', fontSize: '1.5rem' }}>{stats.pending + stats.shipped}</h4>
+            <div style={{ textAlign: 'right', fontSize: '0.75rem', color: '#E65100' }}>
+              <div>Pendientes: <strong>{stats.pending}</strong></div>
+              <div>En Tránsito: <strong>{stats.shipped}</strong></div>
+            </div>
+          </div>
         </div>
-        <div style={{ background: '#F8F9FA', padding: '1rem', borderRadius: '8px', minWidth: '120px', border: '1px solid #E2E8F0' }}>
-          <span style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 600 }}>Transferencia</span>
-          <p style={{ margin: '0.25rem 0 0 0', fontWeight: 700 }}>{formatCurrency(cashFlow.transferencia)}</p>
-        </div>
-        <div style={{ background: '#F8F9FA', padding: '1rem', borderRadius: '8px', minWidth: '120px', border: '1px solid #E2E8F0' }}>
-          <span style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 600 }}>Depósito</span>
-          <p style={{ margin: '0.25rem 0 0 0', fontWeight: 700 }}>{formatCurrency(cashFlow.deposito)}</p>
-        </div>
-        <div style={{ background: '#F8F9FA', padding: '1rem', borderRadius: '8px', minWidth: '120px', border: '1px solid #E2E8F0' }}>
-          <span style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 600 }}>Tarjeta (Stripe)</span>
-          <p style={{ margin: '0.25rem 0 0 0', fontWeight: 700 }}>{formatCurrency(cashFlow.tarjeta)}</p>
+
+        <div style={{ background: '#E3F2FD', padding: '1rem', borderRadius: '8px', border: '1px solid #BBDEFB' }}>
+          <span style={{ fontSize: '0.8rem', color: '#0D47A1', fontWeight: 700 }}>ORIGEN DE VENTAS</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '0.5rem' }}>
+            <h4 style={{ margin: '0', color: '#0D47A1', fontSize: '1.5rem' }}>{orders?.length || 0}</h4>
+            <div style={{ textAlign: 'right', fontSize: '0.75rem', color: '#0D47A1' }}>
+              <div>Manuales: <strong>{stats.manuales}</strong></div>
+              <div>Vía Web: <strong>{stats.web}</strong></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -161,7 +302,7 @@ const AdminOrders = ({ orders, loadingOrders, addToast, products = [], users = [
         </div>
       ) : (
         <div className="admin-list-container" style={{ gap: '1.5rem', maxHeight: 'none' }}>
-          {orders.map((order) => {
+          {currentOrders.map((order) => {
             let statusBg = '#CCC';
             if (order.status === 'paid') statusBg = 'var(--color-primary)';
             else if (order.status === 'shipped') statusBg = 'var(--color-accent)';
@@ -215,9 +356,9 @@ const AdminOrders = ({ orders, loadingOrders, addToast, products = [], users = [
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', borderTop: '1px solid #F0F0F0', paddingTop: '0.75rem' }}>
-                  {['paid', 'shipped'].includes(order.status) && (
+                  {['pending', 'paid', 'shipped'].includes(order.status) && (
                     <Button variant="outline" onClick={() => handleOpenDispatch(order)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.4rem 0.75rem' }}>
-                      <Edit size={14} /> Editar Despacho
+                      <Edit size={14} /> {order.status === 'pending' ? 'Despachar (Aprobar y Enviar)' : 'Editar Despacho'}
                     </Button>
                   )}
                   {order.status === 'shipped' && (
@@ -225,10 +366,24 @@ const AdminOrders = ({ orders, loadingOrders, addToast, products = [], users = [
                       <CheckCircle size={14} /> Entregado
                     </Button>
                   )}
+                  <Button variant="outline" onClick={() => handleOpenEdit(order)} disabled={triggeringOrderId === order._id} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.4rem 0.75rem', color: '#10B981', borderColor: '#10B981' }}>
+                    <Edit size={14} /> Editar
+                  </Button>
+                  <Button variant="outline" onClick={() => confirmDeleteOrder(order._id)} disabled={triggeringOrderId === order._id} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.4rem 0.75rem', color: '#D9534F', borderColor: '#F5C6CB' }}>
+                    <Trash2 size={14} /> Eliminar
+                  </Button>
                 </div>
               </div>
             );
           })}
+
+          {totalPages > 1 && (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginTop: '1rem', padding: '1rem', background: '#F8F9FA', borderRadius: '8px' }}>
+              <Button variant="outline" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>Anterior</Button>
+              <span style={{ fontSize: '0.9rem', fontWeight: '600' }}>Página {currentPage} de {totalPages}</span>
+              <Button variant="outline" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Siguiente</Button>
+            </div>
+          )}
         </div>
       )}
 
@@ -299,10 +454,15 @@ const AdminOrders = ({ orders, loadingOrders, addToast, products = [], users = [
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Producto*</label>
-                  <select value={manualForm.productId} onChange={e => setManualForm({...manualForm, productId: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC' }} required>
-                    <option value="">Seleccionar producto...</option>
-                    {products.filter(p => !p.isDeleted).map(p => <option key={p._id} value={p._id}>{p.name} - {formatCurrency(p.price)}</option>)}
-                  </select>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'nowrap', width: '100%' }}>
+                    <select value={manualForm.productId} onChange={e => setManualForm({...manualForm, productId: e.target.value})} style={{ flex: '1 1 0%', minWidth: '0', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC', textOverflow: 'ellipsis' }} required>
+                      <option value="">Seleccionar producto...</option>
+                      {products.filter(p => !p.isDeleted).map(p => <option key={p._id} value={p._id}>{p.name} - {formatCurrency(p.price)}</option>)}
+                    </select>
+                    <Button type="button" variant="outline" onClick={() => setShowQuickProductModal(true)} style={{ padding: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }} title="Crear Producto Nuevo">
+                      <PlusCircle size={16} />
+                    </Button>
+                  </div>
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Cantidad*</label>
@@ -339,6 +499,143 @@ const AdminOrders = ({ orders, loadingOrders, addToast, products = [], users = [
                 <Button type="button" variant="outline" onClick={() => setShowManualModal(false)} style={{ flex: 1 }}>Cancelar</Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showEditModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000 }}>
+          <div style={{ background: '#FFF', padding: '2rem', borderRadius: '8px', width: '90%', maxWidth: '500px' }}>
+            <h4 style={{ margin: '0 0 1rem 0' }}>Editar Pedido (Cambiar Producto/Precio)</h4>
+            <p style={{ fontSize: '0.85rem', color: '#64748B', marginBottom: '1.5rem' }}>
+              Al guardar, se recalculará el stock y el precio total de la orden. (Solo modifica el primer producto).
+            </p>
+            <form onSubmit={submitEditOrder} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Producto*</label>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'nowrap', width: '100%' }}>
+                  <select value={editForm.productId} onChange={e => {
+                    const prod = products.find(p => p._id === e.target.value);
+                    setEditForm({...editForm, productId: e.target.value, price: prod ? prod.price : editForm.price});
+                  }} style={{ flex: '1 1 0%', minWidth: '0', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC', textOverflow: 'ellipsis' }} required>
+                    <option value="">Seleccionar producto...</option>
+                    {products.map(p => <option key={p._id} value={p._id}>{p.name} - {formatCurrency(p.price)}</option>)}
+                  </select>
+                  <Button type="button" variant="outline" onClick={() => setShowQuickProductModal(true)} style={{ padding: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }} title="Crear Producto Nuevo">
+                    <PlusCircle size={16} />
+                  </Button>
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Cantidad*</label>
+                  <input type="number" min="1" value={editForm.quantity} onChange={e => setEditForm({...editForm, quantity: parseInt(e.target.value)})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC' }} required />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Precio Unitario*</label>
+                  <input type="number" min="0" value={editForm.price} onChange={e => setEditForm({...editForm, price: parseFloat(e.target.value)})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC' }} required />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Método Pago*</label>
+                  <select value={editForm.paymentMethod} onChange={e => setEditForm({...editForm, paymentMethod: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC' }} required>
+                    <option value="efectivo">Efectivo</option>
+                    <option value="transferencia">Transferencia</option>
+                    <option value="deposito">Depósito Bancario</option>
+                    <option value="tarjeta">Tarjeta (Web)</option>
+                    <option value="wompi">Wompi (Web)</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Detalles Custom (Opcional)</label>
+                <textarea rows="2" value={editForm.customization} onChange={e => setEditForm({...editForm, customization: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC', resize: 'none' }} placeholder="Detalles de diseño..." />
+              </div>
+
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                <Button type="submit" variant="primary" style={{ flex: 1 }}>{triggeringOrderId ? 'Guardando...' : 'Guardar Cambios'}</Button>
+                <Button type="button" variant="outline" onClick={() => setShowEditModal(false)} style={{ flex: 1 }}>Cancelar</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showQuickProductModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 11000 }}>
+          <div style={{ background: '#FFF', padding: '2rem', borderRadius: '8px', width: '90%', maxWidth: '550px', maxHeight: '90vh', overflowY: 'auto' }}>
+            <h4 style={{ margin: '0 0 1rem 0' }}>Crear Producto Rápido</h4>
+            <p style={{ fontSize: '0.8rem', color: '#64748B', marginBottom: '1rem' }}>Crea un producto rápidamente para asignarlo a esta orden.</p>
+            <form onSubmit={submitQuickProduct} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Nombre del Producto*</label>
+                  <input type="text" value={quickProductForm.name} onChange={e => setQuickProductForm({...quickProductForm, name: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC' }} required />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Precio Base*</label>
+                  <input type="number" min="0" value={quickProductForm.price} onChange={e => setQuickProductForm({...quickProductForm, price: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC' }} required />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Descripción*</label>
+                <textarea rows="2" value={quickProductForm.description} onChange={e => setQuickProductForm({...quickProductForm, description: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC', resize: 'none' }} required />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Categoría*</label>
+                  <select value={quickProductForm.category} onChange={e => setQuickProductForm({...quickProductForm, category: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC' }} required>
+                    {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Técnica*</label>
+                  <select value={quickProductForm.type} onChange={e => setQuickProductForm({...quickProductForm, type: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC' }} required>
+                    <option value="prenda">Prenda</option>
+                    <option value="dtf">DTF</option>
+                    <option value="sublimacion">Sublimación</option>
+                    <option value="plotter">Plotter</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Colección</label>
+                  <input type="text" value={quickProductForm.collectionName} onChange={e => setQuickProductForm({...quickProductForm, collectionName: e.target.value})} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC' }} />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem', fontWeight: 600 }}>Imágenes (Opcional)</label>
+                <input type="file" multiple accept="image/*" onChange={e => setQuickProductImages(Array.from(e.target.files))} style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #CCC' }} />
+                <p style={{ fontSize: '0.75rem', color: '#888', marginTop: '0.25rem' }}>Puedes seleccionar varias imágenes (Máx 5).</p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                <Button type="submit" variant="primary" style={{ flex: 1 }}>{triggeringOrderId === 'quick_product' ? 'Creando...' : 'Crear Producto'}</Button>
+                <Button type="button" variant="outline" onClick={() => setShowQuickProductModal(false)} style={{ flex: 1 }}>Cancelar</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {orderToDelete && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 12000 }}>
+          <div style={{ background: '#FFF', padding: '2rem', borderRadius: '8px', width: '90%', maxWidth: '400px', textAlign: 'center' }}>
+            <AlertCircle size={48} color="#D9534F" style={{ margin: '0 auto 1rem auto' }} />
+            <h4 style={{ margin: '0 0 0.5rem 0' }}>¿Eliminar Orden?</h4>
+            <p style={{ fontSize: '0.9rem', color: '#64748B', marginBottom: '1.5rem' }}>
+              Esta acción es permanente e irreversible. Si esta orden ya había descontado productos, el inventario será restaurado. ¿Estás seguro?
+            </p>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <Button type="button" variant="primary" onClick={executeDeleteOrder} style={{ flex: 1, backgroundColor: '#D9534F' }}>
+                {triggeringOrderId === orderToDelete ? 'Eliminando...' : 'Aceptar'}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => setOrderToDelete(null)} style={{ flex: 1 }}>
+                Cancelar
+              </Button>
+            </div>
           </div>
         </div>
       )}

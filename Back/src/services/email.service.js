@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 const env = require('../config/env');
 const logger = require('../logs/logger');
-const { orderConfirmation, orderStatusUpdate, passwordReset, quoteRequestAdmin, quoteRequestUser } = require('../utils/emailTemplates');
+const { orderConfirmation, orderStatusUpdate, passwordReset, quoteRequestAdmin, quoteRequestUser, orderEdited, orderDeleted } = require('../utils/emailTemplates');
 
 let transporter = null;
 
@@ -119,4 +119,42 @@ const sendQuoteEmails = async (quote) => {
   }
 };
 
-module.exports = { sendOrderConfirmation, sendOrderStatusUpdate, sendPasswordReset, sendQuoteEmails };
+const sendOrderEdited = async (to, order) => {
+  try {
+    const t = await getTransporter();
+    const info = await t.sendMail({
+      from: env.EMAIL_FROM,
+      to,
+      subject: `Actualización de pedido #${order._id} - SonTerry`,
+      html: orderEdited(order),
+    });
+    if (info.messageId && info.messageId.includes('ethereal')) {
+      logger.info(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+    }
+    logger.info(`Email de edición enviado a ${to} para orden ${order._id}`);
+    return info;
+  } catch (error) {
+    logger.error(`Error enviando email a ${to}: ${error.message}`);
+  }
+};
+
+const sendOrderDeleted = async (to, order) => {
+  try {
+    const t = await getTransporter();
+    const info = await t.sendMail({
+      from: env.EMAIL_FROM,
+      to,
+      subject: `Pedido #${order._id} Cancelado - SonTerry`,
+      html: orderDeleted(order),
+    });
+    if (info.messageId && info.messageId.includes('ethereal')) {
+      logger.info(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+    }
+    logger.info(`Email de eliminación enviado a ${to} para orden ${order._id}`);
+    return info;
+  } catch (error) {
+    logger.error(`Error enviando email a ${to}: ${error.message}`);
+  }
+};
+
+module.exports = { sendOrderConfirmation, sendOrderStatusUpdate, sendPasswordReset, sendQuoteEmails, sendOrderEdited, sendOrderDeleted };

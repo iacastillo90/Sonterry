@@ -15,6 +15,8 @@ router.patch('/:id/status', protect, restrictTo('admin'), zodValidate(updateOrde
 router.patch('/:id/dispatch', protect, restrictTo('admin'), ordersControllers.updateOrderDispatch);
 router.patch('/:id/cancel', protect, ordersControllers.cancelOrder);
 router.put('/:id/items', protect, zodValidate(updateOrderItemsSchema), ordersControllers.updateOrderItems);
+router.put('/:id/items-admin', protect, restrictTo('admin'), zodValidate(updateOrderItemsSchema), ordersControllers.updateOrderItemsAdmin);
 router.put('/:id/shipping', protect, zodValidate(updateOrderShippingSchema), ordersControllers.updateOrderShipping);
+router.delete('/:id', protect, restrictTo('admin'), ordersControllers.deleteOrder);
 
 module.exports = router;

@@ -165,4 +165,65 @@ const quoteRequestUser = (quote) => `
 </body>
 </html>`;
 
-module.exports = { orderConfirmation, orderStatusUpdate, passwordReset, quoteRequestAdmin, quoteRequestUser };
+const orderEdited = (order) => `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family:Arial,sans-serif;background:#f5f5f5;margin:0;padding:0">
+  <div style="max-width:600px;margin:0 auto;background:#fff">
+    <div style="background:#3D3D3D;padding:24px;text-align:center">
+      <h1 style="color:#D4A373;margin:0;font-size:24px">SonTerry Accesorios</h1>
+    </div>
+    <div style="padding:32px">
+      <h2 style="color:#3D3D3D;margin:0 0 16px">Actualización de tu pedido</h2>
+      <p style="color:#666">Hola,</p>
+      <p style="color:#666">Queremos informarte que se ha realizado una modificación en tu pedido <strong>#${order._id}</strong> por parte de nuestro equipo para ajustarlo a tus requerimientos.</p>
+      
+      <table style="width:100%;border-collapse:collapse;margin:24px 0">
+        <thead>
+          <tr style="background:#f8f8f8">
+            <th style="padding:12px;text-align:left">Producto Actualizado</th>
+            <th style="padding:12px;text-align:left">Cant</th>
+            <th style="padding:12px;text-align:left">Precio</th>
+          </tr>
+        </thead>
+        <tbody>${orderItemsTable(order.items)}</tbody>
+      </table>
+      
+      <div style="text-align:right;font-size:18px;font-weight:bold;color:#3D3D3D;margin:16px 0">
+        Nuevo Total: ${formatCurrency(order.total)}
+      </div>
+
+      <p style="color:#666">Si tienes alguna duda sobre esta actualización, contáctanos a través de WhatsApp.</p>
+    </div>
+    <div style="background:#3D3D3D;padding:16px;text-align:center;color:#999;font-size:12px">
+      <p style="margin:0">SonTerry Accesorios — Personalización textil</p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+const orderDeleted = (order) => `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family:Arial,sans-serif;background:#f5f5f5;margin:0;padding:0">
+  <div style="max-width:600px;margin:0 auto;background:#fff">
+    <div style="background:#D9534F;padding:24px;text-align:center">
+      <h1 style="color:#FFF;margin:0;font-size:24px">SonTerry Accesorios</h1>
+    </div>
+    <div style="padding:32px">
+      <h2 style="color:#3D3D3D;margin:0 0 16px">Pedido Cancelado/Eliminado</h2>
+      <p style="color:#666">Hola,</p>
+      <p style="color:#666">Lamentamos informarte que tu pedido <strong>#${order._id}</strong> ha sido cancelado y eliminado de nuestro sistema administrativo.</p>
+      
+      <p style="color:#666;margin-top:24px;">Si ya habías realizado algún pago o si crees que esto es un error, por favor comunícate con nosotros inmediatamente por WhatsApp proporcionando el número de tu orden.</p>
+    </div>
+    <div style="background:#3D3D3D;padding:16px;text-align:center;color:#999;font-size:12px">
+      <p style="margin:0">SonTerry Accesorios — Personalización textil</p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+module.exports = { orderConfirmation, orderStatusUpdate, passwordReset, quoteRequestAdmin, quoteRequestUser, orderEdited, orderDeleted };

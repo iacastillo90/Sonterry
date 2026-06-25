@@ -311,8 +311,10 @@ const AdminDashboard = () => {
               loadingOrders={loadingOrders} 
               addToast={addToast} 
               products={products}
+              categories={categories}
               users={users}
               refetchOrders={refetchOrders}
+              loadCatalogData={loadCatalogData}
             />
           )}
 
