@@ -117,12 +117,12 @@ const AdminUsers = ({ users, loadingUsers, fetchUsersList, addToast }) => {
             style={{ width: '100%', padding: '0.65rem 1rem 0.65rem 2.5rem', borderRadius: '6px', border: '1px solid #CBD5E1', outline: 'none', fontSize: '0.9rem' }}
           />
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Filter size={18} color="#64748B" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', flex: '1 1 auto' }}>
+          <Filter size={18} color="#64748B" style={{ flexShrink: 0 }} />
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            style={{ padding: '0.65rem', borderRadius: '6px', border: '1px solid #CBD5E1', outline: 'none', backgroundColor: '#FFF', fontSize: '0.9rem', minWidth: '130px' }}
+            style={{ flex: 1, padding: '0.65rem', borderRadius: '6px', border: '1px solid #CBD5E1', outline: 'none', backgroundColor: '#FFF', fontSize: '0.9rem', minWidth: '130px' }}
           >
             <option value="all">Todos los roles</option>
             <option value="user">Clientes (user)</option>
@@ -131,7 +131,7 @@ const AdminUsers = ({ users, loadingUsers, fetchUsersList, addToast }) => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            style={{ padding: '0.65rem', borderRadius: '6px', border: '1px solid #CBD5E1', outline: 'none', backgroundColor: '#FFF', fontSize: '0.9rem', minWidth: '130px' }}
+            style={{ flex: 1, padding: '0.65rem', borderRadius: '6px', border: '1px solid #CBD5E1', outline: 'none', backgroundColor: '#FFF', fontSize: '0.9rem', minWidth: '130px' }}
           >
             <option value="all">Todos los estados</option>
             <option value="active">Activos</option>
@@ -149,19 +149,19 @@ const AdminUsers = ({ users, loadingUsers, fetchUsersList, addToast }) => {
           <button onClick={() => { setSearchQuery(''); setStatusFilter('all'); setRoleFilter('all'); }} style={{ marginTop: '1rem', padding: '0.5rem 1rem', border: 'none', backgroundColor: '#E2E8F0', borderRadius: '4px', cursor: 'pointer', fontWeight: '600', color: '#475569' }}>Limpiar filtros</button>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
           {filteredUsers.map(u => {
             const isActive = u.isActive !== false;
             return (
-              <div key={u._id} style={{ border: '1px solid var(--color-border)', borderRadius: '8px', padding: '1.5rem', backgroundColor: isActive ? '#FFFFFF' : '#F8FAFC', position: 'relative', opacity: isActive ? 1 : 0.75, transition: 'box-shadow 0.2s', display: 'flex', flexDirection: 'column' }} onMouseEnter={e => e.currentTarget.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.1)'} onMouseLeave={e => e.currentTarget.style.boxShadow='none'}>
+              <div key={u._id} style={{ border: '1px solid var(--color-border)', borderRadius: '8px', padding: '1.5rem', backgroundColor: isActive ? '#FFFFFF' : '#F8FAFC', position: 'relative', opacity: isActive ? 1 : 0.75, transition: 'box-shadow 0.2s', display: 'flex', flexDirection: 'column', minWidth: 0 }} onMouseEnter={e => e.currentTarget.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.1)'} onMouseLeave={e => e.currentTarget.style.boxShadow='none'}>
                 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{ background: u.role === 'admin' ? '#FEF9C3' : (isActive ? '#EFF6FF' : '#F1F5F9'), padding: '0.5rem', borderRadius: '8px', color: u.role === 'admin' ? '#CA8A04' : (isActive ? '#2563EB' : '#64748B') }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0, flex: 1 }}>
+                    <div style={{ background: u.role === 'admin' ? '#FEF9C3' : (isActive ? '#EFF6FF' : '#F1F5F9'), padding: '0.5rem', borderRadius: '8px', color: u.role === 'admin' ? '#CA8A04' : (isActive ? '#2563EB' : '#64748B'), flexShrink: 0 }}>
                       {u.role === 'admin' ? <Shield size={20} /> : <UserCheck size={20} />}
                     </div>
-                    <div>
-                      <h4 style={{ margin: 0, fontWeight: 700, color: '#0F172A', fontSize: '1.1rem' }}>{u.name}</h4>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <h4 style={{ margin: 0, fontWeight: 700, color: '#0F172A', fontSize: '1.1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.name}</h4>
                       <span style={{ fontSize: '0.7rem', fontWeight: '800', textTransform: 'uppercase', padding: '2px 8px', borderRadius: '12px', backgroundColor: u.role === 'admin' ? '#FEF08A' : '#F1F5F9', color: u.role === 'admin' ? '#A16207' : '#64748B', display: 'inline-block', marginTop: '0.25rem' }}>
                         {u.role === 'admin' ? 'ADMINISTRADOR' : 'CLIENTE'}
                       </span>

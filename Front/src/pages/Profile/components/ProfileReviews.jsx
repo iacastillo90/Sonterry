@@ -5,6 +5,7 @@ import { formatDate } from '../../../utils/formatDate';
 import { useUiStore } from '../../../store/uiStore';
 import { Trash2, Edit3, Clock, CheckCircle, Star } from 'lucide-react';
 import { createPortal } from 'react-dom';
+import './ProfileReviews.css';
 
 const EditReviewModal = ({ review, onClose, onSuccess }) => {
   const addToast = useUiStore(s => s.addToast);
@@ -138,96 +139,83 @@ const ProfileReviews = ({ isActive }) => {
   };
 
   return (
-    <div className="animate-fade-in">
-      <h3 style={{ fontSize: '1.4rem', marginBottom: '0.5rem', color: '#0F172A' }}>Mis Reseñas de Productos</h3>
-      <p style={{ color: '#64748B', fontSize: '0.9rem', marginBottom: '2rem' }}>
-        Aquí puedes ver y gestionar las opiniones y calificaciones que has aportado a la comunidad.
-      </p>
+    <div className="reviews-container">
+      <div className="reviews-header">
+        <h3 className="reviews-title">Mis Reseñas de Productos</h3>
+        <p className="reviews-subtitle">
+          Aquí puedes ver y gestionar las opiniones y calificaciones que has aportado a la comunidad.
+        </p>
+      </div>
 
       {isLoadingReviews ? (
-        <div style={{ padding: '3rem', textAlign: 'center', color: '#64748B' }}>Cargando tus reseñas...</div>
+        <div className="reviews-state">
+          <p>Cargando tus reseñas...</p>
+        </div>
       ) : reviews.length === 0 ? (
-        <div style={{ padding: '3rem', textAlign: 'center', background: '#F8FAFC', borderRadius: '12px', border: '1px dashed #CBD5E1' }}>
-          <p style={{ color: '#64748B', margin: 0 }}>No has escrito ninguna reseña todavía.</p>
+        <div className="reviews-state">
+          <Star size={48} strokeWidth={1} color="var(--text-muted)" />
+          <h3>Sin reseñas</h3>
+          <p>No has escrito ninguna reseña todavía.</p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '1.5rem' }}>
+        <div className="reviews-grid">
           {reviews.map((rev) => (
-            <div
-              key={rev._id}
-              style={{
-                backgroundColor: '#FFFFFF',
-                border: '1px solid #E2E8F0',
-                borderRadius: '12px',
-                padding: '1.25rem',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
-                display: 'flex',
-                flexDirection: 'column',
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={e => e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)'}
-              onMouseLeave={e => e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.05)'}
-            >
-              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+            <div key={rev._id} className="review-card">
+              <div className="review-card-header">
                 {rev.product?.images?.[0] ? (
                   <img 
                     src={rev.product.images[0]} 
                     alt={rev.product?.name || 'Producto'} 
-                    style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #E2E8F0' }} 
+                    className="review-product-img"
                     onError={e => e.target.style.display='none'}
                   />
                 ) : (
-                  <div style={{ width: '60px', height: '60px', backgroundColor: '#F1F5F9', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #E2E8F0' }}>
-                    <span style={{ fontSize: '0.6rem', color: '#94A3B8' }}>Sin imagen</span>
+                  <div className="review-product-no-img">
+                    Sin imagen
                   </div>
                 )}
                 
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <h4 style={{ fontSize: '0.95rem', fontWeight: '700', margin: '0 0 0.2rem 0', color: '#1E293B', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                      {rev.product?.name || 'Producto'}
-                    </h4>
-                    <div style={{ color: '#F59E0B', fontSize: '0.9rem', minWidth: '70px', textAlign: 'right' }}>
-                      {'★'.repeat(rev.rating)}{'☆'.repeat(5 - rev.rating)}
-                    </div>
+                <div className="review-product-info">
+                  <h4 className="review-product-name">
+                    {rev.product?.name || 'Producto'}
+                  </h4>
+                  <div className="review-rating-stars">
+                    {'★'.repeat(rev.rating)}{'☆'.repeat(5 - rev.rating)}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748B' }}>
+                  <div className="review-date">
                     {formatDate(rev.createdAt)}
                   </div>
                 </div>
               </div>
 
-              <div style={{ flex: 1, backgroundColor: '#F8FAFC', padding: '0.75rem', borderRadius: '8px', marginBottom: '1rem', border: '1px solid #F1F5F9' }}>
-                <p style={{ fontSize: '0.85rem', color: '#334155', margin: 0, fontStyle: 'italic', lineHeight: 1.5 }}>
+              <div className="review-comment-box">
+                <p className="review-comment-text">
                   &ldquo;{rev.comment}&rdquo;
                 </p>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #E2E8F0', paddingTop: '1rem', marginTop: 'auto' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  {rev.isApproved ? (
-                    <>
-                      <CheckCircle size={16} color="#10B981" />
-                      <span style={{ fontSize: '0.75rem', color: '#10B981', fontWeight: 600 }}>Publicada</span>
-                    </>
-                  ) : (
-                    <>
-                      <Clock size={16} color="#F59E0B" />
-                      <span style={{ fontSize: '0.75rem', color: '#F59E0B', fontWeight: 600 }}>En moderación</span>
-                    </>
-                  )}
-                </div>
+              <div className="review-card-footer">
+                {rev.isApproved ? (
+                  <div className="review-status approved">
+                    <CheckCircle size={16} />
+                    <span>Publicada</span>
+                  </div>
+                ) : (
+                  <div className="review-status pending">
+                    <Clock size={16} />
+                    <span>En moderación</span>
+                  </div>
+                )}
                 
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <button onClick={() => setEditingReview(rev)} style={{ background: 'none', border: '1px solid #E2E8F0', borderRadius: '6px', padding: '0.3rem 0.6rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.2rem', color: '#475569', transition: 'all 0.2s' }} onMouseEnter={e => {e.currentTarget.style.borderColor='#3B82F6'; e.currentTarget.style.color='#3B82F6'}} onMouseLeave={e => {e.currentTarget.style.borderColor='#E2E8F0'; e.currentTarget.style.color='#475569'}}>
-                    <Edit3 size={14} /> <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Editar</span>
+                <div className="review-actions">
+                  <button onClick={() => setEditingReview(rev)} className="review-action-btn edit">
+                    <Edit3 size={14} /> <span>Editar</span>
                   </button>
-                  <button onClick={() => setDeletingReview(rev)} style={{ background: 'none', border: '1px solid #E2E8F0', borderRadius: '6px', padding: '0.3rem 0.6rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.2rem', color: '#EF4444', transition: 'all 0.2s' }} onMouseEnter={e => {e.currentTarget.style.backgroundColor='#FEF2F2'; e.currentTarget.style.borderColor='#FCA5A5'}} onMouseLeave={e => {e.currentTarget.style.backgroundColor='transparent'; e.currentTarget.style.borderColor='#E2E8F0'}}>
-                    <Trash2 size={14} /> <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>Borrar</span>
+                  <button onClick={() => setDeletingReview(rev)} className="review-action-btn delete">
+                    <Trash2 size={14} /> <span>Borrar</span>
                   </button>
                 </div>
               </div>
-
             </div>
           ))}
         </div>

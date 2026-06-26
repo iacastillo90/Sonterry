@@ -32,13 +32,22 @@ const Footer = () => {
 
         .footer-content {
           position: relative;
-          z-index: 10; /* Aseguramos que el texto esté por encima de la imagen opaca */
-          display: grid;
-          grid-template-columns: 2fr 1fr 1fr;
+          z-index: 10;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: space-between;
           gap: 3rem;
-          max-width: 1100px;
+          max-width: 1200px;
           margin: 0 auto;
           padding: 0 1.5rem;
+        }
+        
+        .footer-brand {
+          flex: 2 1 350px;
+        }
+        
+        .footer-col {
+          flex: 1 1 200px;
         }
 
         .footer-brand h3 {
@@ -106,41 +115,63 @@ const Footer = () => {
         /* RESPONSIVE: Laptops y Tablets (1048px) */
         @media (max-width: 1048px) {
           .main-footer {
-            padding-top: 10rem; /* Hacemos el footer más alto arriba para que la imagen quepa sin cortarse */
+            padding-top: 8rem;
           }
           .footer-wave {
-            height: 550px; /* Casi tan grande como desktop para mantener el sobremontado */
+            height: 550px;
             right: 0;
-            bottom: 0; /* Pegado al fondo */
+            bottom: 0;
             opacity: 1;
             z-index: 0;
           }
         }
 
-        /* RESPONSIVE: Mobile (768px) */
-        @media (max-width: 768px) {
-          .main-footer { padding: 8rem 0 2rem; } /* Más altura para acomodar la imagen grande */
+        /* RESPONSIVE: Tablets/iPads (768px) */
+        @media (max-width: 820px) {
           .footer-content {
-            grid-template-columns: 1fr;
-            gap: 2.5rem;
-            background: transparent;
-            border-radius: 0;
-            padding: 0;
-            backdrop-filter: none;
+            gap: 2rem;
+          }
+          .footer-brand {
+            flex: 1 1 100%;
+          }
+          .footer-brand p {
+            max-width: 100%;
           }
           .footer-col {
-            border-top: 1px solid var(--border-subtle);
-            padding-top: 1.5rem;
+            flex: 1 1 45%;
           }
-          .footer-brand p { max-width: 100%; }
-          .footer-bottom { flex-direction: column; text-align: center; justify-content: center; }
-          
+        }
+
+        /* RESPONSIVE: Mobile (500px) */
+        @media (max-width: 500px) {
+          .main-footer { padding: 4rem 0 2rem; }
+          .footer-content {
+            gap: 1.5rem;
+          }
+          .footer-brand {
+            margin-bottom: 0.5rem;
+          }
+          .footer-col {
+            flex: 1 1 40%;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-subtle);
+          }
+          .footer-col h4 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+          }
+          .footer-col p {
+            font-size: 0.8rem;
+          }
+          .footer-bottom { 
+            flex-direction: column; 
+            text-align: center; 
+            justify-content: center; 
+            margin-top: 2rem;
+            padding-top: 1rem;
+          }
           .footer-wave {
-            height: 450px; /* Aumentado drásticamente para tablet/móvil */
-            right: 0; /* Completamente al borde para no crear scroll horizontal extra */
-            bottom: 0; /* Pegado al fondo */
-            opacity: 1;
-            z-index: 0;
+            height: 300px;
           }
         }
       `}</style>
@@ -151,11 +182,16 @@ const Footer = () => {
         <div className="footer-content">
           {/* Brand */}
           <div className="footer-brand">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1rem' }}>
-              <img src={logoImg} alt="SonTerry" style={{ height: '40px', borderRadius: '8px' }} />
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: '800', color: 'var(--green-brand)' }}>
-                SonTerry Accesorios
-              </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '1.5rem' }}>
+              <img src={logoImg} alt="SonTerry" style={{ height: '60px', borderRadius: '12px', boxShadow: 'var(--s-xs)' }} />
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: '800', color: 'var(--green-brand)', lineHeight: '1.1' }}>
+                  SonTerry
+                </span>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-secondary)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                  Accesorios
+                </span>
+              </div>
             </div>
             <p>
               Taller artesanal de personalización textil. Expertos en estampado digital DTF con excelente calidad.

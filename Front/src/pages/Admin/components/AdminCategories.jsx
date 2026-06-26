@@ -109,12 +109,12 @@ const AdminCategories = ({ categories, setCategories, addToast, loadCatalogData 
 
   return (
     <div className="animate-fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-        <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <div style={{ flex: '1 1 200px' }}>
           <h3 className="admin-tab-title">Gestión de Categorías del Catálogo</h3>
           <p style={{ color: 'var(--color-text-light)', fontSize: '0.88rem' }}>Administra las colecciones y agrupaciones de tus productos.</p>
         </div>
-        <Button variant="primary" onClick={openCreateModal} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <Button variant="primary" onClick={openCreateModal} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap', flexShrink: 0 }}>
           <PlusCircle size={16} /> Nueva Categoría
         </Button>
       </div>
@@ -184,9 +184,9 @@ const AdminCategories = ({ categories, setCategories, addToast, loadCatalogData 
           {paginatedCategories.map((c) => {
             const isAct = c.isActive !== false;
             return (
-              <div key={c._id} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--border-radius-sm)', padding: '1.25rem', backgroundColor: isAct ? '#FFFFFF' : '#F8FAFC', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', transition: 'box-shadow 0.2s', opacity: isAct ? 1 : 0.7 }} onMouseEnter={e => e.currentTarget.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.1)'} onMouseLeave={e => e.currentTarget.style.boxShadow='none'}>
+              <div key={c._id} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--border-radius-sm)', padding: '1.25rem', backgroundColor: isAct ? '#FFFFFF' : '#F8FAFC', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', transition: 'box-shadow 0.2s', opacity: isAct ? 1 : 0.7 }} onMouseEnter={e => e.currentTarget.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.1)'} onMouseLeave={e => e.currentTarget.style.boxShadow='none'}>
                 
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: '1 1 200px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
                     <h5 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '700', color: '#0F172A' }}>{c.name}</h5>
                     <span style={{ fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase', padding: '2px 8px', borderRadius: '12px', backgroundColor: isAct ? '#DCFCE7' : '#F1F5F9', color: isAct ? '#166534' : '#64748B', border: `1px solid ${isAct ? '#BBF7D0' : '#E2E8F0'}` }}>
@@ -198,7 +198,7 @@ const AdminCategories = ({ categories, setCategories, addToast, loadCatalogData 
                   </p>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                   <Button variant="outline" onClick={() => handleToggleStatus(c)} style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.35rem', color: isAct ? '#D97706' : '#10B981', borderColor: isAct ? '#FDE68A' : '#A7F3D0', backgroundColor: isAct ? '#FFFBEB' : '#ECFDF5' }}>
                     {isAct ? <><XCircle size={14} /> Dar de Baja</> : <><Check size={14} /> Activar</>}
                   </Button>

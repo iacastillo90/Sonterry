@@ -68,7 +68,7 @@ const AdminReviews = () => {
           <p style={{ color: '#64748B', margin: 0, fontSize: '0.95rem' }}>Aprueba o rechaza los comentarios de los clientes antes de ser públicos.</p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem', backgroundColor: '#FFF', padding: '0.3rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', backgroundColor: '#FFF', padding: '0.3rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', flexWrap: 'wrap', flex: '1 1 auto' }}>
           {[
             { id: 'pending', label: 'Pendientes', icon: <Clock size={14} /> },
             { id: 'approved', label: 'Aprobadas', icon: <CheckCircle size={14} /> },
@@ -78,6 +78,7 @@ const AdminReviews = () => {
               key={f.id}
               onClick={() => setFilter(f.id)}
               style={{
+                flex: '1 1 auto',
                 padding: '0.5rem 1rem',
                 borderRadius: '6px',
                 border: 'none',
@@ -88,8 +89,10 @@ const AdminReviews = () => {
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'center',
                 gap: '0.4rem',
-                transition: 'all 0.2s'
+                transition: 'all 0.2s',
+                minWidth: '100px'
               }}
             >
               {f.icon} {f.label}
@@ -105,28 +108,28 @@ const AdminReviews = () => {
           <p style={{ color: '#94A3B8', margin: 0 }}>Todo está al día.</p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
           {filteredReviews.map(rev => (
-            <div key={rev._id} style={{ backgroundColor: '#FFF', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column' }}>
+            <div key={rev._id} style={{ backgroundColor: '#FFF', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
               
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', minWidth: 0, flex: '1 1 150px' }}>
                   {rev.product?.images?.[0] ? (
-                    <img src={rev.product.images[0]} alt="img" style={{ width: '45px', height: '45px', objectFit: 'cover', borderRadius: '8px' }} />
+                    <img src={rev.product.images[0]} alt="img" style={{ width: '45px', height: '45px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />
                   ) : (
-                    <div style={{ width: '45px', height: '45px', backgroundColor: '#F1F5F9', borderRadius: '8px' }}></div>
+                    <div style={{ width: '45px', height: '45px', backgroundColor: '#F1F5F9', borderRadius: '8px', flexShrink: 0 }}></div>
                   )}
-                  <div>
-                    <h4 style={{ margin: '0 0 0.2rem 0', color: '#1E293B', fontSize: '0.95rem', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{rev.product?.name || 'Producto eliminado'}</h4>
-                    <span style={{ fontSize: '0.75rem', color: '#64748B' }}>Por: {rev.user?.name || 'Usuario'} ({rev.user?.email || 'N/A'})</span>
+                  <div style={{ minWidth: 0, width: '100%' }}>
+                    <h4 style={{ margin: '0 0 0.2rem 0', color: '#1E293B', fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{rev.product?.name || 'Producto eliminado'}</h4>
+                    <span style={{ fontSize: '0.75rem', color: '#64748B', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Por: {rev.user?.name || 'Usuario'} ({rev.user?.email || 'N/A'})</span>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.2rem' }}>
-                  <div style={{ color: '#F59E0B', fontSize: '0.9rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.2rem', flexShrink: 0, minWidth: 'min-content' }}>
+                  <div style={{ color: '#F59E0B', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>
                     {'★'.repeat(rev.rating)}{'☆'.repeat(5 - rev.rating)}
                   </div>
-                  <span style={{ fontSize: '0.7rem', color: '#94A3B8' }}>{formatDate(rev.createdAt)}</span>
+                  <span style={{ fontSize: '0.7rem', color: '#94A3B8', whiteSpace: 'nowrap' }}>{formatDate(rev.createdAt)}</span>
                 </div>
               </div>
 

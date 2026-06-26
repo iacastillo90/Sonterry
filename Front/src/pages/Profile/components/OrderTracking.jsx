@@ -1,5 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { formatDate } from '../../../utils/formatDate';
+import { formatCurrency } from '../../../utils/formatCurrency';
+import './OrderTracking.css';
 
 const getTrackingLink = (company, trackingNumber) => {
   switch (company) {
@@ -19,10 +22,12 @@ const getTrackingLink = (company, trackingNumber) => {
 };
 
 const OrderTracking = ({ order }) => {
+  const navigate = useNavigate();
+
   const steps = [
     { key: 'pending', label: 'Orden Recibida' },
     { key: 'paid', label: 'Pago Aprobado (Preparando Estampado)' },
-    { key: 'shipped', label: 'En Tránsito ( WhatsApp Notificado)' },
+    { key: 'shipped', label: 'En Tránsito (WhatsApp Notificado)' },
     { key: 'delivered', label: 'Entregado con Éxito' }
   ];
 
@@ -38,59 +43,83 @@ const OrderTracking = ({ order }) => {
   };
 
   return (
-    <div style={{
-      backgroundColor: '#FFFFFF',
-      padding: '2rem',
-      borderRadius: 'var(--border-radius-md)',
-      boxShadow: 'var(--shadow-sm)',
-      border: '1px solid var(--color-border)',
-      animation: 'fadeIn 0.4s'
-    }}>
-      <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem' }}>Progreso de tu Personalización</h3>
+    <div className="tracking-container">
+      <h3 className="tracking-title">Detalles del Pedido #{order._id.substring(18)}</h3>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'relative' }}>
+      {/* Order Items List */}
+      <div className="tracking-items-list">
+        {order.items && order.items.map((item, index) => {
+          const productId = item.product?._id || item.product; // In case it's populated or just ID
+          const imageUrl = item.product?.images?.[0];
+
+          return (
+            <div key={index} className="tracking-item-card">
+              {imageUrl ? (
+                <img 
+                  src={imageUrl} 
+                  alt={item.name} 
+                  className="tracking-item-image" 
+                  onClick={() => navigate(`/products/${productId}`)}
+                />
+              ) : (
+                <div 
+                  className="tracking-item-placeholder"
+                  onClick={() => navigate(`/products/${productId}`)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  Sin IMG
+                </div>
+              )}
+              <div className="tracking-item-details">
+                <h4 
+                  className="tracking-item-name"
+                  onClick={() => navigate(`/products/${productId}`)}
+                >
+                  {item.name}
+                </h4>
+                <div className="tracking-item-meta">
+                  <span>Cant: <strong>{item.quantity}</strong></span>
+                  {item.customization?.type && (
+                    <span>
+                      Técnica: <strong>{item.customization.type === 'serigrafia' ? 'Serigrafía' : 'DTF'}</strong>
+                    </span>
+                  )}
+                </div>
+                <div className="tracking-item-price">
+                  {formatCurrency(item.price)} c/u
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <h3 className="tracking-title" style={{ marginTop: '3rem' }}>Progreso de tu Personalización</h3>
+
+      <div className="tracking-timeline">
         {steps.map((st, idx) => {
           const status = getStepStatus(st.key);
           const isCompleted = status === 'completed';
           const trackingLog = order.trackingHistory?.find(h => h.status === st.key);
 
           return (
-            <div key={idx} style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+            <div key={idx} className="tracking-step">
               
               {/* Visual timeline circle indicator */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '50%',
-                  backgroundColor: isCompleted ? 'var(--color-primary)' : 'var(--color-border)',
-                  border: isCompleted ? '4px solid #F5F1E8' : '2px solid transparent',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  zIndex: 2
-                }} />
+              <div className="tracking-indicator">
+                <div className={`tracking-circle ${isCompleted ? 'completed' : 'pending'}`} />
                 {idx < steps.length - 1 && (
-                  <div style={{
-                    width: '2px',
-                    height: '50px',
-                    backgroundColor: isCompleted ? 'var(--color-primary)' : 'var(--color-border)',
-                    margin: '4px 0',
-                    zIndex: 1
-                  }} />
+                  <div className={`tracking-line ${isCompleted ? 'completed' : 'pending'}`} />
                 )}
               </div>
 
               {/* Status details */}
-              <div style={{ flexGrow: 1 }}>
-                <h4 style={{
-                  fontSize: '0.95rem',
-                  fontWeight: '600',
-                  margin: 0,
-                  color: isCompleted ? 'var(--color-text)' : 'var(--color-text-light)'
-                }}>{st.label}</h4>
+              <div className="tracking-step-details">
+                <h4 className={`tracking-step-label ${isCompleted ? 'completed' : 'pending'}`}>
+                  {st.label}
+                </h4>
                 {trackingLog && (
-                  <div style={{ fontSize: '0.8rem', color: 'var(--color-text-light)', marginTop: '2px' }}>
+                  <div className="tracking-step-date">
                     {formatDate(trackingLog.date)}
                   </div>
                 )}
@@ -101,16 +130,16 @@ const OrderTracking = ({ order }) => {
       </div>
 
       {order.shippingDetails?.trackingNumber && (
-        <div style={{ marginTop: '2rem', padding: '1.5rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-          <h4 style={{ margin: '0 0 1rem 0', color: '#0f172a', fontSize: '1rem' }}>Información de Despacho</h4>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div className="tracking-shipping-box">
+          <h4 className="tracking-shipping-title">Información de Despacho</h4>
+          <div className="tracking-shipping-grid">
             <div>
-              <span style={{ display: 'block', fontSize: '0.8rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Transportadora</span>
-              <span style={{ fontSize: '1rem', fontWeight: '500', color: '#334155' }}>{order.shippingDetails.company || 'N/A'}</span>
+              <span className="tracking-shipping-label">Transportadora</span>
+              <span className="tracking-shipping-value">{order.shippingDetails.company || 'N/A'}</span>
             </div>
             <div>
-              <span style={{ display: 'block', fontSize: '0.8rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Número de Guía</span>
-              <span style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--color-primary)' }}>{order.shippingDetails.trackingNumber}</span>
+              <span className="tracking-shipping-label">Número de Guía</span>
+              <span className="tracking-shipping-value highlight">{order.shippingDetails.trackingNumber}</span>
             </div>
           </div>
           
@@ -118,20 +147,7 @@ const OrderTracking = ({ order }) => {
             href={getTrackingLink(order.shippingDetails.company, order.shippingDetails.trackingNumber)} 
             target="_blank" 
             rel="noopener noreferrer"
-            style={{ 
-              display: 'inline-block', 
-              padding: '0.75rem 1.5rem', 
-              background: 'var(--color-primary)', 
-              color: '#fff', 
-              textDecoration: 'none', 
-              borderRadius: '6px',
-              fontWeight: '600',
-              fontSize: '0.9rem',
-              transition: 'background 0.2s',
-              textAlign: 'center',
-              width: '100%',
-              maxWidth: '300px'
-            }}
+            className="tracking-btn"
           >
             Rastrear en página oficial
           </a>

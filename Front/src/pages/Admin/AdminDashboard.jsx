@@ -32,7 +32,9 @@ import {
   Layers,
   Sparkles,
   Landmark,
-  MessageSquare
+  MessageSquare,
+  Menu,
+  X
 } from 'lucide-react';
 import './Admin.css';
 import AdminProducts from './components/AdminProducts';
@@ -53,6 +55,12 @@ const AdminDashboard = () => {
     if (location.pathname.includes('/productos')) return 'productos';
     return 'dashboard';
   });
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [activeTab]);
 
   // Data lists states
   const [categories, setCategories] = useState([]);
@@ -113,7 +121,7 @@ const AdminDashboard = () => {
   const today = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
   return (
-    <div className="admin-container">
+    <div className="container admin-container">
       <div className="admin-header">
         <div className="admin-title-wrap">
           <h2>
@@ -136,16 +144,38 @@ const AdminDashboard = () => {
           >
             <RefreshCw size={14} /> Sincronizar
           </button>
+          <button 
+            className="admin-hamburger" 
+            onClick={() => setIsSidebarOpen(true)}
+            aria-label="Abrir menú"
+          >
+            <Menu size={24} />
+          </button>
         </div>
       </div>
 
       <div className="admin-layout">
         
+        {/* Overlay for mobile */}
+        <div 
+          className={`admin-sidebar-overlay ${isSidebarOpen ? 'open' : ''}`} 
+          onClick={() => setIsSidebarOpen(false)} 
+        />
+
         {/* Left Admin Sidebar */}
-        <div className="admin-sidebar">
-          <div className="admin-sidebar-header">
-            <h4>SonTerry Admin</h4>
-            <span>Modo Administrador</span>
+        <div className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`}>
+          <div className="admin-sidebar-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <h4>SonTerry Admin</h4>
+              <span>Modo Administrador</span>
+            </div>
+            <button 
+              className="admin-hamburger" 
+              style={{ display: isSidebarOpen ? 'flex' : 'none', background: 'transparent', color: 'var(--text-primary)', padding: 0 }}
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              <X size={24} />
+            </button>
           </div>
 
           <button
@@ -219,18 +249,18 @@ const AdminDashboard = () => {
           {/* TAB 1: SUMMARY DASHBOARD */}
           {activeTab === 'dashboard' && (
             <div className="animate-fade-in" style={{ padding: '0.5rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2rem' }}>
-                <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <div style={{ flex: '1 1 200px' }}>
                   <h3 style={{ margin: 0, fontSize: '1.8rem', color: '#0F172A', fontWeight: 800, letterSpacing: '-0.5px' }}>Resumen de Operación</h3>
                   <p style={{ margin: '0.25rem 0 0 0', color: '#64748B', fontSize: '0.95rem' }}>Bienvenido de nuevo. Aquí tienes un vistazo general de tu negocio hoy.</p>
                 </div>
-                <div style={{ background: '#F8FAFC', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '0.85rem', color: '#475569', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ background: '#F8FAFC', padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '0.85rem', color: '#475569', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
                   <Clock size={14} color="#64748B" /> <span style={{ textTransform: 'capitalize' }}>{today}</span>
                 </div>
               </div>
               
               {/* KPIs Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
                 <div style={{ background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)', borderRadius: '12px', padding: '1.5rem', color: '#FFF', boxShadow: '0 10px 15px -3px rgba(37, 99, 235, 0.3)', position: 'relative', overflow: 'hidden' }}>
                   <div style={{ position: 'absolute', right: '-10px', top: '-10px', opacity: 0.1 }}>
                     <TrendingUp size={100} />
@@ -275,7 +305,7 @@ const AdminDashboard = () => {
               </div>
 
               {/* Sub grid for critical alerts & actions */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: '1.5rem', alignItems: 'start' }}>
                 
                 {/* Latest Orders Column */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

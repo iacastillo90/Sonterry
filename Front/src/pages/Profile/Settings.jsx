@@ -56,95 +56,115 @@ const Settings = () => {
   };
 
   return (
-    <div className="settings">
-      <h3 className="settings-title">Configuración</h3>
-
-      {/* Account info */}
-      <div className="settings-section">
-        <h4 className="settings-section-title">Información de la cuenta</h4>
-        <div className="settings-info-grid">
-          <div>
-            <span className="settings-info-label">Nombre</span>
-            <p className="settings-info-value">{user?.name}</p>
-          </div>
-          <div>
-            <span className="settings-info-label">Correo electrónico</span>
-            <p className="settings-info-value">{user?.email}</p>
-          </div>
-          <div>
-            <span className="settings-info-label">Rol</span>
-            <p className="settings-info-value capitalize">{user?.role === 'admin' ? 'Administrador' : 'Cliente'}</p>
-          </div>
-        </div>
+    <div className="settings-container">
+      <div className="settings-header">
+        <h3 className="settings-title">Configuración</h3>
+        <p className="settings-subtitle">Administra tu información personal y la seguridad de tu cuenta.</p>
       </div>
 
-      {/* Change password */}
-      <div className="settings-section">
-        <h4 className="settings-section-title">
-          <Lock size={18} /> Cambiar contraseña
-        </h4>
-
-        <form onSubmit={handleSubmit} className="settings-password-form">
-          {error && (
-            <div className="settings-alert error">
-              <AlertCircle size={16} /> {error}
+      <div className="settings-grid">
+        {/* Account info Card */}
+        <div className="settings-card">
+          <div className="settings-card-header">
+            <div className="settings-icon-wrap">
+              <Lock size={20} />
             </div>
-          )}
-          {success && (
-            <div className="settings-alert success">
-              <CheckCircle size={16} /> {success}
+            <h4 className="settings-section-title">Información de la cuenta</h4>
+          </div>
+          
+          <div className="settings-info-list">
+            <div className="settings-info-item">
+              <span className="settings-info-label">Nombre</span>
+              <p className="settings-info-value">{user?.name}</p>
             </div>
-          )}
-
-          <div className="settings-password-field">
-            <label>Contraseña actual</label>
-            <div className="settings-input-wrapper">
-              <input
-                type={showCurrent ? 'text' : 'password'}
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Ingresa tu contraseña actual"
-              />
-              <button type="button" className="settings-toggle-pw" onClick={() => setShowCurrent(!showCurrent)}>
-                {showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+            <div className="settings-info-item">
+              <span className="settings-info-label">Correo electrónico</span>
+              <p className="settings-info-value">{user?.email}</p>
+            </div>
+            <div className="settings-info-item">
+              <span className="settings-info-label">Nivel de acceso</span>
+              <div>
+                <span className={`role-badge ${user?.role === 'admin' ? 'admin' : ''}`}>
+                  {user?.role === 'admin' ? 'Administrador' : 'Cliente SonTerry'}
+                </span>
+              </div>
             </div>
           </div>
+        </div>
 
-          <div className="settings-password-field">
-            <label>Nueva contraseña</label>
-            <div className="settings-input-wrapper">
-              <input
-                type={showNew ? 'text' : 'password'}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Mínimo 8 caracteres"
-              />
-              <button type="button" className="settings-toggle-pw" onClick={() => setShowNew(!showNew)}>
-                {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
+        {/* Change password Card */}
+        <div className="settings-card">
+          <div className="settings-card-header">
+            <div className="settings-icon-wrap">
+              <Lock size={20} />
             </div>
+            <h4 className="settings-section-title">Cambiar contraseña</h4>
           </div>
 
-          <div className="settings-password-field">
-            <label>Confirmar nueva contraseña</label>
-            <div className="settings-input-wrapper">
-              <input
-                type={showConfirm ? 'text' : 'password'}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Repite la nueva contraseña"
-              />
-              <button type="button" className="settings-toggle-pw" onClick={() => setShowConfirm(!showConfirm)}>
-                {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </div>
+          <form onSubmit={handleSubmit} className="settings-password-form">
+            {error && (
+              <div className="settings-alert error">
+                <AlertCircle size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
+                <span>{error}</span>
+              </div>
+            )}
+            {success && (
+              <div className="settings-alert success">
+                <CheckCircle size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
+                <span>{success}</span>
+              </div>
+            )}
 
-          <button type="submit" className="settings-submit-btn" disabled={sending}>
-            {sending ? 'Actualizando...' : 'Actualizar contraseña'}
-          </button>
-        </form>
+            <div className="settings-password-field">
+              <label>Contraseña actual</label>
+              <div className="settings-input-wrapper">
+                <input
+                  type={showCurrent ? 'text' : 'password'}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="Ingresa tu contraseña actual"
+                />
+                <button type="button" className="settings-toggle-pw" onClick={() => setShowCurrent(!showCurrent)}>
+                  {showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="settings-password-field">
+              <label>Nueva contraseña</label>
+              <div className="settings-input-wrapper">
+                <input
+                  type={showNew ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Mínimo 8 caracteres"
+                />
+                <button type="button" className="settings-toggle-pw" onClick={() => setShowNew(!showNew)}>
+                  {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="settings-password-field">
+              <label>Confirmar nueva contraseña</label>
+              <div className="settings-input-wrapper">
+                <input
+                  type={showConfirm ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Repite la nueva contraseña"
+                />
+                <button type="button" className="settings-toggle-pw" onClick={() => setShowConfirm(!showConfirm)}>
+                  {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" className="settings-submit-btn" disabled={sending}>
+              {sending ? 'Actualizando...' : 'Actualizar contraseña'}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

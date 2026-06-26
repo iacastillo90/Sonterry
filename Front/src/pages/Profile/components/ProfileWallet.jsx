@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ShieldCheck, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../../../store/authStore';
 import { useUiStore } from '../../../store/uiStore';
+import './ProfileWallet.css';
 
 const ProfileWallet = () => {
   const { user } = useAuthStore();
@@ -62,27 +63,20 @@ const ProfileWallet = () => {
   };
 
   return (
-    <div className="animate-fade-in">
-      <h3 style={{ fontSize: '1.4rem', marginBottom: '0.5rem' }}>Mi Billetera Digital</h3>
-      <p style={{ color: 'var(--color-text-light)', fontSize: '0.9rem', marginBottom: '2rem' }}>
-        Visualiza los medios de pago asociados de forma segura a tu cuenta.
-      </p>
+    <div className="wallet-container">
+      <div className="wallet-header">
+        <h3 className="wallet-title">Mi Billetera Digital</h3>
+        <p className="wallet-subtitle">
+          Visualiza los medios de pago asociados de forma segura a tu cuenta.
+        </p>
+      </div>
 
       {/* Compliance Security Box */}
-      <div style={{
-        backgroundColor: 'rgba(82, 143, 88, 0.08)',
-        border: '1px solid rgba(82, 143, 88, 0.2)',
-        borderRadius: 'var(--border-radius-sm)',
-        padding: '1.25rem',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '1rem',
-        marginBottom: '2.5rem'
-      }}>
-        <ShieldCheck size={32} style={{ color: 'var(--color-primary)', flexShrink: 0, marginTop: '2px' }} />
+      <div className="wallet-compliance-box">
+        <ShieldCheck size={32} />
         <div>
-          <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '0.9rem', fontWeight: '700', color: 'var(--color-primary)' }}>Cumplimiento de Seguridad de Datos (PCI-DSS)</h4>
-          <p style={{ fontSize: '0.8rem', color: 'var(--color-text-light)', lineHeight: '1.4' }}>
+          <h4>Cumplimiento de Seguridad de Datos (PCI-DSS)</h4>
+          <p>
             Por regulaciones internacionales de seguridad bancaria, <strong>no almacenamos los datos reales de tu tarjeta en nuestros servidores</strong>. 
             Los métodos listados abajo son referencias autorizadas vinculadas directamente en las pasarelas de pago asociadas (Stripe y PayPal).
           </p>
@@ -90,24 +84,11 @@ const ProfileWallet = () => {
       </div>
 
       {/* Header with action button */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h4 style={{ margin: 0, fontSize: '1.15rem', fontWeight: '700' }}>Métodos Vinculados</h4>
+      <div className="wallet-actions-header">
+        <h4 className="wallet-actions-title">Métodos Vinculados</h4>
         <button
           onClick={() => setShowAddCard(!showAddCard)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.35rem',
-            backgroundColor: showAddCard ? 'var(--color-danger)' : 'var(--color-primary)',
-            color: '#FFFFFF',
-            border: 'none',
-            padding: '0.5rem 1.25rem',
-            borderRadius: 'var(--border-radius-sm)',
-            fontSize: '0.85rem',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'var(--transition-smooth)'
-          }}
+          className={`wallet-btn ${showAddCard ? 'cancel' : ''}`}
         >
           {showAddCard ? 'Cancelar' : 'Vincular Tarjeta'}
         </button>
@@ -115,33 +96,16 @@ const ProfileWallet = () => {
 
       {/* Add Card Form */}
       {showAddCard && (
-        <form onSubmit={handleAddCard} style={{
-          backgroundColor: '#FDFCFB',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--border-radius-sm)',
-          padding: '1.5rem',
-          marginBottom: '2rem',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1rem',
-          animation: 'fadeIn 0.3s'
-        }}>
-          <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: '700' }}>Nueva Tarjeta de Crédito (Pasarela Segura Simulación)</h4>
+        <form onSubmit={handleAddCard} className="wallet-form-card">
+          <h4 className="wallet-form-title">Nueva Tarjeta de Crédito (Pasarela Segura Simulación)</h4>
           
-          <div className="profile-form-row">
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.25rem' }}>Franquicia</label>
+          <div className="wallet-form-row">
+            <div className="wallet-field">
+              <label>Franquicia</label>
               <select
                 value={newCardBrand}
                 onChange={(e) => setNewCardBrand(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  borderRadius: '4px',
-                  border: '1px solid var(--color-border)',
-                  backgroundColor: '#FFFFFF',
-                  outline: 'none'
-                }}
+                className="wallet-select"
               >
                 <option value="Visa">Visa</option>
                 <option value="Mastercard">Mastercard</option>
@@ -149,154 +113,80 @@ const ProfileWallet = () => {
               </select>
             </div>
 
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.25rem' }}>Número de Tarjeta</label>
+            <div className="wallet-field">
+              <label>Número de Tarjeta</label>
               <input
                 type="text"
                 placeholder="4242 4242 4242 4242"
                 value={newCardNumber}
                 onChange={(e) => setNewCardNumber(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  borderRadius: '4px',
-                  border: '1px solid var(--color-border)',
-                  outline: 'none'
-                }}
+                className="wallet-input"
               />
             </div>
           </div>
 
-          <div className="profile-form-row">
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.25rem' }}>Expiración (MM/AA)</label>
+          <div className="wallet-form-row">
+            <div className="wallet-field">
+              <label>Expiración (MM/AA)</label>
               <input
                 type="text"
                 placeholder="12/28"
                 value={newCardExp}
                 onChange={(e) => setNewCardExp(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  borderRadius: '4px',
-                  border: '1px solid var(--color-border)',
-                  outline: 'none'
-                }}
+                className="wallet-input"
               />
             </div>
 
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.25rem' }}>Titular</label>
+            <div className="wallet-field">
+              <label>Titular</label>
               <input
                 type="text"
                 value={newCardHolder}
                 onChange={(e) => setNewCardHolder(e.target.value)}
                 placeholder="Nombre completo"
-                style={{
-                  width: '100%',
-                  padding: '0.5rem',
-                  borderRadius: '4px',
-                  border: '1px solid var(--color-border)',
-                  outline: 'none'
-                }}
+                className="wallet-input"
               />
             </div>
           </div>
 
-          <button
-            type="submit"
-            style={{
-              backgroundColor: 'var(--color-accent)',
-              color: '#FFFFFF',
-              border: 'none',
-              padding: '0.6rem 1.5rem',
-              borderRadius: '4px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              alignSelf: 'flex-start',
-              transition: 'var(--transition-smooth)'
-            }}
-          >
+          <button type="submit" className="wallet-btn" style={{ alignSelf: 'flex-start' }}>
             Vincular Tarjeta
           </button>
         </form>
       )}
 
       {/* Cards Grid */}
-      <div className="profile-wallet-grid">
+      <div className="wallet-cards-grid">
         {walletCards.map((card) => (
-          <div
-            key={card.id}
-            style={{
-              background: card.type === 'Stripe' 
-                ? 'linear-gradient(135deg, #4F46E5, #3B82F6)' 
-                : 'linear-gradient(135deg, #003087, #0079C1)',
-              color: '#FFFFFF',
-              padding: '1.5rem',
-              borderRadius: 'var(--border-radius-md)',
-              boxShadow: '0 8px 16px rgba(0,0,0,0.15)',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              height: '180px',
-              position: 'relative',
-              overflow: 'hidden'
-            }}
-          >
-            {/* Trash icon for deletion */}
+          <div key={card.id} className={`payment-card ${card.type === 'Stripe' ? 'stripe' : 'paypal'}`}>
             <button
               onClick={() => handleRemoveCard(card.id)}
-              style={{
-                position: 'absolute',
-                top: '12px',
-                right: '12px',
-                backgroundColor: 'rgba(255, 255, 255, 0.25)',
-                border: 'none',
-                borderRadius: '50%',
-                width: '28px',
-                height: '28px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                color: '#FFFFFF',
-                zIndex: 5,
-                transition: 'var(--transition-smooth)'
-              }}
+              className="payment-card-delete"
               title="Eliminar método de pago"
             >
-              <Trash2 size={14} />
+              <Trash2 size={16} />
             </button>
 
-            {/* Gloss circle effects */}
-            <div style={{
-              position: 'absolute',
-              right: '-30px',
-              top: '-30px',
-              width: '120px',
-              height: '120px',
-              borderRadius: '50%',
-              background: 'rgba(255, 255, 255, 0.08)'
-            }} />
+            <div className="payment-card-gloss" />
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.85rem', fontWeight: '600', opacity: 0.85 }}>{card.type}</span>
-              <span style={{ fontSize: '1.2rem', fontWeight: '800', fontStyle: 'italic' }}>{card.brand}</span>
+            <div className="payment-card-header">
+              <span className="payment-card-type">{card.type}</span>
+              <span className="payment-card-brand">{card.brand}</span>
             </div>
 
-            <div className="wallet-card-number">
+            <div className="payment-card-number">
               {card.brand === 'PayPal Balance' ? card.last4 : `••••  ••••  ••••  ${card.last4}`}
             </div>
 
-            <div className="wallet-card-footer">
+            <div className="payment-card-footer">
               <div>
-                <span style={{ display: 'block', fontSize: '0.65rem', textTransform: 'uppercase', opacity: 0.7 }}>Titular</span>
-                <span style={{ fontSize: '0.85rem', fontWeight: '500', wordBreak: 'break-word' }}>{card.holder || user?.name}</span>
+                <span className="payment-card-label">Titular</span>
+                <span className="payment-card-value">{card.holder || user?.name}</span>
               </div>
               {card.exp !== 'N/A' && (
                 <div style={{ textAlign: 'right' }}>
-                  <span style={{ display: 'block', fontSize: '0.65rem', textTransform: 'uppercase', opacity: 0.7 }}>Expira</span>
-                  <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>{card.exp}</span>
+                  <span className="payment-card-label">Expira</span>
+                  <span className="payment-card-value">{card.exp}</span>
                 </div>
               )}
             </div>

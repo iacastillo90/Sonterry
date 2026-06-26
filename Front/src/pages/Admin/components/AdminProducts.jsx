@@ -218,7 +218,7 @@ const AdminProducts = ({ categories, products, loadingProducts, loadCatalogData,
       </div>
 
       {/* TABLE SECTION */}
-      <div style={{ background: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+      <div style={{ background: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden', overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
           <thead>
             <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', color: '#64748b' }}>
@@ -259,7 +259,8 @@ const AdminProducts = ({ categories, products, loadingProducts, loadCatalogData,
                       <span style={{ 
                         padding: '4px 8px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold',
                         background: p.stock > 5 ? '#dcfce7' : '#fee2e2',
-                        color: p.stock > 5 ? '#166534' : '#991b1b'
+                        color: p.stock > 5 ? '#166534' : '#991b1b',
+                        whiteSpace: 'nowrap'
                       }}>
                         {p.stock} uds
                       </span>
@@ -268,7 +269,8 @@ const AdminProducts = ({ categories, products, loadingProducts, loadCatalogData,
                       <span style={{ 
                         padding: '4px 8px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold',
                         background: p.isActive ? '#e0f2fe' : '#fef3c7',
-                        color: p.isActive ? '#0369a1' : '#b45309'
+                        color: p.isActive ? '#0369a1' : '#b45309',
+                        whiteSpace: 'nowrap'
                       }}>
                         {p.isActive ? 'Activo' : 'De baja'}
                       </span>

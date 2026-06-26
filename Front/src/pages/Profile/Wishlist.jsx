@@ -47,7 +47,7 @@ const Wishlist = () => {
   }
 
   return (
-    <div className="wishlist">
+    <div className="wishlist-container">
       <div className="wishlist-header">
         <h3>Mi Lista de Deseos</h3>
         <span className="wishlist-count">{products.length} {products.length === 1 ? 'producto' : 'productos'}</span>
@@ -71,7 +71,7 @@ const Wishlist = () => {
 
               <div className="wishlist-card-actions">
                 <Link to={`/productos/${product.slug}`} className="wishlist-view-btn">
-                  Ver producto
+                  Ver producto <span style={{ fontSize: '1.2em' }}>→</span>
                 </Link>
                 <button
                   className="wishlist-remove-btn"

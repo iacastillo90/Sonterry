@@ -12,6 +12,7 @@ import { useUiStore } from '../../../store/uiStore';
 import EditItemsModal from './EditItemsModal';
 import EditShippingModal from './EditShippingModal';
 import ReviewOrderModal from './ReviewOrderModal';
+import './OrderHistory.css';
 
 const CANCELABLE_STATUSES = ['pending', 'paid'];
 
@@ -34,66 +35,17 @@ const loadWompiScript = (publicKey) => {
 };
 
 const CancelModal = ({ order, onConfirm, onClose, loading }) => (
-  <div
-    onClick={onClose}
-    style={{
-      position: 'fixed',
-      inset: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1000,
-    }}
-  >
-    <div
-      onClick={e => e.stopPropagation()}
-      style={{
-        backgroundColor: '#FFF',
-        borderRadius: '12px',
-        padding: '2rem',
-        maxWidth: '420px',
-        width: '90%',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-      }}
-    >
-      <h3 style={{ marginTop: 0, marginBottom: '0.75rem', fontSize: '1.25rem' }}>
-        Cancelar pedido
-      </h3>
-      <p style={{ color: '#666', marginBottom: '1.5rem', lineHeight: 1.5 }}>
+  <div onClick={onClose} className="order-modal-overlay">
+    <div onClick={e => e.stopPropagation()} className="order-modal-content">
+      <h3 className="order-modal-title">Cancelar pedido</h3>
+      <p className="order-modal-text">
         ¿Estás seguro de cancelar este pedido? Esta acción no se puede deshacer.
       </p>
-      <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-        <button
-          onClick={onClose}
-          disabled={loading}
-          style={{
-            padding: '0.6rem 1.25rem',
-            borderRadius: '8px',
-            border: '1px solid var(--color-border)',
-            backgroundColor: '#FFF',
-            cursor: 'pointer',
-            fontWeight: 600,
-            fontSize: '0.9rem',
-          }}
-        >
+      <div className="order-modal-actions">
+        <button onClick={onClose} disabled={loading} className="order-action-btn secondary">
           No, mantener
         </button>
-        <button
-          onClick={onConfirm}
-          disabled={loading}
-          style={{
-            padding: '0.6rem 1.25rem',
-            borderRadius: '8px',
-            border: 'none',
-            backgroundColor: '#DC2626',
-            color: '#FFF',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            fontWeight: 600,
-            fontSize: '0.9rem',
-            opacity: loading ? 0.7 : 1,
-          }}
-        >
+        <button onClick={onConfirm} disabled={loading} className="order-action-btn danger">
           {loading ? 'Cancelando...' : 'Sí, cancelar'}
         </button>
       </div>
@@ -218,26 +170,16 @@ const OrderHistory = () => {
   const filteredOrders = orders.filter(o => statusFilter ? o.status === statusFilter : true);
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <h3 style={{ fontSize: '1.4rem', margin: 0 }}>Historial de Trabajos</h3>
+    <div className="orders-container">
+      <div className="orders-header">
+        <h3 className="orders-title">Historial de Trabajos</h3>
         
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <div className="orders-filters">
           {[{ key: '', label: 'Todos' }, { key: 'pending', label: 'Pendiente' }, { key: 'paid', label: 'En Proceso' }, { key: 'shipped', label: 'En Camino' }, { key: 'delivered', label: 'Completado' }].map(f => (
             <button
               key={f.key}
               onClick={() => { setStatusFilter(f.key); setSelectedOrder(null); }}
-              style={{
-                padding: '0.5rem 1rem',
-                borderRadius: '20px',
-                border: statusFilter === f.key ? 'none' : '1px solid #cbd5e1',
-                background: statusFilter === f.key ? 'var(--color-primary)' : '#fff',
-                color: statusFilter === f.key ? '#fff' : '#475569',
-                fontSize: '0.85rem',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
+              className={`order-filter-btn ${statusFilter === f.key ? 'active' : ''}`}
             >
               {f.label}
             </button>
@@ -246,11 +188,11 @@ const OrderHistory = () => {
       </div>
       
       {filteredOrders.length === 0 ? (
-        <div style={{ padding: '3rem', textAlign: 'center', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-          <p style={{ color: '#64748b', margin: 0 }}>No hay trabajos que coincidan con este estado.</p>
+        <div className="orders-empty-state">
+          <p>No hay trabajos que coincidan con este estado.</p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
+        <div className="orders-grid">
           {filteredOrders.map((order) => {
             const canCancel = CANCELABLE_STATUSES.includes(order.status);
 
@@ -258,54 +200,51 @@ const OrderHistory = () => {
             <div
               key={order._id}
               onClick={() => setSelectedOrder(order)}
-              style={{
-                backgroundColor: '#FFFFFF',
-                padding: '1.25rem',
-                borderRadius: 'var(--border-radius-sm)',
-                border: selectedOrder?._id === order._id ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
-                cursor: 'pointer',
-                boxShadow: 'var(--shadow-sm)',
-                transition: 'var(--transition-smooth)'
-              }}
+              className={`order-card ${selectedOrder?._id === order._id ? 'selected' : ''}`}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                <span style={{ fontWeight: '700', fontSize: '0.95rem' }}>Trabajo #{order._id.substring(18)}</span>
-                <span style={{
-                  backgroundColor: order.status === 'paid' ? 'var(--color-primary)' : order.status === 'shipped' ? 'var(--color-accent)' : order.status === 'cancelled' ? '#DC2626' : '#ccc',
-                  color: '#FFFFFF',
-                  padding: '2px 8px',
-                  borderRadius: '12px',
-                  fontSize: '0.75rem',
-                  fontWeight: '600',
-                  textTransform: 'uppercase'
-                }}>{order.status === 'shipped' ? 'En Tránsito' : order.status === 'cancelled' ? 'Cancelado' : order.status}</span>
+              <div className="order-card-header">
+                <span className="order-card-id">Trabajo #{order._id.substring(18)}</span>
+                <span className={`order-status-badge ${order.status}`}>
+                  {order.status === 'shipped' ? 'En Tránsito' : order.status === 'cancelled' ? 'Cancelado' : order.status}
+                </span>
               </div>
               
-              <div style={{ fontSize: '0.85rem', color: 'var(--color-text-light)', marginBottom: '0.5rem' }}>
+              <div className="order-card-date">
                 Solicitado el {formatDate(order.createdAt)}
               </div>
 
-              <div style={{ fontWeight: '600', color: 'var(--color-text)', marginBottom: '0.5rem' }}>
+              {order.items && order.items.length > 0 && (
+                <div className="order-card-items-preview">
+                  {order.items[0].product && order.items[0].product.images && order.items[0].product.images.length > 0 ? (
+                    <img 
+                      src={order.items[0].product.images[0]} 
+                      alt={order.items[0].name} 
+                      className="order-preview-image"
+                    />
+                  ) : (
+                    <div className="order-preview-image-placeholder">Sin IMG</div>
+                  )}
+                  <div className="order-preview-details">
+                    <h4 className="order-preview-title">{order.items[0].name}</h4>
+                    <p className="order-preview-summary">
+                      {order.items.length > 1 
+                        ? `+${order.items.length - 1} artículo(s) más` 
+                        : `Cant: ${order.items[0].quantity}`}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <div className="order-card-total">
                 Total: {formatCurrency(order.total)}
               </div>
 
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <div className="order-card-actions">
                 {order.status === 'pending' && order.paymentMethod === 'wompi' && (
                   <button
                     onClick={e => handlePayNow(e, order)}
                     disabled={payingId === order._id}
-                    style={{
-                      padding: '0.4rem 1rem',
-                      borderRadius: '6px',
-                      border: '1px solid var(--color-primary)',
-                      backgroundColor: 'var(--color-primary)',
-                      color: '#FFFFFF',
-                      cursor: payingId === order._id ? 'not-allowed' : 'pointer',
-                      fontWeight: 600,
-                      fontSize: '0.8rem',
-                      opacity: payingId === order._id ? 0.7 : 1,
-                      transition: 'var(--transition-smooth)',
-                    }}
+                    className="order-action-btn primary"
                   >
                     {payingId === order._id ? 'Procesando...' : 'Pagar ahora'}
                   </button>
@@ -314,33 +253,13 @@ const OrderHistory = () => {
                   <>
                     <button
                       onClick={e => handleEditItemsClick(e, order)}
-                      style={{
-                        padding: '0.4rem 1rem',
-                        borderRadius: '6px',
-                        border: '1px solid var(--color-border)',
-                        backgroundColor: '#FFF',
-                        color: 'var(--color-text)',
-                        cursor: 'pointer',
-                        fontWeight: 600,
-                        fontSize: '0.8rem',
-                        transition: 'var(--transition-smooth)',
-                      }}
+                      className="order-action-btn secondary"
                     >
                       Editar items
                     </button>
                     <button
                       onClick={e => handleEditShippingClick(e, order)}
-                      style={{
-                        padding: '0.4rem 1rem',
-                        borderRadius: '6px',
-                        border: '1px solid var(--color-border)',
-                        backgroundColor: '#FFF',
-                        color: 'var(--color-text)',
-                        cursor: 'pointer',
-                        fontWeight: 600,
-                        fontSize: '0.8rem',
-                        transition: 'var(--transition-smooth)',
-                      }}
+                      className="order-action-btn secondary"
                     >
                       Editar dirección
                     </button>
@@ -349,19 +268,7 @@ const OrderHistory = () => {
                 {canCancel && (
                   <button
                     onClick={e => handleCancelClick(e, order)}
-                    style={{
-                      padding: '0.4rem 1rem',
-                      borderRadius: '6px',
-                      border: '1px solid #FCA5A5',
-                      backgroundColor: '#FEF2F2',
-                      color: '#DC2626',
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                      fontSize: '0.8rem',
-                      transition: 'var(--transition-smooth)',
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FEE2E2'}
-                    onMouseLeave={e => e.currentTarget.style.backgroundColor = '#FEF2F2'}
+                    className="order-action-btn danger"
                   >
                     Cancelar pedido
                   </button>
@@ -372,22 +279,7 @@ const OrderHistory = () => {
                       e.stopPropagation();
                       setOrderToReview(order);
                     }}
-                    style={{
-                      padding: '0.4rem 1rem',
-                      borderRadius: '6px',
-                      border: '1px solid #FCD34D',
-                      backgroundColor: '#FFFBEB',
-                      color: '#D97706',
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                      fontSize: '0.8rem',
-                      transition: 'var(--transition-smooth)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.3rem'
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FEF3C7'}
-                    onMouseLeave={e => e.currentTarget.style.backgroundColor = '#FFFBEB'}
+                    className="order-action-btn review"
                   >
                     ★ Dejar Reseña
                   </button>
@@ -400,7 +292,7 @@ const OrderHistory = () => {
       )}
 
       {selectedOrder && (
-        <div style={{ marginTop: '2.5rem' }}>
+        <div className="order-tracking-wrapper">
           <OrderTracking order={selectedOrder} />
         </div>
       )}

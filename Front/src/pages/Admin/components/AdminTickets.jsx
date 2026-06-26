@@ -127,12 +127,12 @@ const AdminTickets = ({ tickets, loadingTickets, addToast, refetchTickets }) => 
             style={{ width: '100%', padding: '0.65rem 1rem 0.65rem 2.5rem', borderRadius: '6px', border: '1px solid #CBD5E1', outline: 'none', fontSize: '0.9rem' }}
           />
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Filter size={18} color="#64748B" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', flex: '1 1 auto' }}>
+          <Filter size={18} color="#64748B" style={{ flexShrink: 0 }} />
           <select
             value={typeFilter}
             onChange={(e) => { setTypeFilter(e.target.value); setCurrentPage(1); }}
-            style={{ padding: '0.65rem', borderRadius: '6px', border: '1px solid #CBD5E1', outline: 'none', backgroundColor: '#FFF', fontSize: '0.9rem', minWidth: '150px' }}
+            style={{ flex: 1, padding: '0.65rem', borderRadius: '6px', border: '1px solid #CBD5E1', outline: 'none', backgroundColor: '#FFF', fontSize: '0.9rem', minWidth: '150px' }}
           >
             <option value="all">Todas las Categorías</option>
             <option value="queja">Quejas</option>
@@ -144,7 +144,7 @@ const AdminTickets = ({ tickets, loadingTickets, addToast, refetchTickets }) => 
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-            style={{ padding: '0.65rem', borderRadius: '6px', border: '1px solid #CBD5E1', outline: 'none', backgroundColor: '#FFF', fontSize: '0.9rem', minWidth: '150px' }}
+            style={{ flex: 1, padding: '0.65rem', borderRadius: '6px', border: '1px solid #CBD5E1', outline: 'none', backgroundColor: '#FFF', fontSize: '0.9rem', minWidth: '150px' }}
           >
             <option value="all">Todos los estados</option>
             <option value="pending">Pendientes</option>
@@ -166,47 +166,47 @@ const AdminTickets = ({ tickets, loadingTickets, addToast, refetchTickets }) => 
         </div>
       ) : (
         <>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
             {paginatedTickets.map((t) => {
               const statusColor = getStatusColor(t.status);
               return (
-                <div key={t._id} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--border-radius-sm)', padding: '1.25rem', backgroundColor: '#FDFCFB', display: 'flex', flexDirection: 'column', gap: '0.75rem', transition: 'box-shadow 0.2s' }} onMouseEnter={e => e.currentTarget.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.1)'} onMouseLeave={e => e.currentTarget.style.boxShadow='none'}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div>
-                      <span style={{ backgroundColor: 'rgba(0,0,0,0.06)', padding: '3px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '700', marginRight: '0.5rem', textTransform: 'uppercase', color: '#475569' }}>{t.type}</span>
-                      <span style={{ fontWeight: '700', fontSize: '1.1rem', color: '#0F172A' }}>{t.subject}</span>
+                <div key={t._id} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--border-radius-sm)', padding: '1.25rem', backgroundColor: '#FDFCFB', display: 'flex', flexDirection: 'column', gap: '0.75rem', transition: 'box-shadow 0.2s', height: '100%', minWidth: 0 }} onMouseEnter={e => e.currentTarget.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.1)'} onMouseLeave={e => e.currentTarget.style.boxShadow='none'}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <span style={{ backgroundColor: 'rgba(0,0,0,0.06)', padding: '3px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '700', marginRight: '0.5rem', textTransform: 'uppercase', color: '#475569', display: 'inline-block', marginBottom: '0.25rem' }}>{t.type}</span>
+                      <span style={{ fontWeight: '700', fontSize: '1.1rem', color: '#0F172A', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.subject}</span>
                     </div>
-                    <span style={{ color: statusColor, fontWeight: '700', fontSize: '0.75rem', textTransform: 'uppercase', background: `${statusColor}15`, padding: '4px 12px', borderRadius: '20px', border: `1px solid ${statusColor}30` }}>{t.status === 'in_progress' ? 'en curso' : t.status}</span>
+                    <span style={{ color: statusColor, fontWeight: '700', fontSize: '0.75rem', textTransform: 'uppercase', background: `${statusColor}15`, padding: '4px 12px', borderRadius: '20px', border: `1px solid ${statusColor}30`, flexShrink: 0 }}>{t.status === 'in_progress' ? 'en curso' : t.status}</span>
                   </div>
 
                   <p style={{ margin: 0, fontSize: '0.9rem', color: '#475569', lineHeight: '1.5' }}>
                     {t.description.length > 180 ? t.description.substring(0, 180) + '...' : t.description}
                   </p>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #F1F5F9', paddingTop: '1rem', marginTop: '0.25rem', fontSize: '0.85rem', color: '#64748B', flexWrap: 'wrap', gap: '1rem' }}>
-                    <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}><Mail size={14} /> <strong>{t.user?.email || 'N/A'}</strong></span>
-                      <span>{formatDate(t.createdAt)}</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', borderTop: '1px solid #F1F5F9', paddingTop: '1rem', marginTop: 'auto' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.85rem', color: '#64748B' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}><Mail size={14} flexShrink={0} /> <strong>{t.user?.email || 'N/A'}</strong></span>
+                      <span style={{ fontSize: '0.75rem' }}>{formatDate(t.createdAt)}</span>
                     </div>
                     
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'nowrap' }}>
                       <select
                         value={t.status}
                         onChange={(e) => handleUpdateTicket(t._id, e.target.value)}
                         disabled={updatingTicketId === t._id}
-                        style={{ padding: '0.4rem 0.5rem', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.8rem', backgroundColor: '#F8FAFC', cursor: 'pointer', outline: 'none', fontWeight: '500', color: '#334155' }}
+                        style={{ flex: 1, minWidth: 0, padding: '0.4rem 0.5rem', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.8rem', backgroundColor: '#F8FAFC', cursor: 'pointer', outline: 'none', fontWeight: '500', color: '#334155' }}
                       >
-                        <option value="pending">Marcar Pendiente</option>
-                        <option value="open">Marcar Abierto</option>
-                        <option value="in_progress">Marcar En Curso</option>
-                        <option value="resolved">Marcar Resuelto</option>
-                        <option value="closed">Marcar Cerrado</option>
+                        <option value="pending">Pendiente</option>
+                        <option value="open">Abierto</option>
+                        <option value="in_progress">En Curso</option>
+                        <option value="resolved">Resuelto</option>
+                        <option value="closed">Cerrado</option>
                       </select>
                       
-                      <Button variant="primary" onClick={() => setSelectedTicket(t)} style={{ padding: '0.4rem 1.2rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: '600' }}>
+                      <Button variant="primary" onClick={() => setSelectedTicket(t)} style={{ flex: 1, padding: '0.4rem 0', fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.3rem', fontWeight: '600', whiteSpace: 'nowrap' }}>
                         <MessageSquare size={16} /> Gestionar
                       </Button>
-                      <button onClick={() => setDeleteConfirmTicketId(t._id)} title="Eliminar ticket permanentemente" style={{ background: '#FEF2F2', color: '#EF4444', border: '1px solid #FECACA', padding: '0.4rem 0.5rem', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.2s' }}>
+                      <button onClick={() => setDeleteConfirmTicketId(t._id)} title="Eliminar ticket permanentemente" style={{ flexShrink: 0, background: '#FEF2F2', color: '#EF4444', border: '1px solid #FECACA', padding: '0.4rem 0.5rem', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background-color 0.2s' }}>
                         <Trash2 size={16} />
                       </button>
                     </div>

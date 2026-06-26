@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { useUiStore } from '../../store/uiStore';
-import { User, ShoppingBag, CreditCard, MessageSquare, LifeBuoy, Heart, Settings as SettingsIcon, LogOut, Menu, X } from 'lucide-react';
+import { User, ShoppingBag, CreditCard, MessageSquare, LifeBuoy, Heart, Settings as SettingsIcon, LogOut, Menu, X, LayoutDashboard } from 'lucide-react';
+import ProfileDashboard from './components/ProfileDashboard';
 import OrderHistory from './components/OrderHistory';
 import ProfileWallet from './components/ProfileWallet';
 import ProfileReviews from './components/ProfileReviews';
@@ -18,7 +19,7 @@ const Profile = () => {
   const location = useLocation();
   const addToast = useUiStore((state) => state.addToast);
   
-  const [activeTab, setActiveTab] = useState(location.state?.tab || 'perfil');
+  const [activeTab, setActiveTab] = useState(location.state?.tab || 'inicio');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   // Listen for state changes to update tab if navigating to profile while already inside
@@ -78,21 +79,16 @@ const Profile = () => {
             </div>
 
           <button
+            onClick={() => setActiveTab('inicio')}
+            className={`profile-nav-btn ${activeTab === 'inicio' ? 'active' : ''}`}
+          >
+            <LayoutDashboard size={18} />
+            <span>Resumen</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('perfil')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.75rem 1rem',
-              borderRadius: 'var(--border-radius-sm)',
-              border: 'none',
-              cursor: 'pointer',
-              backgroundColor: activeTab === 'perfil' ? 'var(--color-primary)' : 'transparent',
-              color: activeTab === 'perfil' ? '#FFFFFF' : 'var(--color-text)',
-              fontWeight: activeTab === 'perfil' ? '600' : '500',
-              textAlign: 'left',
-              transition: 'var(--transition-smooth)'
-            }}
+            className={`profile-nav-btn ${activeTab === 'perfil' ? 'active' : ''}`}
           >
             <User size={18} />
             <span>Mi Perfil</span>
@@ -100,20 +96,7 @@ const Profile = () => {
 
           <button
             onClick={() => setActiveTab('pedidos')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.75rem 1rem',
-              borderRadius: 'var(--border-radius-sm)',
-              border: 'none',
-              cursor: 'pointer',
-              backgroundColor: activeTab === 'pedidos' ? 'var(--color-primary)' : 'transparent',
-              color: activeTab === 'pedidos' ? '#FFFFFF' : 'var(--color-text)',
-              fontWeight: activeTab === 'pedidos' ? '600' : '500',
-              textAlign: 'left',
-              transition: 'var(--transition-smooth)'
-            }}
+            className={`profile-nav-btn ${activeTab === 'pedidos' ? 'active' : ''}`}
           >
             <ShoppingBag size={18} />
             <span>Mis Pedidos / Trabajos</span>
@@ -121,20 +104,7 @@ const Profile = () => {
 
           <button
             onClick={() => setActiveTab('billetera')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.75rem 1rem',
-              borderRadius: 'var(--border-radius-sm)',
-              border: 'none',
-              cursor: 'pointer',
-              backgroundColor: activeTab === 'billetera' ? 'var(--color-primary)' : 'transparent',
-              color: activeTab === 'billetera' ? '#FFFFFF' : 'var(--color-text)',
-              fontWeight: activeTab === 'billetera' ? '600' : '500',
-              textAlign: 'left',
-              transition: 'var(--transition-smooth)'
-            }}
+            className={`profile-nav-btn ${activeTab === 'billetera' ? 'active' : ''}`}
           >
             <CreditCard size={18} />
             <span>Mi Billetera</span>
@@ -142,20 +112,7 @@ const Profile = () => {
 
           <button
             onClick={() => setActiveTab('comentarios')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.75rem 1rem',
-              borderRadius: 'var(--border-radius-sm)',
-              border: 'none',
-              cursor: 'pointer',
-              backgroundColor: activeTab === 'comentarios' ? 'var(--color-primary)' : 'transparent',
-              color: activeTab === 'comentarios' ? '#FFFFFF' : 'var(--color-text)',
-              fontWeight: activeTab === 'comentarios' ? '600' : '500',
-              textAlign: 'left',
-              transition: 'var(--transition-smooth)'
-            }}
+            className={`profile-nav-btn ${activeTab === 'comentarios' ? 'active' : ''}`}
           >
             <MessageSquare size={18} />
             <span>Mis Reseñas</span>
@@ -163,20 +120,7 @@ const Profile = () => {
 
           <button
             onClick={() => setActiveTab('soporte')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.75rem 1rem',
-              borderRadius: 'var(--border-radius-sm)',
-              border: 'none',
-              cursor: 'pointer',
-              backgroundColor: activeTab === 'soporte' ? 'var(--color-primary)' : 'transparent',
-              color: activeTab === 'soporte' ? '#FFFFFF' : 'var(--color-text)',
-              fontWeight: activeTab === 'soporte' ? '600' : '500',
-              textAlign: 'left',
-              transition: 'var(--transition-smooth)'
-            }}
+            className={`profile-nav-btn ${activeTab === 'soporte' ? 'active' : ''}`}
           >
             <LifeBuoy size={18} />
             <span>Soporte Técnico</span>
@@ -184,20 +128,7 @@ const Profile = () => {
 
           <button
             onClick={() => setActiveTab('deseos')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.75rem 1rem',
-              borderRadius: 'var(--border-radius-sm)',
-              border: 'none',
-              cursor: 'pointer',
-              backgroundColor: activeTab === 'deseos' ? 'var(--color-primary)' : 'transparent',
-              color: activeTab === 'deseos' ? '#FFFFFF' : 'var(--color-text)',
-              fontWeight: activeTab === 'deseos' ? '600' : '500',
-              textAlign: 'left',
-              transition: 'var(--transition-smooth)'
-            }}
+            className={`profile-nav-btn ${activeTab === 'deseos' ? 'active' : ''}`}
           >
             <Heart size={18} />
             <span>Lista de Deseos</span>
@@ -205,44 +136,18 @@ const Profile = () => {
 
           <button
             onClick={() => setActiveTab('configuracion')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.75rem 1rem',
-              borderRadius: 'var(--border-radius-sm)',
-              border: 'none',
-              cursor: 'pointer',
-              backgroundColor: activeTab === 'configuracion' ? 'var(--color-primary)' : 'transparent',
-              color: activeTab === 'configuracion' ? '#FFFFFF' : 'var(--color-text)',
-              fontWeight: activeTab === 'configuracion' ? '600' : '500',
-              textAlign: 'left',
-              transition: 'var(--transition-smooth)'
-            }}
+            className={`profile-nav-btn ${activeTab === 'configuracion' ? 'active' : ''}`}
           >
             <SettingsIcon size={18} />
             <span>Configuración</span>
           </button>
 
           {/* Separator line */}
-          <div style={{ borderTop: '1px solid var(--color-border)', margin: '0.75rem 0' }} />
+          <div style={{ borderTop: '1px solid var(--border-subtle)', margin: '0.75rem 0' }} />
 
           <button
             onClick={handleLogout}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.75rem 1rem',
-              borderRadius: 'var(--border-radius-sm)',
-              border: 'none',
-              cursor: 'pointer',
-              backgroundColor: 'transparent',
-              color: 'var(--color-danger)',
-              fontWeight: '600',
-              textAlign: 'left',
-              transition: 'var(--transition-smooth)'
-            }}
+            className="profile-nav-btn danger"
           >
             <LogOut size={18} />
             <span>Cerrar Sesión</span>
@@ -252,6 +157,11 @@ const Profile = () => {
         {/* Content Area */}
         <div className="profile-content">
           
+          {/* TAB 0: INICIO (DASHBOARD) */}
+          {activeTab === 'inicio' && (
+            <ProfileDashboard setActiveTab={setActiveTab} />
+          )}
+
           {/* TAB 1: PERFIL */}
           {activeTab === 'perfil' && (
             <ProfileInfo />

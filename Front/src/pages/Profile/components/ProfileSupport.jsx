@@ -3,6 +3,7 @@ import { Plus, AlertTriangle, Send, Paperclip, ArrowLeft, Download } from 'lucid
 import { useUserTickets, useCreateTicket, useReplyTicket } from '../../../queries/useTickets';
 import { useUiStore } from '../../../store/uiStore';
 import { formatDate } from '../../../utils/formatDate';
+import './ProfileSupport.css';
 
 const ProfileSupport = () => {
   const addToast = useUiStore((state) => state.addToast);
@@ -91,203 +92,128 @@ const ProfileSupport = () => {
   };
 
   return (
-    <div className="animate-fade-in">
-      <h3 style={{ fontSize: '1.4rem', marginBottom: '0.5rem' }}>Soporte Técnico & Reclamaciones</h3>
-      <p style={{ color: 'var(--color-text-light)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-        ¿Tienes alguna inconformidad con tu pedido o deseas reportar alguna devolución o retraso? Crea un ticket y te contactaremos por WhatsApp.
-      </p>
+    <div className="support-container">
+      <div className="support-header">
+        <h3 className="support-title">Soporte Técnico & Reclamaciones</h3>
+        <p className="support-subtitle">
+          ¿Tienes alguna inconformidad con tu pedido o deseas reportar alguna devolución o retraso? Crea un ticket y te contactaremos por WhatsApp.
+        </p>
+      </div>
 
       {/* Sub-tabs for Support */}
-      <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '0.75rem', marginBottom: '2rem' }}>
+      <div className="support-tabs">
         <button
+          className={`support-tab ${supportView === 'nuevo' && !selectedTicket ? 'active' : ''}`}
           onClick={() => { setSupportView('nuevo'); setSelectedTicket(null); }}
-          style={{
-            background: 'none',
-            border: 'none',
-            fontWeight: '600',
-            fontSize: '0.9rem',
-            color: supportView === 'nuevo' && !selectedTicket ? 'var(--color-primary)' : 'var(--color-text-light)',
-            borderBottom: supportView === 'nuevo' && !selectedTicket ? '2px solid var(--color-primary)' : 'none',
-            paddingBottom: '0.25rem',
-            cursor: 'pointer',
-            transition: 'var(--transition-smooth)'
-          }}
         >
           Crear Nuevo Ticket
         </button>
         <button
+          className={`support-tab ${supportView === 'historial' && !selectedTicket ? 'active' : ''}`}
           onClick={() => { setSupportView('historial'); setSelectedTicket(null); }}
-          style={{
-            background: 'none',
-            border: 'none',
-            fontWeight: '600',
-            fontSize: '0.9rem',
-            color: supportView === 'historial' ? 'var(--color-primary)' : 'var(--color-text-light)',
-            borderBottom: supportView === 'historial' ? '2px solid var(--color-primary)' : 'none',
-            paddingBottom: '0.25rem',
-            cursor: 'pointer',
-            transition: 'var(--transition-smooth)'
-          }}
         >
           Historial de Tickets
         </button>
       </div>
 
       <div>
-
         {/* Submit Ticket Form */}
         {supportView === 'nuevo' && (
-          <form onSubmit={handleSubmitTicket} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '600px' }} className="animate-fade-in">
-            <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.35rem' }}>
-                Tipo de Solicitud
-              </label>
-              <select
-                value={ticketType}
-                onChange={(e) => setTicketType(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  borderRadius: 'var(--border-radius-sm)',
-                  border: '1px solid var(--color-border)',
-                  backgroundColor: '#FFFFFF',
-                  outline: 'none'
-                }}
+          <div className="support-card animate-fade-in">
+            <form onSubmit={handleSubmitTicket} className="support-form">
+              <div className="support-field">
+                <label>Tipo de Solicitud</label>
+                <select
+                  value={ticketType}
+                  onChange={(e) => setTicketType(e.target.value)}
+                  className="support-select"
+                >
+                  <option value="queja">Queja / Inconformidad</option>
+                  <option value="reclamo">Reclamo Técnico</option>
+                  <option value="devolucion">Solicitud de Devolución</option>
+                  <option value="pedido_pendiente">Pedido Pendiente / Retraso</option>
+                  <option value="otro">Otro Asunto</option>
+                </select>
+              </div>
+
+              <div className="support-field">
+                <label>Asunto corto</label>
+                <input
+                  type="text"
+                  value={ticketSubject}
+                  onChange={(e) => setTicketSubject(e.target.value)}
+                  placeholder="Ej: Retraso en el envío de gorras"
+                  className="support-input"
+                />
+              </div>
+
+              <div className="support-field">
+                <label>Descripción detallada</label>
+                <textarea
+                  value={ticketDescription}
+                  onChange={(e) => setTicketDescription(e.target.value)}
+                  placeholder="Describe ampliamente tu solicitud. Si aplica, incluye el código del pedido..."
+                  className="support-textarea"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmittingTicket}
+                className="support-submit-btn"
               >
-                <option value="queja">Queja / Inconformidad</option>
-                <option value="reclamo">Reclamo Técnico</option>
-                <option value="devolucion">Solicitud de Devolución</option>
-                <option value="pedido_pendiente">Pedido Pendiente / Retraso</option>
-                <option value="otro">Otro Asunto</option>
-              </select>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.35rem' }}>
-                Asunto corto
-              </label>
-              <input
-                type="text"
-                value={ticketSubject}
-                onChange={(e) => setTicketSubject(e.target.value)}
-                placeholder="Ej: Retraso en el envío de gorras"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  borderRadius: 'var(--border-radius-sm)',
-                  border: '1px solid var(--color-border)',
-                  backgroundColor: '#FFFFFF',
-                  outline: 'none'
-                }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.35rem' }}>
-                Descripción detallada
-              </label>
-              <textarea
-                value={ticketDescription}
-                onChange={(e) => setTicketDescription(e.target.value)}
-                placeholder="Describe ampliamente tu solicitud. Si aplica, incluye el código del pedido..."
-                style={{
-                  width: '100%',
-                  height: '140px',
-                  padding: '0.75rem',
-                  borderRadius: 'var(--border-radius-sm)',
-                  border: '1px solid var(--color-border)',
-                  backgroundColor: '#FFFFFF',
-                  outline: 'none',
-                  fontFamily: 'inherit',
-                  fontSize: '0.9rem'
-                }}
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={isSubmittingTicket}
-              style={{
-                backgroundColor: 'var(--color-accent)',
-                color: '#FFFFFF',
-                border: 'none',
-                padding: '0.85rem 2rem',
-                borderRadius: 'var(--border-radius-sm)',
-                fontWeight: '600',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem',
-                transition: 'var(--transition-smooth)',
-                opacity: isSubmittingTicket ? 0.7 : 1,
-                width: 'fit-content'
-              }}
-            >
-              <Plus size={18} />
-              <span>{isSubmittingTicket ? 'Creando Ticket...' : 'Generar Ticket'}</span>
-            </button>
-          </form>
+                <Plus size={18} />
+                <span>{isSubmittingTicket ? 'Creando Ticket...' : 'Generar Ticket'}</span>
+              </button>
+            </form>
+          </div>
         )}
 
         {/* Selected Ticket Thread View */}
         {selectedTicket && (
-          <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '700px' }}>
+          <div className="animate-fade-in">
             <button
               onClick={() => setSelectedTicket(null)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'none', border: 'none',
-                color: 'var(--color-text-light)', cursor: 'pointer', width: 'fit-content', padding: 0,
-                fontWeight: '600', fontSize: '0.9rem'
-              }}
+              className="support-back-btn"
             >
               <ArrowLeft size={16} /> Volver al historial
             </button>
 
-            <div style={{ backgroundColor: '#FDFCFB', border: '1px solid var(--color-border)', borderRadius: 'var(--border-radius-sm)', padding: '1.25rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <span style={{ fontWeight: '600', fontSize: '0.75rem', textTransform: 'uppercase', backgroundColor: '#EAEAEA', padding: '4px 10px', borderRadius: '4px' }}>
+            <div className="support-card">
+              <div className="support-ticket-header">
+                <span className="ticket-type-badge">
                   {selectedTicket.type}
                 </span>
-                <span style={{ fontWeight: '700', fontSize: '0.75rem', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '4px', color: '#FFFFFF', backgroundColor: selectedTicket.status === 'open' ? 'var(--color-primary)' : selectedTicket.status === 'in_progress' ? 'var(--color-accent)' : selectedTicket.status === 'resolved' ? '#2E7D32' : '#888' }}>
+                <span className={`ticket-status-badge ${selectedTicket.status}`}>
                   {selectedTicket.status === 'open' ? 'Abierto' : selectedTicket.status === 'in_progress' ? 'En Curso' : selectedTicket.status === 'resolved' ? 'Resuelto' : 'Cerrado'}
                 </span>
               </div>
-              <h4 style={{ fontSize: '1.1rem', margin: '0 0 0.5rem 0' }}>{selectedTicket.subject}</h4>
-              <p style={{ color: 'var(--color-text-light)', fontSize: '0.9rem', margin: '0 0 1rem 0' }}>{selectedTicket.description}</p>
-              <span style={{ fontSize: '0.75rem', color: '#888' }}>{formatDate(selectedTicket.createdAt)}</span>
+              <h4 className="support-ticket-subject">{selectedTicket.subject}</h4>
+              <p className="support-ticket-desc" style={{ WebkitLineClamp: 'unset' }}>{selectedTicket.description}</p>
+              <div className="support-ticket-date">Generado el {formatDate(selectedTicket.createdAt)}</div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+            <div className="support-thread-messages">
               {selectedTicket.messages && selectedTicket.messages.map((msg, idx) => (
-                <div key={idx} style={{
-                  alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
-                  backgroundColor: msg.sender === 'user' ? 'var(--color-primary)' : '#EAEAEA',
-                  color: msg.sender === 'user' ? '#FFFFFF' : 'var(--color-text)',
-                  padding: '1rem',
-                  borderRadius: '8px',
-                  maxWidth: '80%',
-                  borderBottomRightRadius: msg.sender === 'user' ? '0' : '8px',
-                  borderBottomLeftRadius: msg.sender === 'user' ? '8px' : '0',
-                }}>
-                  <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', whiteSpace: 'pre-wrap' }}>{msg.content}</p>
+                <div key={idx} className={`support-message ${msg.sender === 'user' ? 'user' : 'admin'}`}>
+                  <p className="support-message-content">{msg.content}</p>
+                  
                   {msg.attachment && (
-                    <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem', alignItems: 'center', background: msg.sender === 'user' ? '#1E40AF' : '#E2E8F0', padding: '0.5rem 0.75rem', borderRadius: '6px', border: `1px solid ${msg.sender === 'user' ? '#1D4ED8' : '#CBD5E1'}`, width: 'fit-content' }}>
-                      <Paperclip size={16} color={msg.sender === 'user' ? '#DBEAFE' : '#475569'} />
-                      <span style={{ fontSize: '0.85rem', color: msg.sender === 'user' ? '#DBEAFE' : '#475569', fontWeight: '500' }}>
-                        Archivo adjunto
-                      </span>
-                      <div style={{ display: 'flex', gap: '0.5rem', marginLeft: '0.5rem' }}>
-                        <button type="button" onClick={() => setPreviewAttachment(msg.attachment)} style={{ fontSize: '0.75rem', color: msg.sender === 'user' ? '#FFF' : '#2563EB', textDecoration: 'none', fontWeight: '600', padding: '4px 8px', backgroundColor: msg.sender === 'user' ? 'rgba(255,255,255,0.2)' : 'rgba(37, 99, 235, 0.1)', borderRadius: '4px', transition: 'background-color 0.2s', border: 'none', cursor: 'pointer' }}>
+                    <div className="support-attachment">
+                      <Paperclip size={16} />
+                      <span style={{ fontSize: '0.85rem', fontWeight: '500' }}>Archivo adjunto</span>
+                      <div className="attachment-actions">
+                        <button type="button" onClick={() => setPreviewAttachment(msg.attachment)} className="attachment-btn">
                           Ver
                         </button>
-                        <button type="button" onClick={() => handleDownload(msg.attachment)} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: msg.sender === 'user' ? '#FFF' : '#2563EB', textDecoration: 'none', fontWeight: '600', padding: '4px 8px', backgroundColor: msg.sender === 'user' ? 'rgba(255,255,255,0.2)' : 'rgba(37, 99, 235, 0.1)', borderRadius: '4px', transition: 'background-color 0.2s', border: 'none', cursor: 'pointer' }}>
+                        <button type="button" onClick={() => handleDownload(msg.attachment)} className="attachment-btn">
                           <Download size={14} /> Descargar
                         </button>
                       </div>
                     </div>
                   )}
-                  <div style={{ fontSize: '0.7rem', opacity: 0.8, textAlign: 'right', marginTop: '0.5rem' }}>
+                  
+                  <div className="support-message-date">
                     {formatDate(msg.createdAt)}
                   </div>
                 </div>
@@ -295,18 +221,16 @@ const ProfileSupport = () => {
             </div>
 
             {selectedTicket.status !== 'closed' && selectedTicket.status !== 'resolved' && (
-              <form onSubmit={handleReplySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
+              <form onSubmit={handleReplySubmit} className="support-reply-form">
                 <textarea
                   value={replyContent}
                   onChange={(e) => setReplyContent(e.target.value)}
                   placeholder="Escribe tu respuesta..."
-                  style={{
-                    width: '100%', height: '80px', padding: '0.75rem', borderRadius: 'var(--border-radius-sm)',
-                    border: '1px solid var(--color-border)', backgroundColor: '#FFFFFF', outline: 'none', fontFamily: 'inherit', fontSize: '0.9rem'
-                  }}
+                  className="support-textarea"
+                  style={{ minHeight: '80px' }}
                 />
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--color-text-light)' }}>
+                <div className="support-reply-controls">
+                  <label className="file-upload-label">
                     <Paperclip size={18} />
                     <span>{replyFile ? replyFile.name : 'Adjuntar archivo'}</span>
                     <input type="file" onChange={(e) => setReplyFile(e.target.files[0])} style={{ display: 'none' }} accept="image/*,.pdf" />
@@ -315,13 +239,10 @@ const ProfileSupport = () => {
                   <button
                     type="submit"
                     disabled={replyTicketMutation.isLoading}
-                    style={{
-                      backgroundColor: 'var(--color-accent)', color: '#FFFFFF', border: 'none', padding: '0.6rem 1.5rem',
-                      borderRadius: 'var(--border-radius-sm)', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
-                      opacity: replyTicketMutation.isLoading ? 0.7 : 1
-                    }}
+                    className="support-submit-btn"
+                    style={{ marginTop: 0 }}
                   >
-                    <Send size={16} /> Enviar
+                    <Send size={16} /> Enviar Respuesta
                   </button>
                 </div>
               </form>
@@ -333,60 +254,34 @@ const ProfileSupport = () => {
         {supportView === 'historial' && !selectedTicket && (
           <div className="animate-fade-in">
             {isLoadingTickets ? (
-              <p>Cargando tickets...</p>
+              <div className="wishlist-state">
+                <Loader size={32} className="spin" color="var(--green-brand)" />
+                <p>Cargando tickets...</p>
+              </div>
             ) : !tickets || tickets.length === 0 ? (
-              <p style={{ opacity: 0.7, fontSize: '0.9rem' }}>No tienes tickets creados actualmente.</p>
+              <div className="wishlist-empty">
+                <AlertTriangle size={48} strokeWidth={1} color="var(--color-text-light)" />
+                <h3 style={{fontFamily: 'var(--font-display)', margin: 0, color: 'var(--text-primary)'}}>Sin tickets</h3>
+                <p>No tienes tickets creados actualmente.</p>
+              </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="support-tickets-grid">
                 {tickets.map((t) => (
                   <div
                     key={t._id}
                     onClick={() => setSelectedTicket(t)}
-                    style={{
-                      border: '1px solid var(--color-border)',
-                      borderRadius: 'var(--border-radius-sm)',
-                      padding: '1.25rem',
-                      backgroundColor: '#FDFCFB',
-                      boxShadow: 'var(--shadow-sm)',
-                      cursor: 'pointer',
-                      transition: 'var(--transition-smooth)'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                    onMouseLeave={(e) => e.currentTarget.style.transform = 'none'}
+                    className="support-ticket-item"
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                      <span style={{
-                        fontWeight: '600',
-                        fontSize: '0.75rem',
-                        textTransform: 'uppercase',
-                        backgroundColor: '#EAEAEA',
-                        padding: '4px 10px',
-                        borderRadius: '4px',
-                        color: 'var(--color-text)'
-                      }}>{t.type}</span>
-
-                      <span style={{
-                        fontWeight: '700',
-                        fontSize: '0.75rem',
-                        textTransform: 'uppercase',
-                        padding: '4px 10px',
-                        borderRadius: '4px',
-                        color: '#FFFFFF',
-                        backgroundColor: t.status === 'open' ? 'var(--color-primary)'
-                          : t.status === 'in_progress' ? 'var(--color-accent)'
-                            : t.status === 'resolved' ? '#2E7D32' : '#888'
-                      }}>
+                    <div className="support-ticket-header">
+                      <span className="ticket-type-badge">{t.type}</span>
+                      <span className={`ticket-status-badge ${t.status}`}>
                         {t.status === 'open' ? 'Abierto' : t.status === 'in_progress' ? 'En Curso' : t.status === 'resolved' ? 'Resuelto' : 'Cerrado'}
                       </span>
                     </div>
 
-                    <h5 style={{ fontSize: '1rem', fontWeight: '700', margin: '0 0 0.5rem 0', color: 'var(--color-text)' }}>{t.subject}</h5>
-                    <p style={{ fontSize: '0.9rem', color: 'var(--color-text-light)', margin: '0 0 1rem 0', lineHeight: '1.5' }}>
-                      {t.description}
-                    </p>
-                    <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '0.75rem' }}>
-                      <span style={{ fontSize: '0.75rem', color: '#888' }}>Generado el {formatDate(t.createdAt)}</span>
-                    </div>
+                    <h5 className="support-ticket-subject">{t.subject}</h5>
+                    <p className="support-ticket-desc">{t.description}</p>
+                    <div className="support-ticket-date">Generado el {formatDate(t.createdAt)}</div>
                   </div>
                 ))}
               </div>

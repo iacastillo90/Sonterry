@@ -262,15 +262,15 @@ const AdminOrders = ({ orders, loadingOrders, addToast, products = [], categorie
 
   return (
     <div className="animate-fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
-        <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <div style={{ flex: '1 1 200px' }}>
           <h3 className="admin-tab-title">Despachos & Logística de Ventas</h3>
           <p style={{ color: 'var(--color-text-light)', fontSize: '0.88rem' }}>Gestión de envíos y registro de órdenes manuales.</p>
         </div>
         <Button variant="primary" onClick={() => {
           setDispatchForm({ company: 'Servientrega', trackingNumber: '', dispatchDate: '', estimatedDeliveryDate: '', notes: '' });
           setShowManualModal(true);
-        }} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        }} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap', flexShrink: 0 }}>
           <PlusCircle size={16} /> Venta Manual
         </Button>
       </div>
@@ -327,23 +327,23 @@ const AdminOrders = ({ orders, loadingOrders, addToast, products = [], categorie
 
             return (
               <div key={order._id} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--border-radius-md)', padding: '1.5rem', backgroundColor: '#FFFFFF', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #F0F0F0', paddingBottom: '0.75rem' }}>
-                  <div>
-                    <span style={{ fontWeight: '700', fontSize: '1.05rem' }}>Orden #{order._id.slice(-6)}</span>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--color-text-light)', marginLeft: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #F0F0F0', paddingBottom: '0.75rem', flexWrap: 'wrap', gap: '1rem' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: 0, flex: 1 }}>
+                    <span style={{ fontWeight: '700', fontSize: '1.1rem' }}>Orden #{order._id.slice(-6)}</span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--color-text-light)' }}>
                       {formatDate(order.createdAt)} • {order.paymentMethod ? order.paymentMethod.toUpperCase() : 'TARJETA'}
                     </span>
                   </div>
-                  <span style={{ backgroundColor: statusBg, color: '#FFFFFF', padding: '2px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', textTransform: 'uppercase' }}>
+                  <span style={{ backgroundColor: statusBg, color: '#FFFFFF', padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', flexShrink: 0 }}>
                     {order.status === 'paid' ? 'Pagado (Prep.)' : order.status === 'shipped' ? 'En Tránsito' : order.status}
                   </span>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1.5rem', fontSize: '0.88rem' }}>
-                  <div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', fontSize: '0.88rem' }}>
+                  <div style={{ flex: '1 1 250px', minWidth: 0 }}>
                     <h5 style={{ margin: '0 0 0.5rem 0', fontWeight: '700' }}>Información de Envío</h5>
                     <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                      <li>Cliente: <strong>{order.user?.name || 'Cliente'}</strong> ({order.user?.email})</li>
+                      <li style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Cliente: <strong>{order.user?.name || 'Cliente'}</strong> ({order.user?.email})</li>
                       <li>Teléfono / WhatsApp: <strong>{order.shippingAddress?.phone}</strong></li>
                       <li>Dirección: <strong>{order.shippingAddress?.address}, {order.shippingAddress?.city}</strong></li>
                     </ul>
@@ -355,13 +355,13 @@ const AdminOrders = ({ orders, loadingOrders, addToast, products = [], categorie
                     )}
                   </div>
 
-                  <div style={{ borderLeft: '1px solid #F0F0F0', paddingLeft: '1.5rem' }}>
+                  <div style={{ flex: '1 1 250px', minWidth: 0, background: '#F8FAFC', padding: '1rem', borderRadius: '8px', border: '1px solid #F1F5F9' }}>
                     <h5 style={{ margin: '0 0 0.5rem 0', fontWeight: '700' }}>Artículos</h5>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                       {order.items?.map((item, idx) => (
                         <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                          <span>{item.product?.name || item.name} (x{item.quantity})</span>
-                          <span>{formatCurrency((item.price || 0) * item.quantity)}</span>
+                          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginRight: '0.5rem' }}>{item.product?.name || item.name} (x{item.quantity})</span>
+                          <span style={{ flexShrink: 0, fontWeight: 600 }}>{formatCurrency((item.price || 0) * item.quantity)}</span>
                         </div>
                       ))}
                       <div style={{ borderTop: '1px solid #EFEFEF', marginTop: '0.5rem', paddingTop: '0.5rem', display: 'flex', justifyContent: 'space-between', fontWeight: '700' }}>
@@ -372,21 +372,21 @@ const AdminOrders = ({ orders, loadingOrders, addToast, products = [], categorie
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', borderTop: '1px solid #F0F0F0', paddingTop: '0.75rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', borderTop: '1px solid #F0F0F0', paddingTop: '0.75rem', flexWrap: 'wrap' }}>
                   {['pending', 'paid', 'shipped'].includes(order.status) && (
-                    <Button variant="outline" onClick={() => handleOpenDispatch(order)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.4rem 0.75rem' }}>
-                      <Edit size={14} /> {order.status === 'pending' ? 'Despachar (Aprobar y Enviar)' : 'Editar Despacho'}
+                    <Button variant="outline" onClick={() => handleOpenDispatch(order)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.4rem 0.75rem', flex: '1 1 auto', justifyContent: 'center' }}>
+                      <Truck size={14} /> {order.status === 'pending' ? 'Despachar (Aprobar)' : 'Editar Despacho'}
                     </Button>
                   )}
                   {order.status === 'shipped' && (
-                    <Button variant="primary" onClick={() => handleDeliverOrder(order._id)} disabled={triggeringOrderId === order._id} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.4rem 0.75rem' }}>
+                    <Button variant="primary" onClick={() => handleDeliverOrder(order._id)} disabled={triggeringOrderId === order._id} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.4rem 0.75rem', flex: '1 1 auto', justifyContent: 'center' }}>
                       <CheckCircle size={14} /> Entregado
                     </Button>
                   )}
-                  <Button variant="outline" onClick={() => handleOpenEdit(order)} disabled={triggeringOrderId === order._id} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.4rem 0.75rem', color: '#10B981', borderColor: '#10B981' }}>
+                  <Button variant="outline" onClick={() => handleOpenEdit(order)} disabled={triggeringOrderId === order._id} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.4rem 0.75rem', color: '#10B981', borderColor: '#10B981', flex: '1 1 auto', justifyContent: 'center' }}>
                     <Edit size={14} /> Editar
                   </Button>
-                  <Button variant="outline" onClick={() => confirmDeleteOrder(order._id)} disabled={triggeringOrderId === order._id} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.4rem 0.75rem', color: '#D9534F', borderColor: '#F5C6CB' }}>
+                  <Button variant="outline" onClick={() => confirmDeleteOrder(order._id)} disabled={triggeringOrderId === order._id} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', padding: '0.4rem 0.75rem', color: '#D9534F', borderColor: '#F5C6CB', flex: '1 1 auto', justifyContent: 'center' }}>
                     <Trash2 size={14} /> Eliminar
                   </Button>
                 </div>
