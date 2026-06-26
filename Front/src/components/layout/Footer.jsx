@@ -189,7 +189,7 @@ const Footer = () => {
                   SonTerry
                 </span>
                 <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-secondary)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                  Accesorios
+                  Tienda
                 </span>
               </div>
             </div>
@@ -221,7 +221,7 @@ const Footer = () => {
 
         <div className="footer-bottom">
           <p>© {new Date().getFullYear()} SonTerry. Todos los derechos reservados.</p>
-          <p>Creado con dedicación por Iván Castillo.</p>
+          <p>Creado con dedicación por KronoSoft.</p>
         </div>
       </footer>
     </>
