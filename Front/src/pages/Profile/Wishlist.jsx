@@ -58,7 +58,7 @@ const Wishlist = () => {
           <div key={product._id} className={`wishlist-card ${!product.isActive ? 'inactive' : ''}`}>
             <Link to={`/productos/${product.slug}`} className="wishlist-card-img">
               <img
-                src={product.images?.[0]?.url || '/placeholder.svg'}
+                src={product.images?.[0] || 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&h=400&fit=crop'}
                 alt={product.name}
               />
             </Link>

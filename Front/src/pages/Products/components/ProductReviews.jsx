@@ -24,6 +24,8 @@ const ProductReviews = ({ productId }) => {
       setReviews(revs);
     } catch (err) {
       console.error('Error fetching reviews:', err);
+    } finally {
+      setLoadingReviews(false);
     }
   }, [productId]);
 
@@ -47,7 +49,7 @@ const ProductReviews = ({ productId }) => {
         rating,
         comment
       });
-      addToast('¡Reseña publicada con éxito!', 'success');
+      addToast('¡Reseña enviada! Aparecerá aquí una vez sea aprobada por moderación.', 'success');
       setComment('');
       setRating(5);
       loadReviews();
@@ -172,9 +174,14 @@ const ProductReviews = ({ productId }) => {
               />
             </div>
 
-            <Button type="submit" variant="primary" disabled={submittingReview}>
-              {submittingReview ? 'Publicando...' : 'Publicar Comentario'}
-            </Button>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+              <Button type="submit" variant="primary" disabled={submittingReview}>
+                {submittingReview ? 'Enviando...' : 'Enviar para Moderación'}
+              </Button>
+              <span style={{ fontSize: '0.8rem', color: '#64748B', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <AlertCircle size={14} /> Todas las reseñas son revisadas antes de su publicación.
+              </span>
+            </div>
           </form>
         ) : (
           <div style={{

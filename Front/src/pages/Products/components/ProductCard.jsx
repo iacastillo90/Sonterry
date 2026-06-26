@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { formatCurrency } from '../../../utils/formatCurrency';
 import { useCartStore } from '../../../store/cartStore';
 import { useUiStore } from '../../../store/uiStore';
+import { useWishlist, useToggleWishlist } from '../../../queries/useWishlist';
 import { Heart, ShoppingBag } from 'lucide-react';
 import '../Products.css'; // Importamos los estilos para que la card no se rompa fuera de ProductList
 
@@ -48,15 +49,25 @@ const DEFAULT_TYPE = {
 };
 
 const ProductCard = ({ product }) => {
-  const [wishlisted, setWishlisted] = useState(false);
   const addToCart = useCartStore((s) => s.addToCart);
   const addToast  = useUiStore((s) => s.addToast);
+  
+  const { data: wishlistData } = useWishlist();
+  const toggleWishlist = useToggleWishlist();
+  
+  const wishlisted = wishlistData?.products?.some(p => p._id === product._id) || false;
 
   const handleAdd = (e) => {
     e.preventDefault();
     e.stopPropagation();
     addToCart(product, 1);
     addToast(`${product.name} añadido al carrito`, 'success');
+  };
+
+  const handleToggleWishlist = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlist.mutate(product._id);
   };
 
   const typeKey   = product.type?.toLowerCase().replace(/\s+/g, '') ?? '';
@@ -92,8 +103,9 @@ const ProductCard = ({ product }) => {
           {/* Wishlist */}
           <button
             className={`snt-card__wish ${wishlisted ? 'active' : ''}`}
-            onClick={(e) => { e.preventDefault(); setWishlisted((v) => !v); }}
+            onClick={handleToggleWishlist}
             aria-label="Agregar a favoritos"
+            disabled={toggleWishlist.isPending}
           >
             <Heart
               size={15}

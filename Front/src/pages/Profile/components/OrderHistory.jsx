@@ -11,6 +11,7 @@ import { createWompiTransaction } from '../../../services/wompi.service';
 import { useUiStore } from '../../../store/uiStore';
 import EditItemsModal from './EditItemsModal';
 import EditShippingModal from './EditShippingModal';
+import ReviewOrderModal from './ReviewOrderModal';
 
 const CANCELABLE_STATUSES = ['pending', 'paid'];
 
@@ -113,6 +114,21 @@ const OrderHistory = () => {
   const [editItemsOrder, setEditItemsOrder] = useState(null);
   const [editShippingOrder, setEditShippingOrder] = useState(null);
   const [statusFilter, setStatusFilter] = useState('');
+  const [orderToReview, setOrderToReview] = useState(null);
+
+  React.useEffect(() => {
+    if (orders && orders.length > 0) {
+      // Find the first delivered order that hasn't been dismissed OR submitted
+      const deliveredOrder = orders.find(o => 
+        o.status === 'delivered' && 
+        !localStorage.getItem(`has_dismissed_review_${o._id}`) &&
+        !localStorage.getItem(`has_submitted_review_${o._id}`)
+      );
+      if (deliveredOrder) {
+        setOrderToReview(deliveredOrder);
+      }
+    }
+  }, [orders]);
 
   const handlePayNow = async (e, order) => {
     e.stopPropagation();
@@ -350,6 +366,32 @@ const OrderHistory = () => {
                     Cancelar pedido
                   </button>
                 )}
+                {order.status === 'delivered' && !localStorage.getItem(`has_submitted_review_${order._id}`) && (
+                  <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      setOrderToReview(order);
+                    }}
+                    style={{
+                      padding: '0.4rem 1rem',
+                      borderRadius: '6px',
+                      border: '1px solid #FCD34D',
+                      backgroundColor: '#FFFBEB',
+                      color: '#D97706',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                      fontSize: '0.8rem',
+                      transition: 'var(--transition-smooth)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.3rem'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#FEF3C7'}
+                    onMouseLeave={e => e.currentTarget.style.backgroundColor = '#FFFBEB'}
+                  >
+                    ★ Dejar Reseña
+                  </button>
+                )}
               </div>
             </div>
           );
@@ -383,6 +425,13 @@ const OrderHistory = () => {
         <EditShippingModal
           order={editShippingOrder}
           onClose={() => setEditShippingOrder(null)}
+        />
+      )}
+
+      {orderToReview && (
+        <ReviewOrderModal
+          order={orderToReview}
+          onClose={() => setOrderToReview(null)}
         />
       )}
     </div>

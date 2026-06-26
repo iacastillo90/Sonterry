@@ -34,6 +34,8 @@
           border-bottom: 1px solid var(--border-subtle);
           display: flex;
           align-items: center;
+          position: relative;
+          z-index: 50;
         }
         .nav-main-inner {
           display: flex;
@@ -157,6 +159,8 @@
           border-bottom: 1px solid var(--border-subtle);
           display: flex;
           align-items: center;
+          position: relative;
+          z-index: 40;
         }
         .nav-sub-inner {
           display: flex;

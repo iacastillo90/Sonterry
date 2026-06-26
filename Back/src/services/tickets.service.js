@@ -1,6 +1,7 @@
 const Ticket = require('../models/ticket.model');
 const AppError = require('../errors/AppError');
 const { addNotificationJob } = require('../jobs/notificationQueue');
+const notificationsService = require('./notifications.service');
 const logger = require('../logs/logger');
 
 const createTicket = async (userId, ticketData, userName) => {
@@ -18,6 +19,14 @@ const createTicket = async (userId, ticketData, userName) => {
     ticketType: ticket.type
   }).catch(err => logger.error(`[Tickets] Failed to enqueue ticket notification: ${err.message}`));
 
+  // In-app notification for admin
+  notificationsService.createNotification({
+    targetRole: 'admin',
+    title: 'Nuevo Ticket',
+    message: `${userName || 'Cliente'} ha abierto un ticket: ${ticket.subject}.`,
+    link: '/admin',
+  }).catch(err => logger.error(`[Notifications] Failed to create in-app notification: ${err.message}`));
+
   return ticket;
 };
 
@@ -30,8 +39,17 @@ const getAllTickets = async () => {
 };
 
 const updateTicketStatus = async (id, status) => {
-  const ticket = await Ticket.findByIdAndUpdate(id, { status }, { new: true });
+  const ticket = await Ticket.findByIdAndUpdate(id, { status }, { new: true }).populate('user');
   if (!ticket) throw new AppError('Ticket no encontrado', 404);
+
+  notificationsService.createNotification({
+    user: ticket.user._id,
+    targetRole: 'client',
+    title: 'Actualización de Ticket',
+    message: `Tu ticket "${ticket.subject}" ha cambiado de estado a: ${status}.`,
+    link: '/profile',
+  }).catch(err => logger.error(`[Notifications] Failed to create in-app notification: ${err.message}`));
+
   return ticket;
 };
 
@@ -71,6 +89,16 @@ const replyToTicket = async (id, sender, content, statusUpdate, user, file) => {
   if (sender === 'admin') {
     // Notificar al usuario (Email)
     sendTicketReplyToUser(ticket.user.email, ticket, content).catch(err => logger.error(`[Tickets] Email al usuario falló: ${err.message}`));
+    
+    // In-app notification to client
+    notificationsService.createNotification({
+      user: ticket.user._id,
+      targetRole: 'client',
+      title: 'Respuesta en Ticket',
+      message: `El soporte respondió a tu ticket: ${ticket.subject}.`,
+      link: '/profile',
+    }).catch(err => logger.error(`[Notifications] Failed to create in-app notification: ${err.message}`));
+
   } else {
     // Notificar al admin (Email y Dashboard)
     sendTicketReplyToAdmin(ticket, content, user).catch(err => logger.error(`[Tickets] Email al admin falló: ${err.message}`));
@@ -82,6 +110,14 @@ const replyToTicket = async (id, sender, content, statusUpdate, user, file) => {
       customerName: user.name || 'Cliente',
       ticketType: ticket.type
     }).catch(err => logger.error(`[Tickets] Notification job falló: ${err.message}`));
+
+    // In-app notification to admin
+    notificationsService.createNotification({
+      targetRole: 'admin',
+      title: 'Respuesta en Ticket',
+      message: `${user.name || 'Cliente'} respondió al ticket: ${ticket.subject}.`,
+      link: '/admin',
+    }).catch(err => logger.error(`[Notifications] Failed to create in-app notification: ${err.message}`));
   }
 
   return ticket;

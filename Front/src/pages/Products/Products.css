@@ -261,7 +261,7 @@
           justify-content: center;
           cursor: pointer;
           transition: all 0.22s ease;
-          z-index: 2;
+          z-index: 10;
           padding: 0;
         }
         .snt-card__wish:hover {

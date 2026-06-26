@@ -6,6 +6,7 @@ const AppError = require('../errors/AppError');
 const { getCart } = require('./cart.service');
 const { addNotificationJob } = require('../jobs/notificationQueue');
 const { sendOrderConfirmation, sendOrderStatusUpdate, sendOrderEdited, sendOrderDeleted } = require('./email.service');
+const notificationsService = require('./notifications.service');
 const logger = require('../logs/logger');
 
 const deductOrderStock = async (order) => {
@@ -72,6 +73,14 @@ const createOrder = async (userId, shippingAddress, customerName, paymentMethod 
     customerName: customerName || 'Cliente',
   }).catch(err => logger.error(`[Orders] Failed to enqueue notification: ${err.message}`));
 
+  // Notificar al admin in-app
+  notificationsService.createNotification({
+    targetRole: 'admin',
+    title: 'Nuevo pedido',
+    message: `${customerName || 'Un cliente'} ha realizado un pedido de $${total}.`,
+    link: '/admin',
+  }).catch(err => logger.error(`[Notifications] Failed to create in-app notification: ${err.message}`));
+
   User.findById(userId).select('email').then(user => {
     if (user?.email) sendOrderConfirmation(user.email, order);
   }).catch(err => logger.error(`[Orders] Failed to send email: ${err.message}`));
@@ -100,6 +109,15 @@ const updateOrderStatus = async (orderId, newStatus) => {
     customerName: order.user.name,
   }).catch(err => logger.error(`[Orders] Failed to enqueue notification: ${err.message}`));
 
+  // Notificar al cliente in-app
+  notificationsService.createNotification({
+    user: order.user._id,
+    targetRole: 'client',
+    title: 'Actualización de Pedido',
+    message: `El pedido #${order._id.toString().slice(-6).toUpperCase()} ha pasado a estado: ${newStatus}.`,
+    link: '/profile',
+  }).catch(err => logger.error(`[Notifications] Failed to create in-app notification: ${err.message}`));
+
   if (order.user?.email) {
     sendOrderStatusUpdate(order.user.email, order, previousStatus);
   }
@@ -113,7 +131,7 @@ const getUserOrders = async (userId, filters = {}) => {
   const skip = (page - 1) * limit;
 
   const [data, total] = await Promise.all([
-    Order.find({ user: userId }).sort({ createdAt: -1 }).skip(skip).limit(limit),
+    Order.find({ user: userId }).populate('items.product', 'name images').sort({ createdAt: -1 }).skip(skip).limit(limit),
     Order.countDocuments({ user: userId }),
   ]);
 
@@ -168,6 +186,14 @@ const updateOrderDispatch = async (orderId, shippingDetails) => {
 
   if (order.status !== previousStatus) {
     sendOrderStatusUpdate(order.user.email, order, previousStatus).catch(err => logger.error(err));
+    // Notificar in-app
+    notificationsService.createNotification({
+      user: order.user._id,
+      targetRole: 'client',
+      title: 'Actualización de Pedido',
+      message: `El pedido #${order._id.toString().slice(-6).toUpperCase()} ha pasado a estado: ${order.status}.`,
+      link: '/profile',
+    }).catch(err => logger.error(`[Notifications] Failed to create in-app notification: ${err.message}`));
   }
 
   return order;

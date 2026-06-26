@@ -7,6 +7,7 @@ import { ShoppingBag, User as UserIcon, Search, Truck, Store, Phone, MapPin, Cof
 import logo from '../../assets/img/logo23.png';
 import api from '../../services/api';
 import SearchAutocomplete from './SearchAutocomplete';
+import NotificationBell from './NotificationBell';
 import './Navbar.css';
 
 const WhatsappIcon = ({ size = 24, color = "currentColor", strokeWidth = 2, ...props }) => (
@@ -104,6 +105,7 @@ const Navbar = () => {
 
               {isAuthenticated ? (
                 <>
+                  <NotificationBell asAdmin={user?.role === 'admin'} />
                   <Link to={user?.role === 'admin' ? '/admin' : '/profile'} className="nav-action-btn">
                     <UserIcon size={22} color="var(--green-deep)" />
                     <span>Mi Cuenta</span>

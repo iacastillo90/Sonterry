@@ -31,7 +31,8 @@ import {
   PlusCircle,
   Layers,
   Sparkles,
-  Landmark
+  Landmark,
+  MessageSquare
 } from 'lucide-react';
 import './Admin.css';
 import AdminProducts from './components/AdminProducts';
@@ -40,6 +41,7 @@ import AdminOrders from './components/AdminOrders';
 import AdminTickets from './components/AdminTickets';
 import AdminUsers from './components/AdminUsers';
 import AdminBankAccounts from './components/AdminBankAccounts';
+import AdminReviews from './components/AdminReviews';
 
 const AdminDashboard = () => {
   const location = useLocation();
@@ -121,18 +123,20 @@ const AdminDashboard = () => {
             Administración centralizada de inventario, ventas, clientes y tickets de soporte.
           </span>
         </div>
-        <button 
-          onClick={() => {
-            loadCatalogData();
-            fetchUsersList();
-            refetchOrders();
-            refetchTickets();
-            addToast('Datos actualizados', 'info');
-          }}
-          className="admin-sync-btn"
-        >
-          <RefreshCw size={14} /> Sincronizar
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button 
+            onClick={() => {
+              loadCatalogData();
+              fetchUsersList();
+              refetchOrders();
+              refetchTickets();
+              addToast('Datos actualizados', 'info');
+            }}
+            className="admin-sync-btn"
+          >
+            <RefreshCw size={14} /> Sincronizar
+          </button>
+        </div>
       </div>
 
       <div className="admin-layout">
@@ -190,6 +194,14 @@ const AdminDashboard = () => {
           >
             <Landmark size={18} />
             <span>Cuentas Bancarias</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('resenas')}
+            className={`admin-tab-btn ${activeTab === 'resenas' ? 'active' : 'inactive'}`}
+          >
+            <MessageSquare size={18} />
+            <span>Moderación de Reseñas</span>
           </button>
 
           <button
@@ -351,7 +363,7 @@ const AdminDashboard = () => {
                                 <span style={{ fontWeight: 600, color: '#334155', fontSize: '0.85rem' }}>{u.name}</span>
                                 <span style={{ fontSize: '0.75rem', color: '#94A3B8' }}>{u.email}</span>
                               </div>
-                              <span style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 600, backgroundColor: u.role === 'admin' ? '#FEF08A' : '#F1F5F9', color: u.role === 'admin' ? '#A16207' : '#64748B', padding: '2px 8px', borderRadius: '12px' }}>
+                              <span style={{ fontSize: '0.75rem', fontWeight: 600, backgroundColor: u.role === 'admin' ? '#FEF08A' : '#F1F5F9', color: u.role === 'admin' ? '#A16207' : '#64748B', padding: '2px 8px', borderRadius: '12px' }}>
                                 {u.role === 'admin' ? 'Admin' : 'Cliente'}
                               </span>
                             </div>
@@ -424,6 +436,11 @@ const AdminDashboard = () => {
           {/* TAB 7: BANK ACCOUNTS MANAGEMENT */}
           {activeTab === 'bancos' && (
             <AdminBankAccounts addToast={addToast} />
+          )}
+
+          {/* TAB 8: REVIEWS MODERATION */}
+          {activeTab === 'resenas' && (
+            <AdminReviews />
           )}
 
         </div>
