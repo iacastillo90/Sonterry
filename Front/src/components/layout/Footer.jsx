@@ -1,7 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import footerWave from '../../assets/img/Footer2.png';
 import logoImg from '../../assets/img/logo.jpg';
-import { Instagram, MessageCircle, PlayCircle } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -196,26 +196,51 @@ const Footer = () => {
             <p>
               Taller artesanal de personalización textil. Expertos en estampado digital DTF con excelente calidad.
             </p>
-            <div className="footer-socials">
-              <a href="#" className="footer-social-icon"><Instagram size={20} /></a>
-              <a href="#" className="footer-social-icon"><MessageCircle size={20} /></a>
-              <a href="#" className="footer-social-icon"><PlayCircle size={20} /></a>
-            </div>
           </div>
 
           {/* Contact */}
           <div className="footer-col">
             <h4>Contáctanos</h4>
-            <p><strong>WhatsApp:</strong> +57 301 826 7373</p>
-            <p><strong>Email:</strong> taller@sonterry.com</p>
+            <p>
+              <strong>WhatsApp:</strong>{' '}
+              <a
+                href="https://wa.me/573242796288"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'inherit', textDecoration: 'none', fontWeight: 600 }}
+              >
+                +57 324 2796288
+              </a>
+            </p>
+            <p style={{
+              fontSize: '0.78rem',
+              color: 'var(--terra-mid, #C97D5C)',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px'
+            }}>
+              💬 Solo mensajes — no llamadas
+            </p>
           </div>
 
           {/* Info */}
           <div className="footer-col">
             <h4>Información</h4>
-            <p>Políticas de Envío</p>
-            <p>Términos y Condiciones</p>
-            <p>Preguntas Frecuentes</p>
+            <p>
+              <Link to="/politicas-envio" style={{ color: 'inherit', textDecoration: 'none' }}
+                onMouseEnter={e => e.target.style.color = 'var(--green-brand)'}
+                onMouseLeave={e => e.target.style.color = 'inherit'}>
+                Políticas de Envío
+              </Link>
+            </p>
+            <p>
+              <Link to="/terminos-condiciones" style={{ color: 'inherit', textDecoration: 'none' }}
+                onMouseEnter={e => e.target.style.color = 'var(--green-brand)'}
+                onMouseLeave={e => e.target.style.color = 'inherit'}>
+                Términos y Condiciones
+              </Link>
+            </p>
           </div>
         </div>
 

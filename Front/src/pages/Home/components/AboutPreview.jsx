@@ -82,7 +82,7 @@ const AboutPreview = () => {
             marginBottom: '2.5rem',
             fontWeight: '500'
           }}>
-            En SonTerry no solo estampamos prendas, damos vida a la identidad de tu marca. Somos un taller dedicado a la excelencia, donde la serigrafía tradicional se encuentra con la máxima tecnología DTF para resultados vibrantes y duraderos.
+            Sonterry nació en el año 2018 en respuesta a la inquietud constante de una persona con discapacidad auditiva por crear espacios de inclusión en una sociedad donde se visibilice “verdaderamente” al otro con todas sus “capacidades”; de la resiliencia y su deseo de superación; de quién fue relegado por la sociedad por muchos años y que aún siente en el día a día la negación del acceso a los derechos fundamentales de las personas en igualdad de condiciones.
           </p>
           <button 
             onClick={() => navigate('/nosotros')}

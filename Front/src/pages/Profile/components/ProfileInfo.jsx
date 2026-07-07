@@ -87,7 +87,7 @@ const ProfileInfo = () => {
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              placeholder="Ej: Bogotá"
+              placeholder="Ej: Medellín"
               className="profile-input"
             />
           </div>

@@ -30,10 +30,7 @@ const WhatsappIcon = ({ size = 24, color = "currentColor", strokeWidth = 2, ...p
 
 /* ─── Trust info cards ────────────────────────────────────── */
 const INFO_CARDS = [
-  { icon: WhatsappIcon, title: 'WhatsApp', desc: '301 826 7373', sub: 'Lun–Vier, 8am – 6pm' },
-  { icon: Mail, title: 'Escríbenos', desc: 'taller@sonterry.com', sub: 'Respondemos en < 24h' },
-  { icon: Instagram, title: 'Instagram', desc: '@sonterry.accesorios', sub: '¡Visítanos!' },
-  { icon: Facebook, title: 'Facebook', desc: '@SonterryAccesorios', sub: '¡Síguenos!' },
+  { icon: WhatsappIcon, title: 'WhatsApp', desc: '+57 324 2796288', sub: 'Solo mensajes — no llamadas' },
 ];
 
 const ContactPage = () => {

@@ -40,10 +40,10 @@ const STATS = [
 ];
 
 const VALUES = [
-  { icon: Award, title: 'Calidad Premium', desc: 'Cada pieza pasa por control de calidad antes de salir del taller.' },
-  { icon: Users, title: 'Atención Personalizada', desc: 'Te acompañamos desde el diseño hasta la entrega de tu pedido.' },
+  { icon: '🤝', title: 'El respeto', desc: 'Por la vida y la valía de cada persona en su esencia.' },
+  { icon: '⚖️', title: 'La igualdad', desc: 'Siendo garantes de los derechos de las personas de vivir en un ambiente de oportunidades para todos, donde nadie es más que otro.' },
   { icon: Truck, title: 'Envíos a Colombia', desc: 'Despachamos a todo el país con seguimiento en tiempo real.' },
-  { icon: Leaf, title: 'Proceso Sostenible', desc: 'Tintas ecológicas y materiales de bajo impacto ambiental.' },
+  { icon: '🌱', title: 'Empoderamiento', desc: 'Potencializar las habilidades de las personas y lo que las apasiona para garantizar que lo que se hace, se hace con el corazón, permitiendo dignificar su vida.' },
 ];
 
 // Free Unsplash images — mugs & caps printing
@@ -201,13 +201,11 @@ const AboutPage = () => {
               Un taller artesanal con tecnología de punta
             </h2>
             <p className="about-section-sub">
-              Fundado en Bogotá, Colombia, SonTerry es un taller especializado en la personalización textil de alta calidad. Nuestro equipo combina más de 8 años de experiencia en serigrafía tradicional con la precisión del estampado DTF (Direct-to-Film) para ofrecer resultados que duran.
+              Somos una empresa dedicada a personalizar tus gustos a través del estampado de prendas de vestir, buscamos brindarte comodidad e identidad
             </p>
-            <p className="about-story-p2">
-              Trabajamos con marcas emergentes, emprendedores, equipos deportivos y empresas que buscan diferenciarse. Desde una sola pieza hasta producción mayorista, cada pedido recibe la misma dedicación y cuidado.
-            </p>
+
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-              {['Serigrafía', 'DTF Premium', 'Bordado', 'Sublimación'].map((t) => (
+              {['Serigrafía', 'DTF Premium', 'Sublimación'].map((t) => (
                 <span key={t} className="about-tag">
                   {t}
                 </span>
@@ -221,18 +219,21 @@ const AboutPage = () => {
           <div className="about-values-inner">
             <div style={{ textAlign: 'center' }}>
               <span className="about-eyebrow about-eyebrow-story">
-                Nuestros valores
-              </span>
+              <Sparkles size={11} /> Nuestros valores
+            </span>
               <h2 className="about-section-title">¿Por qué elegir SonTerry?</h2>
               <p className="about-section-sub" style={{ margin: '0 auto' }}>
                 Cada decisión que tomamos en el taller está guiada por estos pilares.
               </p>
             </div>
             <div className="about-values-grid">
-              {VALUES.map(({ icon: Icon, title, desc }) => (
+              {VALUES.map(({ icon, title, desc }) => (
                 <div key={title} className="about-value-card">
                   <div className="about-value-icon">
-                    <Icon size={22} strokeWidth={1.8} />
+                    {typeof icon === 'string'
+                      ? <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>{icon}</span>
+                      : React.createElement(icon, { size: 22, strokeWidth: 1.8 })
+                    }
                   </div>
                   <div className="about-value-title">{title}</div>
                   <p className="about-value-desc">{desc}</p>
@@ -367,18 +368,18 @@ const AboutPage = () => {
               Desde uniformes corporativos hasta líneas de merch para tu marca. Cotización sin costo, atención personalizada y calidad garantizada.
             </p>
             <div className="about-cta-actions">
-              <button 
-                className="about-cta-btn-primary" 
+              <button
+                className="about-cta-btn-primary"
                 onClick={() => setIsQuoteModalOpen(true)}
-                style={{ 
-                  background: 'linear-gradient(45deg, #D4A373, #E6C287)', 
-                  border: 'none', 
+                style={{
+                  background: 'linear-gradient(45deg, #D4A373, #E6C287)',
+                  border: 'none',
                   boxShadow: '0 8px 20px rgba(212, 163, 115, 0.4)',
                   transform: 'scale(1.05)',
                   animation: 'pulse-subtle 2s infinite'
                 }}
               >
-                <ImageIcon size={18} /> ¡Cotiza tu Diseño Personalizado! 
+                <ImageIcon size={18} /> ¡Cotiza tu Diseño Personalizado!
               </button>
               <button className="about-cta-btn-outline" onClick={() => navigate('/contacto')}>
                 Contacto
