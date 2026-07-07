@@ -27,6 +27,8 @@ const ConfiguratorPage = lazy(() => import('../pages/Configurator/ConfiguratorPa
 const ContactPage      = lazy(() => import('../pages/Contact/ContactPage'));
 const AboutPage        = lazy(() => import('../pages/About/AboutPage'));
 const CheckoutCallback = lazy(() => import('../pages/Checkout/CheckoutCallback'));
+const ShippingPolicy   = lazy(() => import('../pages/ShippingPolicy/ShippingPolicy'));
+const TermsAndConditions = lazy(() => import('../pages/TermsAndConditions/TermsAndConditions'));
 
 export const router = createBrowserRouter([
   {
@@ -44,6 +46,14 @@ export const router = createBrowserRouter([
   {
     path: '/nosotros',
     element: <MainLayout><AboutPage /></MainLayout>
+  },
+  {
+    path: '/politicas-envio',
+    element: <MainLayout><ShippingPolicy /></MainLayout>
+  },
+  {
+    path: '/terminos-condiciones',
+    element: <MainLayout><TermsAndConditions /></MainLayout>
   },
   {
     path: '/productos',
