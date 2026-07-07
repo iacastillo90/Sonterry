@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { formatCurrency } from '../../../utils/formatCurrency';
 import { useCartStore } from '../../../store/cartStore';
 import { useUiStore } from '../../../store/uiStore';
+import { useAuthStore } from '../../../store/authStore';
 import { useWishlist, useToggleWishlist } from '../../../queries/useWishlist';
 import { Heart, ShoppingBag } from 'lucide-react';
 import '../Products.css'; // Importamos los estilos para que la card no se rompa fuera de ProductList
@@ -27,12 +28,6 @@ const TYPE_MAP = {
     badgeText: '#7A3520',
     label:     'Sublimación',
   },
-  bordado: {
-    imageBg:   '#F4EFF9',
-    badgeBg:   '#DDD0F0',
-    badgeText: '#4A2880',
-    label:     'Bordado',
-  },
   prenda: {
     imageBg:   '#EAF4EC',
     badgeBg:   '#C5E0C8',
@@ -49,12 +44,13 @@ const DEFAULT_TYPE = {
 };
 
 const ProductCard = ({ product }) => {
-  const addToCart = useCartStore((s) => s.addToCart);
-  const addToast  = useUiStore((s) => s.addToast);
-  
+  const addToCart      = useCartStore((s) => s.addToCart);
+  const addToast       = useUiStore((s) => s.addToast);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
   const { data: wishlistData } = useWishlist();
   const toggleWishlist = useToggleWishlist();
-  
+
   const wishlisted = wishlistData?.products?.some(p => p._id === product._id) || false;
 
   const handleAdd = (e) => {
@@ -67,6 +63,8 @@ const ProductCard = ({ product }) => {
   const handleToggleWishlist = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    // Solo actuar si el usuario tiene sesión iniciada
+    if (!isAuthenticated) return;
     toggleWishlist.mutate(product._id);
   };
 

@@ -120,7 +120,7 @@ const HeroTV = () => {
                 textShadow: '0px 1px 2px rgba(255,255,255,0.8)'
               }}
             >
-              Estampado DTF · Bordado · Personalización
+              Estampado DTF · Serigrafía · Personalización
             </p>
 
             <h1 ref={titleRef} className="font-display hero-title">

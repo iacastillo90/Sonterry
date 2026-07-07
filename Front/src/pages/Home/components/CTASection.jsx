@@ -123,7 +123,7 @@ const CTASection = () => {
           </h2>
 
           <p style={{ color: 'var(--color-text-light)', fontWeight: '300', fontSize: '0.95rem', lineHeight: '1.6', marginBottom: '2.5rem' }}>
-            Usa nuestro visualizador interactivo 3D para experimentar con parches, bordados y colores. Convierte tu idea en un accesorio exclusivo en pocos pasos.
+            Usa nuestro visualizador interactivo 3D para experimentar con parches, estampados y colores. Convierte tu idea en un accesorio exclusivo en pocos pasos.
           </p>
 
           <Button

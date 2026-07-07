@@ -77,7 +77,7 @@ const HeroSeparator = () => {
             color: '#eaeaea'
           }}
         >
-          Nuestras técnicas de Estampado DTF, Serigrafía y Bordado garantizan durabilidad y una explosión de color en cada prenda.
+          Nuestras técnicas de Estampado DTF y Serigrafía garantizan durabilidad y una explosión de color en cada prenda.
         </p>
         <button
           onClick={() => navigate('/productos')}
