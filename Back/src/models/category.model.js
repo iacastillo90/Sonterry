@@ -4,6 +4,7 @@ const categorySchema = new mongoose.Schema({
   name: { type: String, required: [true, 'Category name is required'], unique: true, trim: true, maxlength: 100 },
   description: { type: String, maxlength: 1000 },
   slug: { type: String, unique: true },
+  order: { type: Number, default: 0 },
   isActive: { type: Boolean, default: true }
 }, { timestamps: true });
 

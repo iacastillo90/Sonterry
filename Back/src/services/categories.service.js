@@ -2,7 +2,7 @@ const Category = require('../models/category.model');
 const AppError = require('../errors/AppError');
 
 const getAllCategories = async () => {
-  return await Category.find();
+  return await Category.find().sort({ order: 1, createdAt: -1 });
 };
 
 const createCategory = async (categoryData) => {

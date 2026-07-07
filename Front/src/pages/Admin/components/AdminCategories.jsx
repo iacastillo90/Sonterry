@@ -14,7 +14,7 @@ const AdminCategories = ({ categories, setCategories, addToast, loadCatalogData 
   const [showFormModal, setShowFormModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [catForm, setCatForm] = useState({ name: '', description: '', isActive: true });
+  const [catForm, setCatForm] = useState({ name: '', description: '', order: 0, isActive: true });
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
@@ -39,14 +39,14 @@ const AdminCategories = ({ categories, setCategories, addToast, loadCatalogData 
   const openCreateModal = () => {
     setIsEditing(false);
     setEditingId(null);
-    setCatForm({ name: '', description: '', isActive: true });
+    setCatForm({ name: '', description: '', order: 0, isActive: true });
     setShowFormModal(true);
   };
 
   const openEditModal = (cat) => {
     setIsEditing(true);
     setEditingId(cat._id);
-    setCatForm({ name: cat.name, description: cat.description || '', isActive: cat.isActive !== false });
+    setCatForm({ name: cat.name, description: cat.description || '', order: cat.order || 0, isActive: cat.isActive !== false });
     setShowFormModal(true);
   };
 
@@ -192,6 +192,9 @@ const AdminCategories = ({ categories, setCategories, addToast, loadCatalogData 
                     <span style={{ fontSize: '0.7rem', fontWeight: '700', textTransform: 'uppercase', padding: '2px 8px', borderRadius: '12px', backgroundColor: isAct ? '#DCFCE7' : '#F1F5F9', color: isAct ? '#166534' : '#64748B', border: `1px solid ${isAct ? '#BBF7D0' : '#E2E8F0'}` }}>
                       {isAct ? 'Activa' : 'De Baja'}
                     </span>
+                    <span style={{ fontSize: '0.7rem', fontWeight: '700', padding: '2px 8px', borderRadius: '12px', backgroundColor: '#F1F5F9', color: '#475569', border: '1px solid #E2E8F0' }}>
+                      Prioridad: {c.order || 0}
+                    </span>
                   </div>
                   <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748B', lineHeight: '1.5' }}>
                     {c.description || 'Sin descripción provista.'}
@@ -274,6 +277,18 @@ const AdminCategories = ({ categories, setCategories, addToast, loadCatalogData 
                   onChange={(e) => setCatForm({...catForm, description: e.target.value})}
                   style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid #CBD5E1', outline: 'none', fontSize: '0.95rem', minHeight: '80px', resize: 'vertical' }}
                 />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '0.35rem', fontWeight: 600, color: '#1E293B' }}>Prioridad / Orden</label>
+                <input
+                  type="number"
+                  placeholder="0 (El menor número va primero)"
+                  value={catForm.order}
+                  onChange={(e) => setCatForm({...catForm, order: Number(e.target.value)})}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '6px', border: '1px solid #CBD5E1', outline: 'none', fontSize: '0.95rem' }}
+                />
+                <span style={{ fontSize: '0.75rem', color: '#64748B' }}>Menor número = Más arriba en el listado (0, 1, 2...).</span>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
