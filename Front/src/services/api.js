@@ -39,6 +39,14 @@ api.interceptors.response.use(
     if (error.response?.status === 401 &&
         !originalRequest._retry &&
         !originalRequest.url?.includes('/auth/refresh')) {
+
+      // Solo intentar refresh si el usuario tenía una sesión activa (había token).
+      // Si es un visitante anónimo, simplemente rechazar sin redirigir al login.
+      const hadToken = !!localStorage.getItem('st_token');
+      if (!hadToken) {
+        return Promise.reject(error);
+      }
+
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -66,7 +74,13 @@ api.interceptors.response.use(
         processQueue(refreshError, null);
         localStorage.removeItem('st_token');
         localStorage.removeItem('st_user');
-        window.location.href = '/login';
+        // Limpiar el estado de Zustand sin redirigir — ProtectedRoute
+        // se encarga de proteger las rutas que lo necesitan.
+        // Un visitante anónimo con token expirado puede seguir navegando.
+        try {
+          const { useAuthStore } = await import('../store/authStore');
+          useAuthStore.setState({ token: null, user: null, isAuthenticated: false, sessionChecked: true });
+        } catch { /* ignorar si el store no está disponible */ }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

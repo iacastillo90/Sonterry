@@ -1,14 +1,41 @@
 import { create } from 'zustand';
+import axios from 'axios';
 import { useCartStore } from './cartStore';
-
 import api from '../services/api';
 
 export const useAuthStore = create((set, get) => ({
   user: JSON.parse(localStorage.getItem('st_user')) || null,
   token: localStorage.getItem('st_token') || null,
   isAuthenticated: !!localStorage.getItem('st_token'),
+  // false hasta que verifySession termine — bloquea el router para evitar
+  // redirects prematuros basados en un estado de auth todavía sin verificar
+  sessionChecked: !localStorage.getItem('st_token'), // Si no hay token, no hay nada que chequear
   loading: false,
   error: null,
+
+  /**
+   * Verifica silenciosamente si el token guardado sigue siendo válido.
+   * Si el refresh falla, limpia el estado SIN redirigir al login.
+   * Llamar una sola vez al montar la app (en App.jsx).
+   */
+  verifySession: async () => {
+    if (!localStorage.getItem('st_token')) {
+      set({ sessionChecked: true });
+      return;
+    }
+    try {
+      const { data } = await axios.post('/api/auth/refresh', {}, { withCredentials: true });
+      const newToken = data.data.accessToken;
+      localStorage.setItem('st_token', newToken);
+      set({ token: newToken, isAuthenticated: true, sessionChecked: true });
+    } catch {
+      // Token inválido/expirado → limpiar estado silenciosamente
+      localStorage.removeItem('st_token');
+      localStorage.removeItem('st_user');
+      set({ token: null, user: null, isAuthenticated: false, sessionChecked: true });
+    }
+  },
+
 
   /**
    * Synchronize token after silent refresh (called by api.js interceptor).

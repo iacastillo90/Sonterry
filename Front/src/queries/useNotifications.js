@@ -8,6 +8,7 @@ export const useNotifications = (asAdmin = false) => {
       const res = await api.get(`/notifications?asAdmin=${asAdmin}`);
       return res.data.data; // { notifications, unreadCount }
     },
+    enabled: !!localStorage.getItem('st_token'), // Solo ejecutar si hay sesión activa
     refetchInterval: 60000, // Refetch every 60 seconds automatically
   });
 };
