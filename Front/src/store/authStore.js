@@ -24,7 +24,7 @@ export const useAuthStore = create((set, get) => ({
       return;
     }
     try {
-      const { data } = await axios.post('/api/auth/refresh', {}, { withCredentials: true });
+      const { data } = await api.post('/auth/refresh');
       const newToken = data.data.accessToken;
       localStorage.setItem('st_token', newToken);
       set({ token: newToken, isAuthenticated: true, sessionChecked: true });
