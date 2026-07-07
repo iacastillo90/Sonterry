@@ -279,8 +279,7 @@ const AboutPage = () => {
               <div className="about-map-info">
                 {[
                   { icon: MapPin, title: 'Ubicación', value: 'Colombia\nAtención a nivel nacional' },
-                  { icon: WhatsappIcon, title: 'Whatsapp', value: '301 826 7373' },
-                  { icon: Mail, title: 'Correo', value: 'taller@sonterry.com' },
+                  { icon: WhatsappIcon, title: 'Whatsapp', value: '+57 324 2796288' },
                 ].map(({ icon: Icon, title, value }) => (
                   <div key={title} className="about-map-info-item">
                     <div className="about-map-info-icon">
@@ -313,7 +312,7 @@ const AboutPage = () => {
                 minHeight: '300px'
               }}>
                 <a
-                  href="https://wa.me/573018267373"
+                  href="https://wa.me/573242796288"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{

@@ -116,6 +116,27 @@ const ContactPage = () => {
                   <div className="contact-info-title">{title}</div>
                   <div className="contact-info-value">{desc}</div>
                   <div className="contact-info-sub">{sub}</div>
+                  <a
+                    href="https://wa.me/573242796288"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      background: '#25D366',
+                      color: 'white',
+                      padding: '10px 20px',
+                      borderRadius: '8px',
+                      textDecoration: 'none',
+                      fontWeight: '700',
+                      fontSize: '0.9rem',
+                      marginTop: '1rem',
+                      boxShadow: '0 4px 10px rgba(37, 211, 102, 0.3)'
+                    }}
+                  >
+                    Escríbenos ahora
+                  </a>
                 </div>
               </div>
             ))}
