@@ -22,17 +22,10 @@ const seedDB = async () => {
       role: 'admin'
     });
 
-    const customer = await User.create({
-      name: 'Ivan Castillo',
-      email: 'cliente@sonterry.com',
-      password: 'password123',
-      role: 'user'
-    });
-
     // Categories
-    const serigrafiaCat = await Category.create({ name: 'Serigrafía', description: 'Técnica artesanal con rasqueta' });
-    const dtfCat = await Category.create({ name: 'Estampado DTF', description: 'Tecnología digital de alta definición' });
-    const prendasCat = await Category.create({ name: 'Prendas Base', description: 'Poleras, sudaderas y accesorios' });
+    const prendas = await Category.create({ name: 'Prendas Personalizadas', description: 'Estampados en camisas y busos (con chompa y sin chompa)' });
+    const mugs = await Category.create({ name: 'Mugs', description: 'Tus mañanas con mucho más estilo. Piezas de cerámica de alta calidad con colores vibrantes que no se decoloran, perfectas para coleccionar o regalar.' });
+    const gorras = await Category.create({ name: 'Gorras', description: 'El toque final para tu estilo. Gorras de alta calidad con estructura impecable y estampados de alta definición. Diseños urbanos creados para destacar y resistir tu ritmo diario sin perder color.' });
 
     logger.info('Database seeded successfully!');
     process.exit(0);
