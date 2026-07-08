@@ -9,7 +9,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS}
     volumes:
-      - mongo_data:/data/db
+      - mongo_data_v2:/data/db
     networks:
       - sonterry_network
     healthcheck:
@@ -191,7 +191,7 @@ services:
       - sonterry_network
 
 volumes:
-  mongo_data:
+  mongo_data_v2:
   redis_data:
   n8n_data:
   minio_data:
