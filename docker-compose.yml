@@ -73,7 +73,7 @@ services:
       - N8N_API_KEY=${N8N_API_KEY}
       - MEILI_HOST=http://meilisearch:7700
       - MEILI_MASTER_KEY=${MEILI_MASTER_KEY}
-      - CORS_ORIGIN=${CLIENT_URL:-http://localhost:5173},http://localhost:3000
+      - CORS_ORIGIN=${CORS_ORIGIN}
     depends_on:
       database:
         condition: service_healthy
