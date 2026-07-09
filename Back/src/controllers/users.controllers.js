@@ -26,4 +26,10 @@ const deleteUser = catchAsync(async (req, res) => {
   res.status(200).json(formatResponse(true, 'Usuario eliminado', null));
 });
 
-module.exports = { getAllUsers, updateUserStatus, updateUserAdmin, deleteUser };
+const createAdminUser = catchAsync(async (req, res) => {
+  const { name, email, password } = req.body;
+  const user = await usersService.createAdminUser(name, email, password);
+  res.status(201).json(formatResponse(true, 'Administrador creado con éxito', user));
+});
+
+module.exports = { getAllUsers, updateUserStatus, updateUserAdmin, deleteUser, createAdminUser };

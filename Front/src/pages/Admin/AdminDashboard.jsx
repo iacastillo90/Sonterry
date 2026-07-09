@@ -34,7 +34,8 @@ import {
   Landmark,
   MessageSquare,
   Menu,
-  X
+  X,
+  Settings
 } from 'lucide-react';
 import './Admin.css';
 import AdminProducts from './components/AdminProducts';
@@ -44,6 +45,7 @@ import AdminTickets from './components/AdminTickets';
 import AdminUsers from './components/AdminUsers';
 import AdminBankAccounts from './components/AdminBankAccounts';
 import AdminReviews from './components/AdminReviews';
+import AdminSettings from './components/AdminSettings';
 
 const AdminDashboard = () => {
   const location = useLocation();
@@ -240,6 +242,14 @@ const AdminDashboard = () => {
           >
             <Users size={18} />
             <span>Usuarios / Clientes</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('configuracion')}
+            className={`admin-tab-btn ${activeTab === 'configuracion' ? 'active' : 'inactive'}`}
+          >
+            <Settings size={18} />
+            <span>Configuración</span>
           </button>
         </div>
 
@@ -471,6 +481,11 @@ const AdminDashboard = () => {
           {/* TAB 8: REVIEWS MODERATION */}
           {activeTab === 'resenas' && (
             <AdminReviews />
+          )}
+
+          {/* TAB 9: SETTINGS */}
+          {activeTab === 'configuracion' && (
+            <AdminSettings addToast={addToast} />
           )}
 
         </div>

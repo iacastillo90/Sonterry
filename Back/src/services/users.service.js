@@ -58,4 +58,23 @@ const deleteUser = async (id) => {
   return user;
 };
 
-module.exports = { getAllUsers, getUserById, updateUserStatus, updateUserProfile, updateUserDataAdmin, deleteUser };
+const createAdminUser = async (name, email, password) => {
+  if (!name || !email || !password) {
+    throw new AppError('Nombre, correo y contraseña son requeridos', 400);
+  }
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    throw new AppError('El correo electrónico ya está en uso', 400);
+  }
+  const user = await User.create({
+    name,
+    email,
+    password,
+    role: 'admin'
+  });
+  const userResponse = user.toObject();
+  delete userResponse.password;
+  return userResponse;
+};
+
+module.exports = { getAllUsers, getUserById, updateUserStatus, updateUserProfile, updateUserDataAdmin, deleteUser, createAdminUser };
