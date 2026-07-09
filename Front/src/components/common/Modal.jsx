@@ -41,6 +41,9 @@ const Modal = ({ isOpen, onClose, title, children }) => {
         maxWidth: '500px',
         boxShadow: 'var(--shadow-lg)',
         overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        maxHeight: '90vh',
         animation: 'fadeIn 0.3s ease-out'
       }} onClick={(e) => e.stopPropagation()}>
         <div style={{
@@ -48,12 +51,13 @@ const Modal = ({ isOpen, onClose, title, children }) => {
           borderBottom: '1px solid var(--color-border)',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          flexShrink: 0
         }}>
           <h3 style={{ fontSize: '1.25rem', margin: 0 }}>{title}</h3>
           <Button variant="text" onClick={onClose}><X size={20} /></Button>
         </div>
-        <div style={{ padding: '1.5rem' }}>{children}</div>
+        <div style={{ padding: '1.5rem', overflowY: 'auto' }}>{children}</div>
       </div>
     </div>
   );
