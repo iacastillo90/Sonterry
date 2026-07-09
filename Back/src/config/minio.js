@@ -1,4 +1,4 @@
-const { S3Client } = require('@aws-sdk/client-s3');
+const { S3Client, HeadBucketCommand, CreateBucketCommand, PutBucketPolicyCommand } = require('@aws-sdk/client-s3');
 const env = require('./env');
 const logger = require('../logs/logger');
 
@@ -24,6 +24,39 @@ if (env.MINIO_ACCESS_KEY && env.MINIO_SECRET_KEY) {
       },
     });
     logger.info(`S3 client inicializado → ${endpointUrl}`);
+
+    // Asegurar que el bucket exista y sea público
+    const ensureBucketExists = async () => {
+      const bucketName = env.MINIO_BUCKET || 'sonterry';
+      try {
+        await minioClient.send(new HeadBucketCommand({ Bucket: bucketName }));
+      } catch (err) {
+        if (err.name === 'NotFound' || err.$metadata?.httpStatusCode === 404) {
+          try {
+            await minioClient.send(new CreateBucketCommand({ Bucket: bucketName }));
+            logger.info(`[INFO]: Bucket ${bucketName} creado.`);
+            
+            const policy = JSON.stringify({
+              Version: "2012-10-17",
+              Statement: [{
+                Effect: "Allow",
+                Principal: "*",
+                Action: "s3:GetObject",
+                Resource: [`arn:aws:s3:::${bucketName}/*`]
+              }]
+            });
+            await minioClient.send(new PutBucketPolicyCommand({ Bucket: bucketName, Policy: policy }));
+            logger.info(`[INFO]: Política pública aplicada al bucket ${bucketName}.`);
+          } catch (createErr) {
+            logger.error(`Error al crear/configurar el bucket: ${createErr.message}`);
+          }
+        } else {
+          logger.error(`Error al verificar el bucket: ${err.message}`);
+        }
+      }
+    };
+    
+    ensureBucketExists();
   } catch (err) {
     logger.warn(`S3 client no pudo inicializarse: ${err.message}. Subidas deshabilitadas.`);
   }
