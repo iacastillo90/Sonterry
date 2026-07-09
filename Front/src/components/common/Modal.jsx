@@ -57,7 +57,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
           <h3 style={{ fontSize: '1.25rem', margin: 0 }}>{title}</h3>
           <Button variant="text" onClick={onClose}><X size={20} /></Button>
         </div>
-        <div style={{ padding: '1.5rem', overflowY: 'auto' }}>{children}</div>
+        <div style={{ padding: '1.5rem', overflowY: 'auto', flex: 1, minHeight: 0 }}>{children}</div>
       </div>
     </div>
   );
