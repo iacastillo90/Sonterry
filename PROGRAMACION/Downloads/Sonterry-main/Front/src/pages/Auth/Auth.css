@@ -1,0 +1,81 @@
+/* Auth.css */
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-logo {
+  height: 180px;
+  margin: -40px 0;
+  mix-blend-mode: multiply;
+}
+
+.auth-title {
+  font-size: 1.5rem;
+  font-family: var(--font-display);
+}
+
+.auth-subtitle {
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+}
+
+.auth-forgot-password-container {
+  text-align: right;
+  margin-top: -0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.auth-forgot-password-link {
+  font-size: 0.8rem;
+  color: var(--color-primary);
+}
+
+.auth-submit-btn {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.auth-footer-text {
+  font-size: 0.85rem;
+  text-align: center;
+  margin-top: 1.5rem;
+  color: var(--color-text-light);
+}
+
+.auth-footer-link {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.auth-recovery-container {
+  text-align: center;
+  padding: 3rem 0;
+}
+
+.auth-recovery-logo {
+  height: 140px;
+  margin-bottom: 1rem;
+  mix-blend-mode: multiply;
+}
+
+.auth-recovery-title {
+  color: #3D3D3D;
+  margin-bottom: 0.5rem;
+}
+
+.auth-recovery-text {
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.auth-error-msg {
+  color: var(--color-danger);
+  font-size: 0.9rem;
+}
+
+.auth-back-link {
+  color: #D4A373;
+}
+

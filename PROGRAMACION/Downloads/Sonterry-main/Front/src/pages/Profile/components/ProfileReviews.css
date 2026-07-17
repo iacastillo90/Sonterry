@@ -1,0 +1,237 @@
+.reviews-container {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  animation: fadeSlideUp 0.5s ease forwards;
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.reviews-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.reviews-title {
+  font-family: var(--font-display, 'Syne', sans-serif);
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight: 800;
+  color: var(--green-deep, #1E4A28);
+  margin: 0 0 0.25rem 0;
+  letter-spacing: -0.02em;
+}
+
+.reviews-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin: 0;
+  max-width: 600px;
+  line-height: 1.5;
+}
+
+/* Empty & Loading States */
+.reviews-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+  text-align: center;
+  gap: 1rem;
+  background: var(--white);
+  border-radius: var(--r-xl);
+  border: 1px dashed var(--border-mid);
+  box-shadow: var(--s-xs);
+}
+
+.reviews-state p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  max-width: 350px;
+  margin: 0;
+}
+
+.reviews-state h3 {
+  font-family: var(--font-display, 'Syne', sans-serif);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0.5rem 0 0;
+}
+
+/* Grid */
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  .reviews-grid {
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+/* Card */
+.review-card {
+  background: var(--white);
+  border-radius: 20px;
+  border: 1px solid rgba(82,143,88,0.10);
+  box-shadow: 0 4px 15px rgba(30,74,40,0.04);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s cubic-bezier(.4,0,.2,1);
+}
+
+.review-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 40px rgba(30,74,40,0.1);
+  border-color: rgba(82,143,88,0.25);
+}
+
+.review-card-header {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  align-items: flex-start;
+}
+
+.review-product-img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: var(--cream);
+}
+
+.review-product-no-img {
+  width: 60px;
+  height: 60px;
+  background: var(--cream);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.review-product-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.review-product-name {
+  font-family: var(--font-display, 'Syne', sans-serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.2;
+}
+
+.review-rating-stars {
+  color: #F59E0B;
+  font-size: 1rem;
+  letter-spacing: 2px;
+  margin-bottom: 0.25rem;
+}
+
+.review-date {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.review-comment-box {
+  flex: 1;
+  background: var(--cream);
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1.25rem;
+  border: 1px dashed var(--border-mid);
+  position: relative;
+}
+
+.review-comment-text {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin: 0;
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.review-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 1rem;
+  margin-top: auto;
+}
+
+.review-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.review-status.approved {
+  color: #10B981;
+}
+
+.review-status.pending {
+  color: #F59E0B;
+}
+
+.review-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.review-action-btn {
+  background: var(--white);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.review-action-btn.edit:hover {
+  color: var(--green-brand);
+  border-color: var(--green-brand);
+  background: var(--green-ghost);
+}
+
+.review-action-btn.delete {
+  color: #DC2626;
+}
+
+.review-action-btn.delete:hover {
+  background: #FEF2F2;
+  border-color: #FCA5A5;
+}
+
+/* Modal specific overrides if needed, but mostly modals use inline or global classes */

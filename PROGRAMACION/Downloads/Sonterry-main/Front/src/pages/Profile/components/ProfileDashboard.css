@@ -1,0 +1,308 @@
+.profile-dashboard-container {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.pd-header {
+  margin-bottom: 2.5rem;
+}
+
+.pd-title {
+  font-family: var(--font-display, 'Syne', sans-serif);
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight: 800;
+  color: var(--green-deep, #1E4A28);
+  margin: 0 0 0.5rem 0;
+  letter-spacing: -0.02em;
+}
+
+.pd-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Stats Grid */
+.pd-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.pd-stat-card {
+  background: var(--white);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-lg);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(.4,0,.2,1);
+  box-shadow: var(--s-xs);
+}
+
+.pd-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(30,74,40,0.06);
+  border-color: rgba(82,143,88,0.3);
+}
+
+.pd-stat-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pd-stat-info h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-family: var(--font-display, 'Syne', sans-serif);
+}
+
+.pd-stat-info p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* Sections Grid */
+.pd-sections-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .pd-sections-grid {
+    grid-template-columns: 1.5fr 1fr;
+  }
+}
+
+.pd-section-card {
+  background: var(--white);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xl);
+  padding: 2rem;
+  box-shadow: var(--s-xs);
+}
+
+.pd-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.pd-section-header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-family: var(--font-display, 'Syne', sans-serif);
+}
+
+.pd-link-btn {
+  background: transparent;
+  border: none;
+  color: var(--green-brand);
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: opacity 0.2s;
+}
+
+.pd-link-btn:hover {
+  opacity: 0.7;
+}
+
+/* Recent Orders */
+.pd-recent-orders {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pd-recent-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--cream);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pd-recent-item:hover {
+  border-color: var(--green-brand);
+  background: var(--white);
+  transform: translateX(4px);
+}
+
+.pd-recent-item-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-sm);
+  background: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+.pd-recent-item-details {
+  flex: 1;
+}
+
+.pd-recent-item-details h5 {
+  margin: 0 0 0.2rem 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.pd-recent-item-details p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.pd-recent-item-status {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+}
+
+.pd-recent-item-status strong {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.pd-badge {
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #fff;
+}
+.pd-badge.paid { background-color: var(--green-brand); }
+.pd-badge.shipped { background-color: var(--color-accent); }
+.pd-badge.delivered { background-color: #10B981; }
+.pd-badge.cancelled { background-color: #DC2626; }
+.pd-badge.pending { background-color: #F59E0B; }
+
+/* Empty States */
+.pd-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--text-muted);
+  background: var(--cream);
+  border-radius: var(--r-md);
+  border: 1px dashed var(--border-mid);
+}
+
+.pd-empty p {
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.pd-btn-outline {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--green-brand);
+  background: transparent;
+  color: var(--green-brand);
+  font-weight: 600;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pd-btn-outline:hover {
+  background: var(--green-brand);
+  color: #fff;
+}
+
+/* Quick Actions */
+.pd-quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pd-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background: var(--cream);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.pd-action-btn:hover {
+  background: var(--white);
+  border-color: var(--green-brand);
+  color: var(--green-deep);
+}
+
+.pd-action-btn svg {
+  color: var(--green-brand);
+}
+
+/* Wishlist Preview */
+.pd-empty-text {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0;
+  padding: 1.5rem;
+  text-align: center;
+  background: var(--cream);
+  border-radius: var(--r-sm);
+}
+
+.pd-wishlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 0.75rem;
+}
+
+.pd-wishlist-grid img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.pd-wishlist-grid img:hover {
+  transform: scale(1.05);
+  border-color: var(--green-brand);
+}

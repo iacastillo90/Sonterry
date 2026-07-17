@@ -1,0 +1,316 @@
+.wallet-container {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  animation: fadeSlideUp 0.5s ease forwards;
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.wallet-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.wallet-title {
+  font-family: var(--font-display, 'Syne', sans-serif);
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight: 800;
+  color: var(--green-deep, #1E4A28);
+  margin: 0 0 0.25rem 0;
+  letter-spacing: -0.02em;
+}
+
+.wallet-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin: 0;
+  max-width: 600px;
+  line-height: 1.5;
+}
+
+/* Compliance Security Box */
+.wallet-compliance-box {
+  background-color: rgba(82, 143, 88, 0.08);
+  border: 1px solid rgba(82, 143, 88, 0.2);
+  border-radius: var(--r-md);
+  padding: 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.wallet-compliance-box svg {
+  color: var(--green-deep);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.wallet-compliance-box h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--green-deep);
+}
+
+.wallet-compliance-box p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Actions Header */
+.wallet-actions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.wallet-actions-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-family: var(--font-display, 'Syne', sans-serif);
+  color: var(--text-primary);
+}
+
+.wallet-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--green-deep);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-md);
+  font-weight: 700;
+  font-family: var(--font-display, 'Syne', sans-serif);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(.4,0,.2,1);
+}
+
+.wallet-btn:hover {
+  background: #15351c;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(30,74,40,0.25);
+}
+
+.wallet-btn.cancel {
+  background: #FEF2F2;
+  color: #DC2626;
+  border: 1px solid #FCA5A5;
+}
+
+.wallet-btn.cancel:hover {
+  background: #FEE2E2;
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Add Card Form */
+.wallet-form-card {
+  background: var(--white);
+  border-radius: var(--r-xl);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 10px 30px rgba(30,74,40,0.03);
+  padding: 2rem;
+  margin-bottom: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: fadeSlideUp 0.3s ease forwards;
+}
+
+.wallet-form-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-display, 'Syne', sans-serif);
+}
+
+.wallet-form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .wallet-form-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+}
+
+.wallet-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.wallet-field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.wallet-input, .wallet-select {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  font-size: 0.95rem;
+  font-family: var(--font-body);
+  background: var(--cream);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.wallet-input:focus, .wallet-select:focus {
+  outline: none;
+  background: var(--white);
+  border-color: var(--green-brand);
+  box-shadow: 0 0 0 4px rgba(82, 143, 88, 0.1);
+}
+
+/* Payment Methods Grid */
+.wallet-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  .wallet-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+/* Payment Card Styling */
+.payment-card {
+  color: #FFFFFF;
+  padding: 1.75rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 200px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.payment-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.payment-card.stripe {
+  background: linear-gradient(135deg, #1E3A8A, #3B82F6);
+}
+
+.payment-card.paypal {
+  background: linear-gradient(135deg, #071952, #0079C1);
+}
+
+.payment-card-gloss {
+  position: absolute;
+  right: -40px;
+  top: -40px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+.payment-card-delete {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #FFFFFF;
+  z-index: 5;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.payment-card-delete:hover {
+  background: rgba(239, 68, 68, 0.8);
+  transform: scale(1.1);
+}
+
+.payment-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.payment-card-type {
+  font-size: 0.9rem;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.payment-card-brand {
+  font-size: 1.4rem;
+  font-weight: 800;
+  font-style: italic;
+  font-family: var(--font-display, 'Syne', sans-serif);
+}
+
+.payment-card-number {
+  font-size: 1.25rem;
+  letter-spacing: 2px;
+  font-family: monospace;
+  margin-top: 1rem;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.payment-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+}
+
+.payment-card-label {
+  display: block;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  opacity: 0.7;
+  letter-spacing: 1px;
+  margin-bottom: 0.2rem;
+}
+
+.payment-card-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  word-break: break-word;
+}

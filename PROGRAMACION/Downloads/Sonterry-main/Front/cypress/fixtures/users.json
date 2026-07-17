@@ -1,0 +1,16 @@
+{
+  "valid": {
+    "name": "Test User",
+    "email": "test@example.com",
+    "password": "Password123!"
+  },
+  "unregistered": {
+    "email": "nonexistent@example.com",
+    "password": "Password123!"
+  },
+  "duplicate": {
+    "name": "Duplicate User",
+    "email": "existing@example.com",
+    "password": "Password123!"
+  }
+}

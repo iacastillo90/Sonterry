@@ -1,0 +1,208 @@
+name: sonterry
+
+services:
+  database:
+    image: mongo:4.4
+    container_name: sonterry_db
+    restart: unless-stopped
+    ports:
+      - "${PORT_DATABASE:-27017}:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS:-changeme_mongo_password}
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - sonterry_network
+    healthcheck:
+      test: mongo --eval 'db.runCommand("ping").ok' --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: sonterry_cache
+    restart: unless-stopped
+    ports:
+      - "${PORT_REDIS:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - sonterry_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./Back
+      dockerfile: Dockerfile
+    container_name: sonterry_api
+    restart: unless-stopped
+    ports:
+      - "${PORT_API:-5000}:5000"
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - MONGO_URI=mongodb://${MONGO_USER:-admin}:${MONGO_PASS:-changeme_mongo_password}@database:27017/mi-ecommerce?authSource=admin
+      - MONGO_MAX_POOL_SIZE=50
+      - MONGO_MIN_POOL_SIZE=5
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=${JWT_SECRET:-change_me_jwt_secret}
+      - JWT_EXPIRES_IN=1d
+      - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET:-change_me_refresh_secret}
+      - REFRESH_TOKEN_EXPIRES_IN=7d
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
+      - PAYPAL_CLIENT_ID=${PAYPAL_CLIENT_ID:-}
+      - PAYPAL_CLIENT_SECRET=${PAYPAL_CLIENT_SECRET:-}
+      - PAYPAL_API_URL=https://api-m.sandbox.paypal.com
+      - MINIO_ENDPOINT=minio
+      - MINIO_PORT=9000
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER:-admin}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD:-changeme_minio_password}
+      - MINIO_BUCKET=${MINIO_BUCKET:-sonterry}
+      - MINIO_USE_SSL=false
+      - MINIO_PUBLIC_URL=${MINIO_PUBLIC_URL:-http://localhost:9000}
+      - WOMPI_PUBLIC_KEY=${WOMPI_PUBLIC_KEY:-}
+      - WOMPI_PRIVATE_KEY=${WOMPI_PRIVATE_KEY:-}
+      - WOMPI_INTEGRITY_KEY=${WOMPI_INTEGRITY_KEY:-}
+      - WOMPI_EVENTOS_SECRET=${WOMPI_EVENTOS_SECRET:-}
+      - WOMPI_API_URL=${WOMPI_API_URL}
+      - N8N_WEBHOOK_URL=http://n8n:5678/webhook/dispatch-notification
+      - N8N_API_KEY=${N8N_API_KEY:-sonterry_n8n_secret}
+      - MEILI_HOST=http://meilisearch:7700
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY:-sonterry_meili_master_key}
+      - CORS_ORIGIN=${CLIENT_URL:-http://localhost:5173},http://localhost:3000
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      meilisearch:
+        condition: service_healthy
+    networks:
+      - sonterry_network
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: sonterry_n8n
+    restart: unless-stopped
+    ports:
+      - "${PORT_N8N:-5678}:5678"
+    environment:
+      - N8N_PORT=5678
+      - N8N_HOST=${N8N_HOST:-localhost}
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://${N8N_HOST:-localhost}:5678
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-change_me_n8n_encryption_key}
+      - N8N_METRICS=false
+      - EXECUTIONS_DATA_PRUNE=true
+      - EXECUTIONS_DATA_MAX_AGE=168
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - sonterry_network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:5678/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  evolution-api:
+    image: atendai/evolution-api:v1.8.2
+    container_name: sonterry_evolution
+    restart: unless-stopped
+    ports:
+      - "${PORT_EVOLUTION:-8080}:8080"
+    environment:
+      - SERVER_PORT=8080
+      - LOG_LEVEL=info
+      - DATABASE_ENABLED=true
+      - DATABASE_CONNECTION_URI=mongodb://${MONGO_USER:-admin}:${MONGO_PASS:-changeme_mongo_password}@database:27017/evolution-whatsapp?authSource=admin
+      - DATABASE_CONNECT_TIMEOUT_MS=5000
+      - REDIS_ENABLED=true
+      - REDIS_URI=redis://redis:6379
+      - AUTHENTICATION_API_KEY=${EVOLUTION_API_KEY:-change_me_evolution_key}
+      - AUTHENTICATION_EXPOSE_KEY=true
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - sonterry_network
+
+  minio:
+    image: minio/minio:latest
+    container_name: sonterry_storage
+    restart: unless-stopped
+    ports:
+      - "${PORT_MINIO_API:-9000}:9000"
+      - "${PORT_MINIO_CONSOLE:-9001}:9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-admin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-changeme_minio_password}
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - sonterry_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    container_name: sonterry_search
+    restart: unless-stopped
+    ports:
+      - "${PORT_MEILI:-7700}:7700"
+    environment:
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY:-sonterry_meili_master_key}
+      - MEILI_NO_ANALYTICS=true
+      - MEILI_ENV=${NODE_ENV:-development}
+    volumes:
+      - meili_data:/meili_data
+    networks:
+      - sonterry_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: ./Front
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:5000/api}
+    container_name: sonterry_front
+    restart: unless-stopped
+    ports:
+      - "${PORT_FRONT:-3000}:80"
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - sonterry_network
+
+volumes:
+  mongo_data:
+  redis_data:
+  n8n_data:
+  minio_data:
+  meili_data:
+
+networks:
+  sonterry_network:
+    driver: bridge

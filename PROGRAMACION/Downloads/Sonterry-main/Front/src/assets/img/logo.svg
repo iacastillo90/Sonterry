@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <!-- Cat icon -->
+  <path d="M25 45 C 20 45, 12 40, 12 30 C 12 20, 20 15, 28 15 C 32 15, 36 20, 38 25 C 41 20, 45 15, 50 15 C 58 15, 66 20, 66 30 C 66 40, 58 45, 53 45" fill="none" stroke="#6B9E5C" stroke-width="4" stroke-linecap="round"/>
+  <!-- Eyes -->
+  <circle cx="28" cy="28" r="3" fill="#3D3D3D" />
+  <circle cx="50" cy="28" r="3" fill="#3D3D3D" />
+  <!-- Nose/mouth -->
+  <path d="M 37 32 L 39 34 L 41 32" fill="none" stroke="#C97D5C" stroke-width="2" stroke-linecap="round"/>
+  <!-- Squeegee (rasqueta) -->
+  <rect x="58" y="10" width="8" height="30" rx="2" fill="#C97D5C" transform="rotate(15 58 10)" />
+  <!-- Text -->
+  <text x="75" y="38" font-family="'Playfair Display', serif" font-weight="700" font-size="24" fill="#3D3D3D">SonTerry</text>
+  <text x="75" y="50" font-family="'Poppins', sans-serif" font-weight="400" font-size="10" fill="#707070" letter-spacing="1">ACCESORIOS</text>
+</svg>
